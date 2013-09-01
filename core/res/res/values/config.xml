@@ -4362,4 +4362,23 @@
     <bool name="config_pdp_reject_enable_retry">false</bool>
     <!-- pdp data reject retry delay in ms -->
     <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
+
+    <!-- The list of components which should be automatically disabled for a specific device.
+         Note: this MUST not be used to randomly disable components, ask for approval first! -->
+    <string-array name="config_deviceDisabledComponents" translatable="false">
+    </string-array>
+
+    <!-- The list of components which should be automatically disabled for all devices. -->
+    <string-array name="config_globallyDisabledComponents" translatable="false">
+        <item>com.android.vending/com.google.android.finsky.systemupdate.SystemUpdateSettingsContentProvider</item>
+        <item>com.android.vending/com.google.android.finsky.systemupdateactivity.SettingsSecurityEntryPoint</item>
+        <item>com.android.vending/com.google.android.finsky.systemupdateactivity.SystemUpdateActivity</item>
+        <item>com.google.android.gms/com.google.android.gms.update.SystemUpdateActivity</item>
+        <item>com.google.android.gms/com.google.android.gms.update.SystemUpdateGcmTaskService</item>
+        <item>com.google.android.gms/com.google.android.gms.update.SystemUpdateService</item>
+    </string-array>
+
+    <!-- The list of components which should be forced to be enabled. -->
+    <string-array name="config_forceEnabledComponents" translatable="false">
+    </string-array>
 </resources>
