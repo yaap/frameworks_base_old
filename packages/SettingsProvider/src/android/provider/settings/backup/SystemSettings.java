@@ -181,7 +181,8 @@ public class SystemSettings {
                 Settings.System.QS_WIFI_AUTO_ON,
                 Settings.System.QS_BT_AUTO_ON,
                 Settings.System.BRIGHTNESS_SLIDER_HAPTICS,
-                Settings.System.VOLUME_PANEL_HAPTICS
+                Settings.System.VOLUME_PANEL_HAPTICS,
+                Settings.System.THREE_FINGER_GESTURE
         ));
         if (Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
             settings.add(Settings.System.PEAK_REFRESH_RATE);
