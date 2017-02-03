@@ -69,6 +69,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final MultiUserSwitchController mMultiUserSwitchController;
     private final SettingsButton mSettingsButton;
     private final View mSettingsButtonContainer;
+    private final View mRunningServicesButton;
     private final TextView mBuildText;
     private final View mEdit;
     private final PageIndicator mPageIndicator;
@@ -127,6 +128,11 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
             } else if (v == mPowerMenuLite) {
                 mUiEventLogger.log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS);
                 mGlobalActionsDialog.showOrHideDialog(false, true);
+            } else if (v == mRunningServicesButton) {
+                mMetricsLogger.action(
+                        mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
+                                : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
+                startRunningServicesActivity();
             }
         }
     };
@@ -182,7 +188,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
 
         mSettingsButton = mView.findViewById(R.id.settings_button);
         mSettingsButtonContainer = mView.findViewById(R.id.settings_button_container);
-        mBuildText = mView.findViewById(R.id.build);
+        mRunningServicesButton = mView.findViewById(R.id.running_services_button);
         mEdit = mView.findViewById(android.R.id.edit);
         mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
         mPowerMenuLite = mView.findViewById(R.id.pm_lite);
@@ -211,6 +217,8 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
                                 right - left, mQuickQSPanelController.getNumQuickTiles()));
         mSettingsButton.setOnClickListener(mSettingsOnClickListener);
         mSettingsButton.setOnLongClickListener(mSettingsOnLongClickListener);
+
+        mRunningServicesButton.setOnClickListener(mSettingsOnClickListener);
 
         mEdit.setOnClickListener(view -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
@@ -296,6 +304,15 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
                         mSettingsButtonContainer,
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON) : null;
         mActivityStarter.startActivity(new Intent("com.android.settings.YAAP_SETTINGS"),
+                true /* dismissShade */, animationController);
+    }
+
+    private void startRunningServicesActivity() {
+        ActivityLaunchAnimator.Controller animationController =
+                mSettingsButtonContainer != null ? ActivityLaunchAnimator.Controller.fromView(
+                        mSettingsButtonContainer,
+                        InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON) : null;
+        mActivityStarter.startActivity(new Intent("android.settings.RUNNING_SERVICES"),
                 true /* dismissShade */, animationController);
     }
 

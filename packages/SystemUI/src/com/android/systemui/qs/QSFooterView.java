@@ -55,6 +55,7 @@ public class QSFooterView extends FrameLayout {
     private PageIndicator mPageIndicator;
     private TextView mBuildText;
     private boolean mShouldShowBuildText;
+    private View mRunningServicesButton;
 
     private boolean mQsDisabled;
 
@@ -99,6 +100,8 @@ public class QSFooterView extends FrameLayout {
 
         mSettingsButton = findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
+
+        mRunningServicesButton = findViewById(R.id.running_services_button);
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -186,7 +189,7 @@ public class QSFooterView extends FrameLayout {
     @Nullable
     private TouchAnimator createFooterAnimator() {
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
-                .addFloat(mActionsContainer, "alpha", 0, 1)
+                .addFloat(mActionsContainer, "alpha", 0, 1) // contains mRunningServicesButton
                 .addFloat(mPageIndicator, "alpha", 0, 1)
                 .addFloat(mBuildText, "alpha", 0, 1)
                 .setStartDelay(0.9f);
@@ -281,6 +284,7 @@ public class QSFooterView extends FrameLayout {
         mEdit.setClickable(mEdit.getVisibility() == View.VISIBLE);
         mSettingsButton.setClickable(mSettingsButton.getVisibility() == View.VISIBLE);
         mBuildText.setLongClickable(mBuildText.getVisibility() == View.VISIBLE);
+        mRunningServicesButton.setClickable(mSettingsButton.getVisibility() == View.VISIBLE);
     }
 
     private void updateVisibilities(boolean isTunerEnabled, boolean multiUserEnabled) {
@@ -291,6 +295,7 @@ public class QSFooterView extends FrameLayout {
         mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
 
         mBuildText.setVisibility(mExpanded && mShouldShowBuildText ? View.VISIBLE : View.INVISIBLE);
+        mRunningServicesButton.setVisibility(!isDemo && mExpanded ? View.VISIBLE : View.INVISIBLE);
     }
 
     private boolean showUserSwitcher(boolean multiUserEnabled) {
