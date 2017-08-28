@@ -5428,6 +5428,13 @@ public final class Settings {
         public static final String VOLUME_BUTTON_MUSIC_CONTROL_DELAY = "volume_button_music_control_delay";
 
         /**
+         * Whether to enable advanced reboot
+         * @hide
+         */
+        @Readable
+        public static final String OMNI_ADVANCED_REBOOT = "advanced_reboot";
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate

@@ -117,5 +117,6 @@ public class SystemSettings {
         Settings.System.DOUBLE_TAP_SLEEP_GESTURE,
         Settings.System.VOLUME_BUTTON_MUSIC_CONTROL,
         Settings.System.VOLUME_BUTTON_MUSIC_CONTROL_DELAY,
+        Settings.System.OMNI_ADVANCED_REBOOT,
     };
 }
