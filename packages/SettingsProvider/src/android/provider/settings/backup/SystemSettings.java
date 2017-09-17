@@ -120,5 +120,12 @@ public class SystemSettings {
         Settings.System.OMNI_ADVANCED_REBOOT,
         Settings.System.STATUS_BAR_BATTERY_STYLE,
         Settings.System.SHOW_BATTERY_PERCENT_INSIDE,
+        Settings.System.BATTERY_LIGHT_ENABLED,
+        Settings.System.BATTERY_LIGHT_ALLOW_ON_DND,
+        Settings.System.BATTERY_LIGHT_LOW_BLINKING,
+        Settings.System.BATTERY_LIGHT_LOW_COLOR,
+        Settings.System.BATTERY_LIGHT_MEDIUM_COLOR,
+        Settings.System.BATTERY_LIGHT_FULL_COLOR,
+        Settings.System.BATTERY_LIGHT_REALLYFULL_COLOR,
     };
 }
