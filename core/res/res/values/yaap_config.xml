@@ -41,6 +41,9 @@
     <string-array name="config_vendorPlatformSignatures">
     </string-array>
 
+    <!-- Does the device have a notification led -->
+    <bool name="config_hasNotificationLed">true</bool>
+
     <!-- Does the battery LED support multiple colors?
          Used to decide if the user can change the colors -->
     <bool name="config_multiColorBatteryLed">true</bool>
