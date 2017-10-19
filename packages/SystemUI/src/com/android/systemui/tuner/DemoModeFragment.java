@@ -19,13 +19,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
 
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceScreen;
-import androidx.preference.SwitchPreference;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -51,8 +50,8 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         "managed_profile",
     };
 
-    private SwitchPreference mEnabledSwitch;
-    private SwitchPreference mOnSwitch;
+    private SwitchPreferenceCompat mEnabledSwitch;
+    private SwitchPreferenceCompat mOnSwitch;
 
     private DemoModeController mDemoModeController;
     private GlobalSettings mGlobalSettings;
@@ -70,10 +69,10 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         Context context = getContext();
-        mEnabledSwitch = new SwitchPreference(context);
+        mEnabledSwitch = new SwitchPreferenceCompat(context);
         mEnabledSwitch.setTitle(R.string.enable_demo_mode);
         mEnabledSwitch.setOnPreferenceChangeListener(this);
-        mOnSwitch = new SwitchPreference(context);
+        mOnSwitch = new SwitchPreferenceCompat(context);
         mOnSwitch.setTitle(R.string.show_demo_mode);
         mOnSwitch.setEnabled(false);
         mOnSwitch.setOnPreferenceChangeListener(this);
@@ -87,18 +86,6 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         mDemoModeTracker.startTracking();
         updateDemoModeEnabled();
         updateDemoModeOn();
-
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                getFragmentManager().popBackStack();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
