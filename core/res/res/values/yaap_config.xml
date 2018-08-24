@@ -35,4 +35,7 @@
          timing(the duration which the vibrator is expected to vibrate for). -->
     <bool name="config_hasOnePlusHapticMotor">false</bool>
 
+    <!-- Max visible notification icons -->
+    <integer name="config_maxVisibleNotificationIcons">4</integer>
+    <integer name="config_maxVisibleNotificationIconsWhenDark">5</integer>
 </resources>
