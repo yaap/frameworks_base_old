@@ -88,6 +88,7 @@ public class SystemSettings {
         Settings.System.QS_FOOTER_TEXT_STRING,
         Settings.System.LOCKSCREEN_BATTERY_INFO,
         Settings.System.NETWORK_TRAFFIC_STATE,
+        Settings.System.NETWORK_TRAFFIC_TYPE,
         Settings.System.NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD,
     };
 }
