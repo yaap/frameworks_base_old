@@ -35,7 +35,6 @@ import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -48,8 +47,9 @@ import javax.inject.Inject;
  * Retrieve doze information
  */
 @SysUISingleton
-public class DozeParameters implements TunerService.Tunable,
+public class DozeParameters implements
         com.android.systemui.plugins.statusbar.DozeParameters, Dumpable {
+
     private static final int MAX_DURATION = 60 * 1000;
     public static final boolean FORCE_NO_BLANKING =
             SystemProperties.getBoolean("debug.force_no_blanking", false);
@@ -67,7 +67,6 @@ public class DozeParameters implements TunerService.Tunable,
 
     private final Set<Callback> mCallbacks = new HashSet<>();
 
-    private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
 
     @Inject
@@ -77,7 +76,6 @@ public class DozeParameters implements TunerService.Tunable,
             AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
             PowerManager powerManager,
             BatteryController batteryController,
-            TunerService tunerService,
             DumpManager dumpManager,
             FeatureFlags featureFlags,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
@@ -92,11 +90,6 @@ public class DozeParameters implements TunerService.Tunable,
         mPowerManager.setDozeAfterScreenOff(!mControlScreenOffAnimation);
         mFeatureFlags = featureFlags;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
-
-        tunerService.addTunable(
-                this,
-                Settings.Secure.DOZE_ALWAYS_ON,
-                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
     }
 
     public boolean getDisplayStateSupported() {
@@ -187,7 +180,7 @@ public class DozeParameters implements TunerService.Tunable,
      * @return {@code true} if enabled and available.
      */
     public boolean getAlwaysOn() {
-        return mDozeAlwaysOn && !mBatteryController.isAodPowerSave();
+        return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
     }
 
     public boolean isQuickPickupEnabled() {
@@ -279,14 +272,6 @@ public class DozeParameters implements TunerService.Tunable,
      */
     public void removeCallback(Callback callback) {
         mCallbacks.remove(callback);
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
-        for (Callback callback : mCallbacks) {
-            callback.onAlwaysOnChange();
-        }
     }
 
     @Override
