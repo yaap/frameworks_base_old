@@ -5437,7 +5437,16 @@ public final class Settings {
         /**
          * @hide
          */
+        @Readable
         public static final String SCREENSHOT_SHUTTER_SOUND = "screenshot_shutter_sound";
+
+        /**
+         * Style of battery to show.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
