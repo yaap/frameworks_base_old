@@ -103,5 +103,6 @@ public class SystemSettings {
         Settings.System.GAMING_MODE_MEDIA,
         Settings.System.NOTIFICATION_HEADERS,
         Settings.System.SCREEN_OFF_FOD,
+        Settings.System.RINGTONE_VIBRATION_PATTERN,
     };
 }
