@@ -127,9 +127,9 @@ public class SystemSettings {
         Settings.System.BATTERY_LIGHT_MEDIUM_COLOR,
         Settings.System.BATTERY_LIGHT_FULL_COLOR,
         Settings.System.BATTERY_LIGHT_REALLYFULL_COLOR,
-        Settings.System.PULSE_AMBIENT_LIGHT,
-        Settings.System.AMBIENT_NOTIFICATION_LIGHT_ENABLED,
-        Settings.System.AMBIENT_NOTIFICATION_LIGHT,
-        Settings.System.AMBIENT_NOTIFICATION_LIGHT_ACCENT,
+        Settings.System.NOTIFICATION_PULSE,
+        Settings.System.AOD_NOTIFICATION_PULSE,
+        Settings.System.AOD_NOTIFICATION_PULSE_CLEAR,
+        Settings.System.NOTIFICATION_PULSE_ACCENT,
     };
 }
