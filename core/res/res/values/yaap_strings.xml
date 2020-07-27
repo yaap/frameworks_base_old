@@ -62,4 +62,7 @@
      <string name="gapps_package_39">com.samsung.android.modenplugin</string>
      <string name="gapps_package_40">com.samsung.android.neatplugin</string>
      <string name="gapps_package_41">com.samsung.android.waterplugin"</string>
+
+     <!-- Cycle through ringer modes -->
+     <string name="volume_dialog_ringer_guidance_normal">Calls and notifications will ring</string>
 </resources>
