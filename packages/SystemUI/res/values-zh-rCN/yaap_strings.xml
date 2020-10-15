@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2020, Yet Another AOSP Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Caffeine QS Tile -->
+    <string name="quick_settings_caffeine_label">屏幕长亮</string>
+    <string name="quick_settings_caffeine_label_off">关</string>
+    <string name="accessibility_quick_settings_caffeine_off">屏幕长亮 关</string>
+    <string name="accessibility_quick_settings_caffeine_on">屏幕长亮 开</string>
+
+    <!-- CPUInfo tile -->
+    <string name="quick_settings_cpuinfo_label">CPU信息浮窗</string>
+
+    <!-- Compass QS Tile -->
+    <string name="quick_settings_compass_label">指南针</string>
+    <string name="quick_settings_compass_value"><xliff:g id="degrees">%1$.0f</xliff:g>\u00b0 <xliff:g id="direction">%2$s</xliff:g></string>
+    <string name="quick_settings_compass_init">初始化中\u2026</string>
+    <string name="accessibility_quick_settings_compass_off">指南针 关</string>
+    <string name="accessibility_quick_settings_compass_on">指南针 开</string>
+    <string name="accessibility_quick_settings_compass_changed_off">指南针 已关闭</string>
+    <string name="accessibility_quick_settings_compass_changed_on">指南针 已打开</string>
+    <string name="quick_settings_compass_N">北</string>
+    <string name="quick_settings_compass_NE">东北</string>
+    <string name="quick_settings_compass_E">东</string>
+    <string name="quick_settings_compass_SE">东南</string>
+    <string name="quick_settings_compass_S">南</string>
+    <string name="quick_settings_compass_SW">西南</string>
+    <string name="quick_settings_compass_W">西</string>
+    <string name="quick_settings_compass_NW">西北</string>
+
+    <!-- Sound QS Tile -->
+    <string name="quick_settings_sound_label">声音</string>
+    <string name="quick_settings_sound_ring">响铃</string>
+    <string name="quick_settings_sound_vibrate">震动</string>
+    <string name="quick_settings_sound_silent">静音</string>
+
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">弹出通知</string>
+    <string name="accessibility_quick_settings_heads_up_off">弹出通知 关</string>
+    <string name="accessibility_quick_settings_heads_up_on">弹出通知 开</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">弹出通知 已关闭</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">弹出通知 已打开</string>
+
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB网络共享</string>
+
+    <!-- Gaming Mode -->
+    <string name="gaming_mode_tile_title">游戏模式</string>
+    <string name="gaming_mode_tile_toast">游戏模式已开启</string>
+    <string name="gaming_mode_tile_toast_disabled">游戏模式已关闭</string>
+    <string name="gaming_mode_dialog_title">游戏模式</string>
+    <string name="gaming_mode_dialog_message">游戏模式可以切换弹出通知，硬件按钮，免打扰，导航栏，自动亮度和设置媒体音量的设置值。 退出游戏模式后，所有切换的设置都会被切换回原样。 长按进行设置</string>
+    <string name="accessibility_quick_settings_gaming_mode_on">游戏模式 开</string>
+    <string name="accessibility_quick_settings_gaming_mode_off">游戏模式 关</string>
+    <string name="gaming_mode_panel_headsup_title">禁用弹出通知</string>
+    <string name="gaming_mode_panel_zen_title">启用免打扰</string>
+    <string name="gaming_mode_panel_navbar_title">禁用导航栏</string>
+    <string name="gaming_mode_panel_hw_title">禁用硬件导航键</string>
+    <string name="gaming_mode_panel_brightness_title">禁用自动亮度</string>
+    <string name="gaming_mode_panel_media_title">设置媒体音量</string>
+
+    <!-- AOD QS tile states -->
+    <string name="quick_settings_aod_label">息屏显示</string>
+    <string name="quick_settings_aod_on_charge_label">充电时显示息屏 </string>
+    <string name="quick_settings_aod_off_label">息屏显示 关</string>
+    <string name="quick_settings_aod_off_powersave_label">息屏显示 关\n省电</string>
+
+    <!-- QS Config -->
+    <string name="qs_menu_item_columns">列数</string>
+    <string name="qs_menu_item_columns_landscape">列数（横屏）</string>
+    <string name="qs_menu_item_qs_rows">最大列数</string>
+    <string name="qs_menu_item_columns_two">2</string>
+    <string name="qs_menu_item_columns_three">3</string>
+    <string name="qs_menu_item_columns_four">4</string>
+    <string name="qs_menu_item_columns_five">5</string>
+    <string name="qs_menu_item_columns_six">6</string>
+    <string name="qs_menu_item_columns_seven">7</string>
+    <string name="qs_menu_item_columns_eight">8</string>
+    <string name="qs_menu_item_columns_nine">9</string>
+    <string name="qs_menu_item_reset">重置</string>
+    <string name="qs_menu_item_titles">显示磁贴标题</string>
+    <string name="qs_menu_item_qs_columns">快速栏磁贴个数</string>
+    <string name="qs_menu_item_columns_auto">自动</string>
+    <string name="qs_menu_item_titles">页脚文字</string>
+
+    <!-- Indication on the keyguard that is shown when the device is charging with a dash charger. Should match keyguard_plugged_in_dash_charging [CHAR LIMIT=40]-->
+    <string name="keyguard_indication_dash_charging_time" formatted="false"><xliff:g id="percentage">%2$s</xliff:g> • Warp 闪充中(<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> 后充满)</string>
+    <string name="keyguard_plugged_in_dash_charging">Warp 闪充中</string>
+
+    <string name="statusbar_items_title">状态栏图标</string>
+
+</resources>
