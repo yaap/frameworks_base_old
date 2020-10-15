@@ -19,10 +19,5 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="clock_title_binary" translatable="false">二进制</string>
-    <string name="clock_title_default_bold" translatable="false">默认 (粗体)</string>
-    <string name="clock_title_samsung" translatable="false">三星</string>
-    <string name="clock_title_samsung_bold" translatable="false">三星  (粗体)</string>
-
 
 </resources>
