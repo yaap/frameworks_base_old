@@ -103,5 +103,12 @@
     <string name="keyguard_plugged_in_dash_charging">Warp 闪充中</string>
 
     <string name="statusbar_items_title">状态栏图标</string>
+    <!-- Power Menu -->
+    <string name="global_action_reboot">重启</string>
+    <string name="global_action_reboot_more">重启选项\u2026</string>
+    <string name="global_action_reboot_sub">重启系统</string>
+    <string name="global_action_reboot_recovery">重启到恢复模式</string>
+    <string name="global_action_reboot_bootloader">重启到引导模式</string>
+    <string name="global_action_settings">设置</string>
 
 </resources>
