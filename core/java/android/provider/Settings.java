@@ -5590,6 +5590,13 @@ public final class Settings {
         public static final String NOTIFICATION_PULSE_DURATION = "ambient_notification_light_duration";
 
         /**
+         * Whether to enable SmartSpace
+         * @hide
+         */
+        @Readable
+        public static final String SMART_SPACE = "smart_space";
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
