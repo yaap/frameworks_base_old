@@ -137,5 +137,6 @@ public class SystemSettings {
         Settings.System.NOTIFICATION_PULSE_DURATION,
         Settings.System.SMART_SPACE,
         Settings.System.QS_FOOTER_SERVICES_SHOW,
+        Settings.System.KEYGAURD_MEDIA_ART,
     };
 }
