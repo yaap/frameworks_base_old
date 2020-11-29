@@ -16,6 +16,7 @@
 package com.android.systemui;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
+import static android.provider.Settings.System.SHOW_BATTERY_PERCENT_INSIDE;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
@@ -26,6 +27,7 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -163,6 +165,9 @@ public class BatteryMeterView extends LinearLayout implements
                         Settings.System.getUriFor(SHOW_BATTERY_PERCENT),
                         false, mSettingObserver, newUserId);
                 getContext().getContentResolver().registerContentObserver(
+                        Settings.System.getUriFor(SHOW_BATTERY_PERCENT_INSIDE),
+                        false, mSettingObserver, newUserId);
+                getContext().getContentResolver().registerContentObserver(
                         Settings.System.getUriFor(STATUS_BAR_BATTERY_STYLE),
                         false, mSettingObserver, newUserId);
                 getContext().getContentResolver().registerContentObserver(
@@ -279,6 +284,9 @@ public class BatteryMeterView extends LinearLayout implements
                 Settings.System.getUriFor(SHOW_BATTERY_PERCENT),
                 false, mSettingObserver, mUser);
         getContext().getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(SHOW_BATTERY_PERCENT_INSIDE),
+                false, mSettingObserver, mUser);
+        getContext().getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(STATUS_BAR_BATTERY_STYLE),
                 false, mSettingObserver, mUser);
         getContext().getContentResolver().registerContentObserver(
@@ -307,9 +315,7 @@ public class BatteryMeterView extends LinearLayout implements
         mCharging = pluggedIn;
         mLevel = level;
         updatePercentText();
-        if (pluggedIn) {
-            updateShowPercent();
-        }
+        updateShowPercent();
     }
 
     @Override
@@ -381,16 +387,21 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     private void updateShowPercent() {
+        final ContentResolver resolver = mContext.getContentResolver();
+
         final boolean showing = mBatteryPercentView != null;
         final int showBatteryPercent = Settings.System.getIntForUser(
-                mContext.getContentResolver(), SHOW_BATTERY_PERCENT, 0, mUser);
-        final boolean drawPercentInside = mShowPercentMode == MODE_DEFAULT &&
+                resolver, SHOW_BATTERY_PERCENT, 0, mUser);
+        final boolean userDrawPercentInside = Settings.System.getIntForUser(
+                resolver, SHOW_BATTERY_PERCENT_INSIDE, 0, mUser) == 1;
+        final boolean drawPercent = mShowPercentMode == MODE_DEFAULT &&
                 showBatteryPercent == 1;
         final boolean drawPercentOnly = mShowPercentMode == MODE_ESTIMATE ||
                 showBatteryPercent == 2;
         final boolean isText = mBatteryStyle == BATTERY_STYLE_TEXT;
 
-        if (drawPercentOnly && (!drawPercentInside || mCharging) || isText) {
+        if (drawPercentOnly || isText || (drawPercent && (!userDrawPercentInside || mCharging))) {
+            // draw next to the icon
             mCircleDrawable.setShowPercent(false);
             mThemedDrawable.setShowPercent(false);
             if (!showing) {
@@ -409,9 +420,12 @@ public class BatteryMeterView extends LinearLayout implements
                     R.dimen.battery_level_padding_start);
             mBatteryPercentView.setPaddingRelative(isText ? 0 : paddingStart, 0, 0, 0);
         } else {
-            mCircleDrawable.setShowPercent(drawPercentInside);
-            mThemedDrawable.setShowPercent(drawPercentInside);
+            // draw inside if we want it
+            boolean inside = drawPercent && userDrawPercentInside;
+            mCircleDrawable.setShowPercent(inside);
+            mThemedDrawable.setShowPercent(inside);
             if (showing) {
+                // remove the percentage view
                 removeView(mBatteryPercentView);
                 mBatteryPercentView = null;
             }
@@ -566,16 +580,18 @@ public class BatteryMeterView extends LinearLayout implements
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
-            if (TextUtils.equals(uri.getLastPathSegment(),
-                    STATUS_BAR_BATTERY_STYLE)) {
-                updateBatteryStyle();
-            } else if (TextUtils.equals(uri.getLastPathSegment(),
-                    SHOW_BATTERY_PERCENT)) {
-                updateShowPercent();
-            } else if (TextUtils.equals(uri.getLastPathSegment(),
-                    Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME)) {
-                // update the text for sure if the estimate in the cache was updated
-                updatePercentText();
+            switch (uri.getLastPathSegment()) {
+                case STATUS_BAR_BATTERY_STYLE:
+                    updateBatteryStyle();
+                    break;
+                case SHOW_BATTERY_PERCENT:
+                case SHOW_BATTERY_PERCENT_INSIDE:
+                    updateShowPercent();
+                    break;
+                case Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME:
+                    // update the text for sure if the estimate in the cache was updated
+                    updatePercentText();
+                    break;
             }
         }
     }

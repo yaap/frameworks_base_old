@@ -221,7 +221,6 @@ public class KeyguardStatusBarView extends RelativeLayout implements
                 mMultiUserAvatar.setVisibility(View.GONE);
             }
         }
-        mBatteryView.setForceShowPercent(mBatteryCharging);
     }
 
     private void updateSystemIconsLayoutParams() {
