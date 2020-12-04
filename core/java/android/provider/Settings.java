@@ -5227,6 +5227,21 @@ public final class Settings {
         public static final String KEYGAURD_MEDIA_ART = "keygaurd_media_art";
 
         /**
+         * Style of battery to show.
+         * 0 = protrait (default)
+         * 1 = circle
+         * 2 = text
+         * @hide
+         */
+        public static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
+
+        /**
+         * Whether to draw battery percent inside the icon
+         * @hide
+         */
+        public static final String SHOW_BATTERY_PERCENT_INSIDE = "status_bar_show_battery_percent_inside";
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate

@@ -118,5 +118,6 @@
     <!-- Name of the additional status bar icons also exposed with SystemUI Tuner -->
     <string name="status_bar_camera">Camera</string>
     <string name="status_bar_microphone">Microphone</string>
+    <string name="status_bar_battery">Battery</string>
 
 </resources>
