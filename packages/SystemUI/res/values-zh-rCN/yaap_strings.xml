@@ -115,11 +115,9 @@
     <string name="accessibility_dpad_left">光标向左</string>
     <string name="accessibility_dpad_right">光标向右</string>
 
-<<<<<<< HEAD
     <!-- Name of the additional status bar icons also exposed with SystemUI Tuner -->
     <string name="status_bar_camera">相机</string>
     <string name="status_bar_microphone">麦克风</string>
-=======
->>>>>>> 489a8a314753f1902d40967109685383c73cc507
+    <string name="status_bar_battery">电池</string>
 
 </resources>
