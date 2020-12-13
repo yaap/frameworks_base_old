@@ -81,6 +81,9 @@
     <string name="quick_settings_aod_off_label">息屏显示 关</string>
     <string name="quick_settings_aod_off_powersave_label">息屏显示 关\n省电</string>
 
+    <!-- Reading mode tile -->
+    <string name="quick_settings_reading_mode">阅读模式</string>
+
     <!-- QS Config -->
     <string name="qs_menu_item_columns">列数</string>
     <string name="qs_menu_item_columns_landscape">列数（横屏）</string>
@@ -119,5 +122,8 @@
     <string name="status_bar_camera">相机</string>
     <string name="status_bar_microphone">麦克风</string>
     <string name="status_bar_battery">电池</string>
+    <string name="status_bar_data_saver">流量节省</string>
+    <string name="status_bar_vpn">VPN</string>
+    <string name="status_bar_roaming">漫游</string>
 
 </resources>
