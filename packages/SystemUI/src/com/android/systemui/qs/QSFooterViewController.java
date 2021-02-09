@@ -18,12 +18,14 @@ package com.android.systemui.qs;
 
 import static com.android.systemui.qs.dagger.QSFlagsModule.PM_LITE_ENABLED;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,7 +72,6 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final SettingsButton mSettingsButton;
     private final View mSettingsButtonContainer;
     private final View mRunningServicesButton;
-    private final TextView mBuildText;
     private final View mEdit;
     private final PageIndicator mPageIndicator;
     private final View mPowerMenuLite;
@@ -160,6 +161,34 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         }
     };
 
+    private final SettingsObserver mSettingsObserver = new SettingsObserver(new Handler(getContext().getMainLooper()));
+    private class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void observe() {
+            getContext().getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.QS_FOOTER_SERVICES_SHOW), false,
+                    mSettingsObserver, UserHandle.USER_ALL);
+        }
+
+        public void stop() {
+            getContext().getContentResolver().unregisterContentObserver(this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+            if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.QS_FOOTER_SERVICES_SHOW))) {
+                if (mView == null || mMultiUserSwitchController == null) return;
+                mView.updateEverything(isTunerEnabled(),
+                        mMultiUserSwitchController.isMultiUserEnabled());
+            }
+        }
+    };
+
     private boolean mListening;
     private boolean mExpanded;
 
@@ -230,11 +259,14 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
 
         mQsPanelController.setFooterPageIndicator(mPageIndicator);
         mView.updateEverything(isTunerEnabled(), mMultiUserSwitchController.isMultiUserEnabled());
+
+        mSettingsObserver.observe();
     }
 
     @Override
     protected void onViewDetached() {
         setListening(false);
+        mSettingsObserver.stop();
     }
 
     @Override
