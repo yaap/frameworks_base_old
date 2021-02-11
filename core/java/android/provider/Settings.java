@@ -5417,7 +5417,15 @@ public final class Settings {
          * Whether volume button music control is enabled
          * @hide
          */
+        @Readable
         public static final String VOLUME_BUTTON_MUSIC_CONTROL = "volume_button_music_control";
+
+        /**
+         * Time required for volume button music control to be pressed
+         * @hide
+         */
+        @Readable
+        public static final String VOLUME_BUTTON_MUSIC_CONTROL_DELAY = "volume_button_music_control_delay";
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
