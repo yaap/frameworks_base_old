@@ -20,23 +20,14 @@ import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.database.ContentObserver;
-import android.graphics.drawable.Drawable;
 import android.graphics.Rect;
-import android.os.Handler;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 
+import android.view.ViewGroup;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.policy.NetworkTraffic;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 
 public class NetworkTrafficSB extends NetworkTraffic implements StatusIconDisplayable {
@@ -46,50 +37,20 @@ public class NetworkTrafficSB extends NetworkTraffic implements StatusIconDispla
     private int mVisibleState = -1;
     private boolean mSystemIconVisible = true;
 
-    private class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System
-                    .getUriFor(Settings.System.NETWORK_TRAFFIC_STATE), false,
-                    this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System
-                    .getUriFor(Settings.System.NETWORK_TRAFFIC_VIEW_LOCATION), false,
-                    this, UserHandle.USER_ALL);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            setMode();
-            updateVisibility();
-        }
-    }
-
-    /**
-     * @hide
-     */
     public NetworkTrafficSB(Context context) {
         this(context, null);
     }
 
-    /**
-     * @hide
-     */
     public NetworkTrafficSB(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    /**
-     * @hide
-     */
     public NetworkTrafficSB(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        Handler mHandler = new Handler();
-        SettingsObserver settingsObserver = new SettingsObserver(mHandler);
-        settingsObserver.observe();
+        setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
     }
 
     @Override
@@ -118,7 +79,7 @@ public class NetworkTrafficSB extends NetworkTraffic implements StatusIconDispla
 
     @Override
     public boolean isIconVisible() {
-        return mIsEnabled;
+        return true;
     }
 
     @Override
@@ -147,16 +108,6 @@ public class NetworkTrafficSB extends NetworkTraffic implements StatusIconDispla
     }
 
     @Override
-    void updateVisibility() {
-        if (mIsEnabled && mTrafficVisible && mSystemIconVisible && !mTrafficInHeaderView) {
-            setVisibility(View.VISIBLE);
-        } else {
-            setText("");
-            setVisibility(View.GONE);
-        }
-    }
-
-    @Override
     public void setStaticDrawableColor(int color) {
         mTintColor = color;
         setTextColor(mTintColor);
@@ -164,6 +115,11 @@ public class NetworkTrafficSB extends NetworkTraffic implements StatusIconDispla
     }
 
     @Override
-    public void setDecorColor(int color) {
+    public void setDecorColor(int color) { }
+
+    @Override
+    void updateVisibility() {
+        if (mIsEnabled && mTrafficVisible && mSystemIconVisible && !mTrafficInHeaderView) setVisibility(View.VISIBLE);
+        else setVisibility(View.GONE);
     }
 }
