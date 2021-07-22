@@ -85,4 +85,16 @@
     <!-- Slider vibrations fallbacks - set either to non positive to disable
          maximum duration in ms the slider vibrations scale to from 0 -->
     <java-symbol type="integer" name="config_sliderVibFallbackDuration" />
+
+    <!-- Landscape Battery -->
+    <java-symbol type="string" name="config_batterymeterRLandPerimeterPath" />
+    <java-symbol type="string" name="config_batterymeterRLandFillMask" />
+    <java-symbol type="string" name="config_batterymeterRLandBoltPath" />
+    <java-symbol type="string" name="config_batterymeterRLandPowersavePath" />
+    <java-symbol type="string" name="config_batterymeterRLandErrorPerimeterPath" />
+    <java-symbol type="string" name="config_batterymeterLandPerimeterPath" />
+    <java-symbol type="string" name="config_batterymeterLandFillMask" />
+    <java-symbol type="string" name="config_batterymeterLandBoltPath" />
+    <java-symbol type="string" name="config_batterymeterLandPowersavePath" />
+    <java-symbol type="string" name="config_batterymeterLandErrorPerimeterPath" />
 </resources>
