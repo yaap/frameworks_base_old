@@ -60,7 +60,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     // Fade out faster than fade in to finish before QQS hides.
     private static final long QQS_FADE_OUT_DURATION = 50L;
 
-
     private final ArrayList<View> mAllViews = new ArrayList<>();
     /**
      * List of {@link View}s representing Quick Settings that are being animated from the quick QS
