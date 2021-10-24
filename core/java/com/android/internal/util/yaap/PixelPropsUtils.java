@@ -26,11 +26,19 @@ import java.util.Map;
 public final class PixelPropsUtils {
 
     private static final String TAG = "PixelPropsUtils";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
-    private static final Map<String, String> redfinProps = Map.of(
+    private static final Map<String, Object> commonProps = Map.of(
         "BRAND", "google",
         "MANUFACTURER", "Google",
+        "IS_DEBUGGABLE", false,
+        "IS_ENG", false,
+        "IS_USERDEBUG", false,
+        "IS_USER", true,
+        "TYPE", "user"
+    );
+
+    private static final Map<String, String> redfinProps = Map.of(
         "DEVICE", "redfin",
         "PRODUCT", "redfin",
         "MODEL", "Pixel 5",
@@ -38,8 +46,6 @@ public final class PixelPropsUtils {
     );
 
     private static final Map<String, String> marlinProps = Map.of(
-        "BRAND", "google",
-        "MANUFACTURER", "Google",
         "DEVICE", "marlin",
         "PRODUCT", "marlin",
         "MODEL", "Pixel XL",
@@ -47,8 +53,6 @@ public final class PixelPropsUtils {
     );
 
     private static final Map<String, String> walleyeProps = Map.of(
-        "BRAND", "google",
-        "MANUFACTURER", "Google",
         "DEVICE", "walleye",
         "PRODUCT", "walleye",
         "MODEL", "Pixel 2",
@@ -56,8 +60,6 @@ public final class PixelPropsUtils {
     );
 
     private static final Map<String, String> crosshatchProps = Map.of(
-        "BRAND", "google",
-        "MANUFACTURER", "Google",
         "DEVICE", "crosshatch",
         "PRODUCT", "crosshatch",
         "MODEL", "Pixel 3 XL",
@@ -69,8 +71,11 @@ public final class PixelPropsUtils {
         "com.breel.wallpapers20",
         "com.google.android.apps.customization.pixel",
         "com.google.android.apps.fitness",
+        "com.google.android.apps.gcs",
         "com.google.android.apps.maps",
         "com.google.android.apps.nexuslauncher",
+        "com.google.android.apps.messaging",
+        "com.google.android.apps.pixelmigrate",
         "com.google.android.apps.recorder",
         "com.google.android.apps.safetyhub",
         "com.google.android.apps.subscriptions.red",
@@ -79,11 +84,16 @@ public final class PixelPropsUtils {
         "com.google.android.apps.turboadapter",
         "com.google.android.apps.wallpaper",
         "com.google.android.apps.wallpaper.pixel",
+        "com.google.android.apps.wellbeing",
         "com.google.android.as",
+        "com.google.android.configupdater",
         "com.google.android.dialer",
+        "com.google.android.ext.services",
         "com.google.android.gms.location.history",
+        "com.google.android.gsf",
         "com.google.android.inputmethod.latin",
         "com.google.android.soundpicker",
+        "com.google.intelligence.sense",
         "com.google.pixel.dynamicwallpapers",
         "com.google.pixel.livewallpaper"
     );
@@ -117,12 +127,16 @@ public final class PixelPropsUtils {
             Log.d(TAG, "Package = " + packageName);
         }
         if (packagesToChange.contains(packageName)) {
+            commonProps.forEach(PixelPropsUtils::setPropValue);
             redfinProps.forEach(PixelPropsUtils::setPropValue);
         } else if (packagesToChangePixelXL.contains(packageName)) {
+            commonProps.forEach(PixelPropsUtils::setPropValue);
             marlinProps.forEach(PixelPropsUtils::setPropValue);
         } else if (packagesToChangePixel2.contains(packageName)) {
+            commonProps.forEach(PixelPropsUtils::setPropValue);
             walleyeProps.forEach(PixelPropsUtils::setPropValue);
         } else if (packagesToChangePixel3XL.contains(packageName)) {
+            commonProps.forEach(PixelPropsUtils::setPropValue);
             crosshatchProps.forEach(PixelPropsUtils::setPropValue);
         }
         // Set proper indexing fingerprint
@@ -131,7 +145,7 @@ public final class PixelPropsUtils {
         }
     }
 
-    private static void setPropValue(String key, String value) {
+    private static void setPropValue(String key, Object value) {
         try {
             if (DEBUG) {
                 Log.d(TAG, "Setting prop " + key + " to " + value);
