@@ -34,7 +34,7 @@ public final class PixelPropsUtils {
         "DEVICE", "redfin",
         "PRODUCT", "redfin",
         "MODEL", "Pixel 5",
-        "FINGERPRINT", "google/redfin/redfin:11/RQ3A.211001.001/7641976:user/release-keys"
+        "FINGERPRINT", "google/redfin/redfin:12/SP1A.210812.015/7679548:user/release-keys"
     );
 
     private static final Map<String, String> marlinProps = Map.of(
@@ -52,7 +52,7 @@ public final class PixelPropsUtils {
         "DEVICE", "walleye",
         "PRODUCT", "walleye",
         "MODEL", "Pixel 2",
-        "FINGERPRINT", "google/walleye/walleye:8.1.0/OPM1.171019.011/4448085:user/release-keys"
+        "FINGERPRINT", "google/walleye/walleye:10/QP1A.190711.019/5790879:user/release-keys"
     );
 
     private static final Map<String, String> crosshatchProps = Map.of(
@@ -61,7 +61,7 @@ public final class PixelPropsUtils {
         "DEVICE", "crosshatch",
         "PRODUCT", "crosshatch",
         "MODEL", "Pixel 3 XL",
-        "FINGERPRINT", "google/crosshatch/crosshatch:11/RQ3A.211001.001/7641976:user/release-keys"
+        "FINGERPRINT", "google/crosshatch/crosshatch:12/SP1A.210812.015/7679548:user/release-keys"
     );
 
     private static final List<String> packagesToChange = List.of(
