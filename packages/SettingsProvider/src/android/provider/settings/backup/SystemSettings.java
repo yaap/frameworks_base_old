@@ -114,5 +114,6 @@ public class SystemSettings {
         Settings.System.VOLUME_DIALOG_TIMEOUT,
         Settings.System.TORCH_POWER_BUTTON_GESTURE,
         Settings.System.DOUBLE_TAP_SLEEP_LOCKSCREEN,
+        Settings.System.DOUBLE_TAP_SLEEP_GESTURE,
     };
 }
