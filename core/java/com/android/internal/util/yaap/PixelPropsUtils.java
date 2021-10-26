@@ -89,6 +89,7 @@ public final class PixelPropsUtils {
         "com.google.android.configupdater",
         "com.google.android.dialer",
         "com.google.android.ext.services",
+        "com.google.android.gms",
         "com.google.android.gms.location.history",
         "com.google.android.gsf",
         "com.google.android.inputmethod.latin",
@@ -111,10 +112,6 @@ public final class PixelPropsUtils {
         "com.samsung.android.waterplugin"
     );
 
-    private static final List<String> packagesToChangePixel2 = List.of(
-        "com.google.android.gms"
-    );
-
     private static final List<String> packagesToChangePixel3XL = List.of(
         "com.google.android.googlequicksearchbox"
     );
@@ -128,13 +125,16 @@ public final class PixelPropsUtils {
         }
         if (packagesToChange.contains(packageName)) {
             commonProps.forEach(PixelPropsUtils::setPropValue);
-            redfinProps.forEach(PixelPropsUtils::setPropValue);
+            redfinProps.forEach((key, value) -> {
+                if (packageName.equals("com.google.android.gms") && key.equals("MODEL")) {
+                    return;
+                } else {
+                    setPropValue(key, value);
+                }
+            });
         } else if (packagesToChangePixelXL.contains(packageName)) {
             commonProps.forEach(PixelPropsUtils::setPropValue);
             marlinProps.forEach(PixelPropsUtils::setPropValue);
-        } else if (packagesToChangePixel2.contains(packageName)) {
-            commonProps.forEach(PixelPropsUtils::setPropValue);
-            walleyeProps.forEach(PixelPropsUtils::setPropValue);
         } else if (packagesToChangePixel3XL.contains(packageName)) {
             commonProps.forEach(PixelPropsUtils::setPropValue);
             crosshatchProps.forEach(PixelPropsUtils::setPropValue);
