@@ -26,7 +26,7 @@ import java.util.Map;
 public final class PixelPropsUtils {
 
     private static final String TAG = "PixelPropsUtils";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final Map<String, Object> commonProps = Map.of(
         "BRAND", "google",
