@@ -45,27 +45,6 @@ public final class PixelPropsUtils {
         "FINGERPRINT", "google/redfin/redfin:12/SP1A.210812.015/7679548:user/release-keys"
     );
 
-    private static final Map<String, String> marlinProps = Map.of(
-        "DEVICE", "marlin",
-        "PRODUCT", "marlin",
-        "MODEL", "Pixel XL",
-        "FINGERPRINT", "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys"
-    );
-
-    private static final Map<String, String> walleyeProps = Map.of(
-        "DEVICE", "walleye",
-        "PRODUCT", "walleye",
-        "MODEL", "Pixel 2",
-        "FINGERPRINT", "google/walleye/walleye:10/QP1A.190711.019/5790879:user/release-keys"
-    );
-
-    private static final Map<String, String> crosshatchProps = Map.of(
-        "DEVICE", "crosshatch",
-        "PRODUCT", "crosshatch",
-        "MODEL", "Pixel 3 XL",
-        "FINGERPRINT", "google/crosshatch/crosshatch:12/SP1A.210812.015/7679548:user/release-keys"
-    );
-
     private static final List<String> packagesToChange = List.of(
         "com.android.vending",
         "com.breel.wallpapers20",
@@ -98,10 +77,7 @@ public final class PixelPropsUtils {
         "com.google.android.soundpicker",
         "com.google.intelligence.sense",
         "com.google.pixel.dynamicwallpapers",
-        "com.google.pixel.livewallpaper"
-    );
-
-    private static final List<String> packagesToChangePixelXL = List.of(
+        "com.google.pixel.livewallpaper",
         "com.samsung.accessory.berrymgr",
         "com.samsung.accessory.fridaymgr",
         "com.samsung.accessory.neobeanmgr",
@@ -111,9 +87,6 @@ public final class PixelPropsUtils {
         "com.samsung.android.modenplugin",
         "com.samsung.android.neatplugin",
         "com.samsung.android.waterplugin"
-    );
-
-    private static final List<String> packagesToChangePixel3XL = List.of(
     );
 
     public static void setProps(String packageName) {
@@ -132,12 +105,6 @@ public final class PixelPropsUtils {
                     setPropValue(key, value);
                 }
             });
-        } else if (packagesToChangePixelXL.contains(packageName)) {
-            commonProps.forEach(PixelPropsUtils::setPropValue);
-            marlinProps.forEach(PixelPropsUtils::setPropValue);
-        } else if (packagesToChangePixel3XL.contains(packageName)) {
-            commonProps.forEach(PixelPropsUtils::setPropValue);
-            crosshatchProps.forEach(PixelPropsUtils::setPropValue);
         }
         // Set proper indexing fingerprint
         if (packageName.equals("com.google.android.settings.intelligence")) {
