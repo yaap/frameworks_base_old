@@ -75,6 +75,7 @@ public final class PixelPropsUtils {
         "com.google.android.apps.maps",
         "com.google.android.apps.nexuslauncher",
         "com.google.android.apps.messaging",
+        "com.google.android.apps.photos",
         "com.google.android.apps.pixelmigrate",
         "com.google.android.apps.recorder",
         "com.google.android.apps.safetyhub",
@@ -91,6 +92,7 @@ public final class PixelPropsUtils {
         "com.google.android.ext.services",
         "com.google.android.gms",
         "com.google.android.gms.location.history",
+        "com.google.android.googlequicksearchbox",
         "com.google.android.gsf",
         "com.google.android.inputmethod.latin",
         "com.google.android.soundpicker",
@@ -100,7 +102,6 @@ public final class PixelPropsUtils {
     );
 
     private static final List<String> packagesToChangePixelXL = List.of(
-        "com.google.android.apps.photos",
         "com.samsung.accessory.berrymgr",
         "com.samsung.accessory.fridaymgr",
         "com.samsung.accessory.neobeanmgr",
@@ -113,7 +114,6 @@ public final class PixelPropsUtils {
     );
 
     private static final List<String> packagesToChangePixel3XL = List.of(
-        "com.google.android.googlequicksearchbox"
     );
 
     public static void setProps(String packageName) {
