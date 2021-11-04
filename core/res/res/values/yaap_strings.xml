@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2021 YAAP
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Strings for PixelPropUtils -->
+     <string name="build_device">redfin</string>
+     <string name="build_fp">google/redfin/redfin:12/SP1A.210812.015/7679548:user/release-keys</string>
+     <string name="build_model">Pixel 5</string>
+     <string name="gapps_package_1">com.android.vending</string>
+     <string name="gapps_package_2">com.breel.wallpapers20</string>
+     <string name="gapps_package_3">com.google.android.apps.customization.pixel</string>
+     <string name="gapps_package_4">com.google.android.apps.fitness</string>
+     <string name="gapps_package_5">com.google.android.apps.gcs</string>
+     <string name="gapps_package_6">com.google.android.apps.maps</string>
+     <string name="gapps_package_7">com.google.android.apps.nexuslauncher</string>
+     <string name="gapps_package_8">com.google.android.apps.messaging</string>
+     <string name="gapps_package_9">com.google.android.apps.photos</string>
+     <string name="gapps_package_10">com.google.android.apps.pixelmigrate</string>
+     <string name="gapps_package_11">com.google.android.apps.recorder</string>
+     <string name="gapps_package_12">com.google.android.apps.safetyhub</string>
+     <string name="gapps_package_13">com.google.android.apps.subscriptions.red</string>
+     <string name="gapps_package_14">com.google.android.apps.tachyon</string>
+     <string name="gapps_package_15">com.google.android.apps.turbo</string>
+     <string name="gapps_package_16">com.google.android.apps.turboadapter</string>
+     <string name="gapps_package_17">com.google.android.apps.wallpaper</string>
+     <string name="gapps_package_18">com.google.android.apps.wallpaper.pixel</string>
+     <string name="gapps_package_19">com.google.android.apps.wellbeing</string>
+     <string name="gapps_package_20">com.google.android.as</string>
+     <string name="gapps_package_21">com.google.android.configupdater</string>
+     <string name="gapps_package_22">com.google.android.dialer</string>
+     <string name="gapps_package_23">com.google.android.ext.services</string>
+     <string name="gapps_package_24">com.google.android.gms</string>
+     <string name="gapps_package_25">com.google.android.gms.location.history</string>
+     <string name="gapps_package_26">com.google.android.googlequicksearchbox</string>
+     <string name="gapps_package_27">com.google.android.gsf</string>
+     <string name="gapps_package_28">com.google.android.inputmethod.latin</string>
+     <string name="gapps_package_29">com.google.android.soundpicker</string>
+     <string name="gapps_package_30">com.google.intelligence.sense</string>
+     <string name="gapps_package_31">com.google.pixel.dynamicwallpapers</string>
+     <string name="gapps_package_32">com.google.pixel.livewallpaper</string>
+     <string name="gapps_package_33">com.samsung.accessory.berrymgr</string>
+     <string name="gapps_package_34">com.samsung.accessory.fridaymgr</string>
+     <string name="gapps_package_35">com.samsung.accessory.neobeanmgr</string>
+     <string name="gapps_package_36">com.samsung.android.app.watchmanager</string>
+     <string name="gapps_package_37">com.samsung.android.geargplugin</string>
+     <string name="gapps_package_38">com.samsung.android.gearnplugin</string>
+     <string name="gapps_package_39">com.samsung.android.modenplugin</string>
+     <string name="gapps_package_40">com.samsung.android.neatplugin</string>
+     <string name="gapps_package_41">com.samsung.android.waterplugin"</string>
+</resources>
