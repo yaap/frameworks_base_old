@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2021 YAAP
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+ <string-array name="gaaps_package_names">
+    <item>@string/gapps_package_1</item>
+    <item>@string/gapps_package_2</item>
+    <item>@string/gapps_package_3</item>
+    <item>@string/gapps_package_4</item>
+    <item>@string/gapps_package_5</item>
+    <item>@string/gapps_package_6</item>
+    <item>@string/gapps_package_7</item>
+    <item>@string/gapps_package_8</item>
+    <item>@string/gapps_package_9</item>
+    <item>@string/gapps_package_10</item>
+    <item>@string/gapps_package_11</item>
+    <item>@string/gapps_package_12</item>
+    <item>@string/gapps_package_13</item>
+    <item>@string/gapps_package_14</item>
+    <item>@string/gapps_package_15</item>
+    <item>@string/gapps_package_16</item>
+    <item>@string/gapps_package_17</item>
+    <item>@string/gapps_package_18</item>
+    <item>@string/gapps_package_19</item>
+    <item>@string/gapps_package_20</item>
+    <item>@string/gapps_package_21</item>
+    <item>@string/gapps_package_22</item>
+    <item>@string/gapps_package_23</item>
+    <item>@string/gapps_package_24</item>
+    <item>@string/gapps_package_25</item>
+    <item>@string/gapps_package_26</item>
+    <item>@string/gapps_package_27</item>
+    <item>@string/gapps_package_28</item>
+    <item>@string/gapps_package_29</item>
+    <item>@string/gapps_package_30</item>
+    <item>@string/gapps_package_31</item>
+    <item>@string/gapps_package_32</item>
+    <item>@string/gapps_package_33</item>
+    <item>@string/gapps_package_34</item>
+    <item>@string/gapps_package_35</item>
+    <item>@string/gapps_package_36</item>
+    <item>@string/gapps_package_37</item>
+    <item>@string/gapps_package_38</item>
+    <item>@string/gapps_package_39</item>
+    <item>@string/gapps_package_40</item>
+    <item>@string/gapps_package_41</item>
+    </string-array>
+</resources>

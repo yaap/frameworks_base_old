@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 package com.android.internal.util.yaap;
-
+import android.content.res.Resources;
 import android.os.Build;
 import android.util.Log;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -27,67 +28,20 @@ public final class PixelPropsUtils {
 
     private static final String TAG = "PixelPropsUtils";
     private static final boolean DEBUG = false;
-
-    private static final Map<String, Object> commonProps = Map.of(
+    
+    private static final String build_device = Resources.getSystem().getString(com.android.internal.R.string.build_device);
+    private static final String build_fp = Resources.getSystem().getString(com.android.internal.R.string.build_fp);
+    private static final String build_model = Resources.getSystem().getString(com.android.internal.R.string.build_model);
+    private static final Map<String, String> redfinProps = Map.of(
         "BRAND", "google",
         "MANUFACTURER", "Google",
-        "IS_DEBUGGABLE", false,
-        "IS_ENG", false,
-        "IS_USERDEBUG", false,
-        "IS_USER", true,
-        "TYPE", "user"
+        "DEVICE", build_device,
+        "PRODUCT", build_device,
+        "MODEL", build_model,
+        "FINGERPRINT", build_fp
     );
 
-    private static final Map<String, String> redfinProps = Map.of(
-        "DEVICE", "redfin",
-        "PRODUCT", "redfin",
-        "MODEL", "Pixel 5",
-        "FINGERPRINT", "google/redfin/redfin:12/SP1A.210812.015/7679548:user/release-keys"
-    );
-
-    private static final List<String> packagesToChange = List.of(
-        "com.android.vending",
-        "com.breel.wallpapers20",
-        "com.google.android.apps.customization.pixel",
-        "com.google.android.apps.fitness",
-        "com.google.android.apps.gcs",
-        "com.google.android.apps.maps",
-        "com.google.android.apps.nexuslauncher",
-        "com.google.android.apps.messaging",
-        "com.google.android.apps.photos",
-        "com.google.android.apps.pixelmigrate",
-        "com.google.android.apps.recorder",
-        "com.google.android.apps.safetyhub",
-        "com.google.android.apps.subscriptions.red",
-        "com.google.android.apps.tachyon",
-        "com.google.android.apps.turbo",
-        "com.google.android.apps.turboadapter",
-        "com.google.android.apps.wallpaper",
-        "com.google.android.apps.wallpaper.pixel",
-        "com.google.android.apps.wellbeing",
-        "com.google.android.as",
-        "com.google.android.configupdater",
-        "com.google.android.dialer",
-        "com.google.android.ext.services",
-        "com.google.android.gms",
-        "com.google.android.gms.location.history",
-        "com.google.android.googlequicksearchbox",
-        "com.google.android.gsf",
-        "com.google.android.inputmethod.latin",
-        "com.google.android.soundpicker",
-        "com.google.intelligence.sense",
-        "com.google.pixel.dynamicwallpapers",
-        "com.google.pixel.livewallpaper",
-        "com.samsung.accessory.berrymgr",
-        "com.samsung.accessory.fridaymgr",
-        "com.samsung.accessory.neobeanmgr",
-        "com.samsung.android.app.watchmanager",
-        "com.samsung.android.geargplugin",
-        "com.samsung.android.gearnplugin",
-        "com.samsung.android.modenplugin",
-        "com.samsung.android.neatplugin",
-        "com.samsung.android.waterplugin"
-    );
+    private static final List<String> packagesToChange = Arrays.asList(Resources.getSystem().getStringArray(com.android.internal.R.array.gaaps_package_names));
 
     public static void setProps(String packageName) {
         if (packageName == null) {
@@ -97,18 +51,7 @@ public final class PixelPropsUtils {
             Log.d(TAG, "Package = " + packageName);
         }
         if (packagesToChange.contains(packageName)) {
-            commonProps.forEach(PixelPropsUtils::setPropValue);
-            redfinProps.forEach((key, value) -> {
-                if (packageName.equals("com.google.android.gms") && key.equals("MODEL")) {
-                    return;
-                } else {
-                    setPropValue(key, value);
-                }
-            });
-        }
-        // Set proper indexing fingerprint
-        if (packageName.equals("com.google.android.settings.intelligence")) {
-            setPropValue("FINGERPRINT", Build.VERSION.INCREMENTAL);
+            redfinProps.forEach(PixelPropsUtils::setPropValue);
         }
     }
 
