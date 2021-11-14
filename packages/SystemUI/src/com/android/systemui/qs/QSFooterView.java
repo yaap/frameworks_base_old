@@ -119,14 +119,17 @@ public class QSFooterView extends FrameLayout {
     }
 
     private void setBuildText() {
-        if (mBuildText == null) return;
-        boolean isShow = Settings.System.getIntForUser(mContext.getContentResolver(),
+        if (mBuildText == null) {
+            mShouldShowBuildText = false;
+            return;
+        }
+        mShouldShowBuildText = Settings.System.getIntForUser(mContext.getContentResolver(),
                         Settings.System.QS_FOOTER_TEXT_SHOW, 0,
                         UserHandle.USER_CURRENT) == 1;
         String text = Settings.System.getStringForUser(mContext.getContentResolver(),
                         Settings.System.QS_FOOTER_TEXT_STRING,
                         UserHandle.USER_CURRENT);
-        if (isShow) {
+        if (mShouldShowBuildText) {
             if (text == null || text.isEmpty()) {
                 mBuildText.setText("YAAP");
                 mBuildText.setVisibility(View.VISIBLE);
