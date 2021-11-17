@@ -379,6 +379,11 @@ public class NetworkTraffic extends TextView {
         setTextColor(mTintColor);
     }
 
+    public void setTintColor(int color) {
+        mTintColor = color;
+        updateTrafficDrawable();
+    }
+
     boolean isDisabled() {
         return !mIsEnabled || !mTrafficInHeaderView;
     }
