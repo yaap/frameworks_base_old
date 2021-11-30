@@ -718,7 +718,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         int userId = user.id;
 
         // No lockdown option if it's not turned on in Settings
-        if (mSecureSettings.getIntForUser(Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0, userId) == 0) {
+        if (mSecureSettings.getIntForUser(Settings.Secure.LOCKDOWN_IN_POWER_MENU, 1, userId) == 0) {
             return false;
         }
 
