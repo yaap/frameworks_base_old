@@ -84,6 +84,7 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_reboot_systemui">SystemUI</string>
 
     <!-- DataSwitch Tile -->
     <string name="qs_data_switch_label">Switch data card</string>

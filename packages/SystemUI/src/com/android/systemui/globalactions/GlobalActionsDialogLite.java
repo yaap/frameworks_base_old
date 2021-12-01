@@ -60,6 +60,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -173,6 +174,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private static final String GLOBAL_ACTION_KEY_REBOOT_RECOVERY = "reboot_recovery";
     private static final String GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER = "reboot_bootloader";
     private static final String GLOBAL_ACTION_KEY_REBOOT_FASTBOOT = "reboot_fastboot";
+    private static final String GLOBAL_ACTION_KEY_REBOOT_SYSUI = "reboot_sysui";
 
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
@@ -567,6 +569,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         RebootRecoveryAction rebootRecoveryAction = new RebootRecoveryAction();
         RebootBootloaderAction rebootBootloaderAction = new RebootBootloaderAction();
         RebootFastbootAction rebootFastbootAction = new RebootFastbootAction();
+        RebootSystemUIAction rebootSystemUIAction = new RebootSystemUIAction();
 
         ArraySet<String> addedKeys = new ArraySet<>();
         List<Action> tempActions = new ArrayList<>();
@@ -628,6 +631,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 addIfShouldShowAction(tempActions, rebootBootloaderAction);
             } else if (GLOBAL_ACTION_KEY_REBOOT_FASTBOOT.equals(actionKey)) {
                 addIfShouldShowAction(tempActions, rebootFastbootAction);
+            } else if (GLOBAL_ACTION_KEY_REBOOT_SYSUI.equals(actionKey)) {
+                addIfShouldShowAction(tempActions, rebootSystemUIAction);
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -653,6 +658,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mPowerItems.add(rebootRecoveryAction);
                 mPowerItems.add(rebootBootloaderAction);
                 mPowerItems.add(rebootFastbootAction);
+                mPowerItems.add(rebootSystemUIAction);
             }
 
             // add the PowerOptionsAction after Emergency, if present
@@ -1031,6 +1037,27 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         @Override
         public void onPress() {
             mWindowManagerFuncs.reboot(false, PowerManager.REBOOT_FASTBOOT);
+        }
+    }
+
+    private final class RebootSystemUIAction extends SinglePressAction {
+        private RebootSystemUIAction() {
+            super(com.android.systemui.R.drawable.ic_restart_systemui, com.android.systemui.R.string.global_action_reboot_systemui);
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
+        }
+
+        @Override
+        public void onPress() {
+            Process.killProcess(Process.myPid());
         }
     }
 
