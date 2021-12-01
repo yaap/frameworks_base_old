@@ -28,17 +28,25 @@ public final class PixelPropsUtils {
 
     private static final String TAG = "PixelPropsUtils";
     private static final boolean DEBUG = false;
-    
+
     private static final String build_device = Resources.getSystem().getString(com.android.internal.R.string.build_device);
     private static final String build_fp = Resources.getSystem().getString(com.android.internal.R.string.build_fp);
     private static final String build_model = Resources.getSystem().getString(com.android.internal.R.string.build_model);
     private static final Map<String, String> redfinProps = Map.of(
-        "BRAND", "google",
-        "MANUFACTURER", "Google",
         "DEVICE", build_device,
         "PRODUCT", build_device,
         "MODEL", build_model,
         "FINGERPRINT", build_fp
+    );
+
+    private static final Map<String, Object> commonProps = Map.of(
+        "BRAND", "google",
+        "MANUFACTURER", "Google",
+        "IS_DEBUGGABLE", false,
+        "IS_ENG", false,
+        "IS_USERDEBUG", false,
+        "IS_USER", true,
+        "TYPE", "user"
     );
 
     private static final List<String> packagesToChange = Arrays.asList(Resources.getSystem().getStringArray(com.android.internal.R.array.gaaps_package_names));
@@ -51,7 +59,18 @@ public final class PixelPropsUtils {
             Log.d(TAG, "Package = " + packageName);
         }
         if (packagesToChange.contains(packageName)) {
-            redfinProps.forEach(PixelPropsUtils::setPropValue);
+            commonProps.forEach(PixelPropsUtils::setPropValue);
+            redfinProps.forEach((key, value) -> {
+                if (packageName.equals("com.google.android.gms") && key.equals("MODEL")) {
+                    return;
+                } else {
+                    setPropValue(key, value);
+                }
+            });
+        }
+        // Set proper indexing fingerprint
+        if (packageName.equals("com.google.android.settings.intelligence")) {
+            setPropValue("FINGERPRINT", Build.VERSION.INCREMENTAL);
         }
     }
 
