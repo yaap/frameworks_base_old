@@ -196,5 +196,8 @@ public class SecureSettings {
         Settings.Secure.LOCKSCREEN_SHOW_WALLET,
         Settings.Secure.VOLUME_LINK_NOTIFICATION,
         Settings.Secure.SHOW_COMBINED_STATUS_BAR_SIGNAL_ICONS,
+        Settings.Secure.QS_SHOW_BRIGHTNESS,
+        Settings.Secure.QS_BRIGHTNESS_POSITION_BOTTOM,
+        Settings.Secure.QS_SHOW_AUTO_BRIGHTNESS_BUTTON,
     };
 }

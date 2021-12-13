@@ -16,6 +16,7 @@ package com.android.systemui.qs;
 
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -413,8 +414,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             // If brightness is showing at the bottom fade in as we reach the final position
             View brightness = mQsPanelController.getBrightnessView();
             if (brightness != null) {
-                boolean bottom = mTunerService.getValue(
-                        QSPanel.QS_BRIGHTNESS_POSITION_BOTTOM, 0) == 1;
+                boolean bottom = Settings.Secure.getInt(
+                        brightness.getContext().getContentResolver(),
+                        Settings.Secure.QS_BRIGHTNESS_POSITION_BOTTOM, 0) == 1;
                 if (bottom) {
                     builder.addFloat(brightness, "alpha", 0, 1);
                     mBrightnessAnimator = null;
