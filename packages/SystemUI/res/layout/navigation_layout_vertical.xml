@@ -50,7 +50,6 @@
             android:clipToPadding="false"
             android:clipChildren="false" />
 
-        <include layout="@layout/nav_buttons_dpad_group_vertical" />
     </com.android.systemui.navigationbar.buttons.NearestTouchFrame>
 
 </FrameLayout>

@@ -138,6 +138,5 @@ public class SystemSettings {
         Settings.System.SMART_SPACE,
         Settings.System.QS_FOOTER_SERVICES_SHOW,
         Settings.System.KEYGAURD_MEDIA_ART,
-        Settings.System.NAVIGATION_BAR_ARROW_KEYS,
     };
 }
