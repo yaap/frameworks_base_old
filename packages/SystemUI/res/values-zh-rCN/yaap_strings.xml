@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2020, Yet Another AOSP Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Caffeine QS Tile -->
+    <string name="quick_settings_caffeine_label">屏幕长亮</string>
+    <string name="quick_settings_caffeine_label_off">关</string>
+    <string name="accessibility_quick_settings_caffeine_off">屏幕长亮 关</string>
+    <string name="accessibility_quick_settings_caffeine_on">屏幕长亮 开</string>
+
+    <!-- Compass QS Tile -->
+    <string name="quick_settings_compass_label">指南针</string>
+    <string name="quick_settings_compass_value"><xliff:g id="degrees">%1$.0f</xliff:g>\u00b0 <xliff:g id="direction">%2$s</xliff:g></string>
+    <string name="quick_settings_compass_init">初始化中\u2026</string>
+    <string name="accessibility_quick_settings_compass_off">指南针 关</string>
+    <string name="accessibility_quick_settings_compass_on">指南针 开</string>
+    <string name="accessibility_quick_settings_compass_changed_off">指南针 已关闭</string>
+    <string name="accessibility_quick_settings_compass_changed_on">指南针 已打开</string>
+    <string name="quick_settings_compass_N">北</string>
+    <string name="quick_settings_compass_NE">东北</string>
+    <string name="quick_settings_compass_E">东</string>
+    <string name="quick_settings_compass_SE">东南</string>
+    <string name="quick_settings_compass_S">南</string>
+    <string name="quick_settings_compass_SW">西南</string>
+    <string name="quick_settings_compass_W">西</string>
+    <string name="quick_settings_compass_NW">西北</string>
+
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">弹出通知</string>
+    <string name="accessibility_quick_settings_heads_up_off">弹出通知 关</string>
+    <string name="accessibility_quick_settings_heads_up_on">弹出通知 开</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">弹出通知 已关闭</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">弹出通知 已打开</string>
+
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">息屏显示</string>
+    <string name="quick_settings_aod_on_charge_label">充电时显示息屏 </string>
+    <string name="quick_settings_aod_off_label">息屏显示 关</string>
+
+    <!-- Gaming Mode -->
+    <string name="gaming_mode_tile_title">游戏模式</string>
+    <string name="gaming_mode_dialog_title">游戏模式</string>
+    <string name="gaming_mode_dialog_message">请先进行初始化设置。\n长按进入详细设置页面</string>
+    <string name="accessibility_quick_settings_gaming_mode_on">游戏模式 开</string>
+    <string name="accessibility_quick_settings_gaming_mode_off">游戏模式 关</string>
+    <string name="gaming_mode_for">选项:</string>
+    <string name="gaming_mode_headsup">注意脚下</string>
+    <string name="gaming_mode_zen">勿扰</string>
+    <string name="gaming_mode_ringer">响铃</string>
+    <string name="gaming_mode_vibrate">振动</string>
+    <string name="gaming_mode_silent">静音</string>
+    <string name="gaming_mode_night_light">护眼模式</string>
+    <string name="gaming_mode_battery_saver">省电模式</string>
+    <string name="gaming_mode_brightness">亮度</string>
+    <string name="gaming_mode_media">音量键</string>
+
+    <!-- Screen record -->
+    <string name="screenrecord_delete_label">删除</string>
+    <string name="screenrecord_delete_description">录屏已删除</string>
+    <string name="screenrecord_stopdot_label">显示停止圆点\n长按移除</string>
+    <string name="screenrecord_lowquality_label">降低画质以节省空间</string>
+    <string name="screenrecord_longer_timeout_switch_label">扩展录屏文件大小\n调整录屏文件最大为15GB</string>
+    <string name="global_action_reboot_more">高级</string>
+
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">重启</string>
+    <string name="global_action_reboot_sub">系统</string>
+    <string name="global_action_reboot_recovery">恢复模式</string>
+    <string name="global_action_reboot_bootloader">引导模式</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_reboot_systemui">系统界面</string>
+
+    <!-- DataSwitch Tile -->
+    <string name="qs_data_switch_label">切换流量卡</string>
+    <string name="qs_data_switch_toast_0">无SIM卡</string>
+    <string name="qs_data_switch_toast_1">仅有1张SIM卡</string>
+    <string name="qs_data_switch_changed_1">切换到卡1</string>
+    <string name="qs_data_switch_changed_2">切换到卡2</string>
+
+</resources>

@@ -326,6 +326,10 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"拨打电话和管理通话"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"身体传感器"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"访问与您的生命体征相关的传感器数据"</string>
+    <string name="permgrouplab_otherSensors">"其他传感器"</string>
+    <string name="permgroupdesc_otherSensors">"访问方向、运动等传感器"</string>
+    <string name="permgrouplab_network">"网络"</string>
+    <string name="permgroupdesc_network">"访问网络"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"检索窗口内容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"检测您与之互动的窗口的内容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"启用触摸浏览"</string>
