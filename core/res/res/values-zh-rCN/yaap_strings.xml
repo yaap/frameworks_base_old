@@ -18,7 +18,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Cycle through ringer modes -->
-    <string name="volume_dialog_ringer_guidance_normal">Calls and notifications will ring</string>
+    <string name="volume_dialog_ringer_guidance_normal">来电与通知将会响铃</string>
 
     <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
