@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2020, Yet Another AOSP Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Caffeine QS Tile -->
+    <string name="quick_settings_caffeine_label">Не выключать эран</string>
+    <string name="quick_settings_caffeine_label_off">Выключен</string>
+    <string name="accessibility_quick_settings_caffeine_off">Кофеин Выкл</string>
+    <string name="accessibility_quick_settings_caffeine_on">Кофеин Вкл</string>
+
+    <!-- Compass QS Tile -->
+    <string name="quick_settings_compass_label">Компас</string>
+    <string name="quick_settings_compass_value"><xliff:g id="degrees">%1$.0f</xliff:g>\u00b0 <xliff:g id="direction">%2$s</xliff:g></string>
+    <string name="quick_settings_compass_init">Инициализация\u2026</string>
+    <string name="accessibility_quick_settings_compass_off">Компас Выкл</string>
+    <string name="accessibility_quick_settings_compass_on">Compass Вкл</string>
+    <string name="accessibility_quick_settings_compass_changed_off">Компас выключен</string>
+    <string name="accessibility_quick_settings_compass_changed_on">Компас включён</string>
+    <string name="quick_settings_compass_N">С</string>
+    <string name="quick_settings_compass_NE">СВ</string>
+    <string name="quick_settings_compass_E">В</string>
+    <string name="quick_settings_compass_SE">ЮВ</string>
+    <string name="quick_settings_compass_S">Ю</string>
+    <string name="quick_settings_compass_SW">ЮЗ</string>
+    <string name="quick_settings_compass_W">З</string>
+    <string name="quick_settings_compass_NW">СЗ</string>
+
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Всплывающие уведомления</string>
+    <string name="accessibility_quick_settings_heads_up_off">Всплывающие уведомления выкл.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Всплывающие уведомления вкл.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Всплывающие уведомления выключены.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Всплывающие уведомления включены.</string>
+
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD вкл.</string>
+    <string name="quick_settings_aod_on_charge_label">AOD на зарядке</string>
+    <string name="quick_settings_aod_off_label">AOD выкл.</string>
+
+    <!-- Gaming Mode -->
+    <string name="gaming_mode_tile_title">Игровой Режим</string>
+    <string name="gaming_mode_dialog_title">Игровой Режим</string>
+    <string name="gaming_mode_dialog_message">Требуется первоначальная настройка!\nЗажмите плитку для перехода к настройкам</string>
+    <string name="accessibility_quick_settings_gaming_mode_on">Игровой режим включён</string>
+    <string name="accessibility_quick_settings_gaming_mode_off">Игровой режим выключен</string>
+    <string name="gaming_mode_for">для:</string>
+    <string name="gaming_mode_headsup">Всплывающих уведомлений</string>
+    <string name="gaming_mode_zen">Режима Не Беспокоить</string>
+    <string name="gaming_mode_ringer">Звонка</string>
+    <string name="gaming_mode_vibrate">Вибрации</string>
+    <string name="gaming_mode_silent">Без звука</string>
+    <string name="gaming_mode_night_light">Ночной подсветки</string>
+    <string name="gaming_mode_battery_saver">Эергосбережения</string>
+    <string name="gaming_mode_brightness">Яркости</string>
+    <string name="gaming_mode_media">Громоксти Медиа</string>
+
+    <!-- Screen record -->
+    <!-- Label for notification action to delete a screen recording file [CHAR LIMIT=35] -->
+    <string name="screenrecord_delete_label">Удалить</string>
+    <!-- A toast message shown after successfully deleting a screen recording [CHAR LIMIT=NONE] -->
+    <string name="screenrecord_delete_description">Запись экрана удалена</string>
+    <string name="screenrecord_stopdot_label">Показывать кнопку стоп-круг\nЗажмите чтобы передвинуть</string>
+    <string name="screenrecord_lowquality_label">Пониженное качество</string>
+    <string name="screenrecord_longer_timeout_switch_label">Выше лимит размера файла\nОгранчение до 15ГБ</string>
+    <string name="screenrecord_hevc_switch_label">Включить HEVC</string>
+
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Перезагрузка</string>
+    <string name="global_action_reboot_sub">Система</string>
+    <string name="global_action_reboot_recovery">Рекавери</string>
+    <string name="global_action_reboot_bootloader">Бутлоадер</string>
+    <string name="global_action_reboot_fastboot">Фастбут</string>
+    <string name="global_action_reboot_systemui">SystemUI</string>
+    <string name="global_action_reboot_more">Перезагрузка в..</string>
+
+    <!-- DataSwitch Tile -->
+    <string name="qs_data_switch_label">Сменить SIM для интернета</string>
+    <string name="qs_data_switch_toast_0">SIM не вставлена</string>
+    <string name="qs_data_switch_toast_1">Вставлена только одна SIM</string>
+    <string name="qs_data_switch_text_1">SIM 1</string>
+    <string name="qs_data_switch_text_2">SIM 2</string>
+    <string name="qs_data_switch_changed_1">Сменить использование интернета с SIM 1.</string>
+    <string name="qs_data_switch_changed_2">Сменить использование интернета с SIM 2.</string>
+
+    <!-- Bluetooth dialog -->
+    <string name="turn_on_bluetooth">Включить Bluetooth</string>
+    <string name="bluetooth_is_off">Bluetooth выключен</string>
+    <string name="tap_a_device_to_connect">Коснитесь устройства для подключения</string>
+
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB-модем</string>
+
+</resources>
