@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <string name="accessibility_next_alarm">下次闹铃在 %s</string>
+    <string name="accessibility_smartspace_page">第 %1$d 页，共 %2$d 页</string>
+    <string name="generic_smartspace_concatenated_desc">%1$s, %2$s</string>
+    <string name="smartspace_flight_card_gate_header">门号</string>
+    <string name="smartspace_flight_card_seat_header">座位号</string>
+    <string name="smartspace_hours_mins">今天 %1$s %2$s</string>
+    <string name="smartspace_icu_date_pattern">EEEMMMd</string>
+    <string name="smartspace_now">现在</string>
+    <string name="smartspace_pill_text_format">%1$s: %2$s</string>
+    <string name="smartspace_shopping_list_overflow"> %1$d 及更多</string>
+    <string name="weather_description">%1$s, %2$s</string>
+</resources>

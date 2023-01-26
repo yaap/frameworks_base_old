@@ -22,18 +22,28 @@
 
     <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
-    <string name="reboot_confirm">确认重启吗？</string>
+    <string name="reboot_confirm">确定要重启吗？</string>
     <string name="reboot_title">重启</string>
     <!-- advanced reboot to bootloader. -->
-    <string name="reboot_to_bootloader_title">重启到引导模式</string>
-    <string name="reboot_to_bootloader_message">正在重启到引导模式\u2026</string>
+    <string name="reboot_to_bootloader_title">引导模式</string>
+    <string name="reboot_to_bootloader_message">重启至引导模式中\u2026</string>
     <!-- advanced reboot to recovery. -->
-    <string name="reboot_to_recovery_title">重启到恢复模式</string>
-    <string name="reboot_to_recovery_message">正在重启到恢复模式\u2026</string>
+    <string name="reboot_to_recovery_title">恢复模式</string>
+    <string name="reboot_to_recovery_message">重启至恢复模式中\u2026</string>
     <!-- advanced reboot system -->
-    <string name="reboot_system_title">重启到系统</string>
-    <string name="reboot_system_message">正在重启到系统\u2026</string>
+    <string name="reboot_system_title">重启系统</string>
+    <string name="reboot_system_message">正在重新启动系统中\u2026</string>
     <!-- advanced reboot to fastboot. -->
-    <string name="reboot_to_fastboot_title">重启到Fastboot</string>
-    <string name="reboot_to_fastboot_message">正在重启到Fastboot\u2026</string>
+    <string name="reboot_to_fastboot_title">刷机模式</string>
+    <string name="reboot_to_fastboot_message">重启至刷机模式中\u2026</string>
+
+    <!-- Button that opens the screen with details of an application error -->
+    <string name="aerr_show_details">显示详情</string>
+
+    <!-- Pocket Lock -->
+    <string name="pocket_lock_message_long_press">长按电源解锁</string>
+    <string name="pocket_view_title">口袋模式已开启</string>
+    <string name="pocket_view_title_cancel">要使用你的手机:</string>
+    <string name="pocket_view_top_tag_cancel">清理手机的蓝色区域任何污垢或灰尘</string>
+    <string name="pocket_view_top_tag_cancel2">长按电源键可强制退出口袋模式</string>
 </resources>

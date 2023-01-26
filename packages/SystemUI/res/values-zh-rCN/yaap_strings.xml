@@ -19,10 +19,10 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Caffeine QS Tile -->
-    <string name="quick_settings_caffeine_label">屏幕长亮</string>
-    <string name="quick_settings_caffeine_label_off">关</string>
-    <string name="accessibility_quick_settings_caffeine_off">屏幕长亮 关</string>
-    <string name="accessibility_quick_settings_caffeine_on">屏幕长亮 开</string>
+    <string name="quick_settings_caffeine_label">保持亮屏</string>
+    <string name="quick_settings_caffeine_label_off">关闭</string>
+    <string name="accessibility_quick_settings_caffeine_off">保持亮屏 关</string>
+    <string name="accessibility_quick_settings_caffeine_on">保持亮屏 开</string>
 
     <!-- Compass QS Tile -->
     <string name="quick_settings_compass_label">指南针</string>
@@ -42,16 +42,16 @@
     <string name="quick_settings_compass_NW">西北</string>
 
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">弹出通知</string>
-    <string name="accessibility_quick_settings_heads_up_off">弹出通知 关</string>
-    <string name="accessibility_quick_settings_heads_up_on">弹出通知 开</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">弹出通知 已关闭</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">弹出通知 已打开</string>
+    <string name="quick_settings_heads_up_label">浮动通知</string>
+    <string name="accessibility_quick_settings_heads_up_off">浮动通知 关</string>
+    <string name="accessibility_quick_settings_heads_up_on">浮动通知 开</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">浮动通知 已关闭</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">浮动通知 已打开</string>
 
     <!-- AOD QS tile -->
-    <string name="quick_settings_aod_label">息屏显示</string>
-    <string name="quick_settings_aod_on_charge_label">充电时显示息屏 </string>
-    <string name="quick_settings_aod_off_label">息屏显示 关</string>
+    <string name="quick_settings_aod_label">充电环境显示</string>
+    <string name="quick_settings_aod_on_charge_label">充电时显示环境显示</string>
+    <string name="quick_settings_aod_off_label">环境显示 关</string>
 
     <!-- Gaming Mode -->
     <string name="gaming_mode_tile_title">游戏模式</string>
@@ -59,38 +59,48 @@
     <string name="gaming_mode_dialog_message">请先进行初始化设置。\n长按进入详细设置页面</string>
     <string name="accessibility_quick_settings_gaming_mode_on">游戏模式 开</string>
     <string name="accessibility_quick_settings_gaming_mode_off">游戏模式 关</string>
-    <string name="gaming_mode_for">选项:</string>
-    <string name="gaming_mode_headsup">注意脚下</string>
+    <string name="gaming_mode_for">\n选项:</string>
+    <string name="gaming_mode_headsup">浮动通知</string>
     <string name="gaming_mode_zen">勿扰</string>
     <string name="gaming_mode_ringer">响铃</string>
     <string name="gaming_mode_vibrate">振动</string>
     <string name="gaming_mode_silent">静音</string>
     <string name="gaming_mode_night_light">护眼模式</string>
     <string name="gaming_mode_battery_saver">省电模式</string>
-    <string name="gaming_mode_brightness">亮度</string>
-    <string name="gaming_mode_media">音量键</string>
+    <string name="gaming_mode_brightness">自动亮度</string>
+    <string name="gaming_mode_media">媒体音量</string>
 
     <!-- Screen record -->
     <string name="screenrecord_delete_label">删除</string>
     <string name="screenrecord_delete_description">录屏已删除</string>
     <string name="screenrecord_stopdot_label">显示停止圆点\n长按移除</string>
     <string name="screenrecord_lowquality_label">降低画质以节省空间</string>
-    <string name="screenrecord_longer_timeout_switch_label">扩展录屏文件大小\n调整录屏文件最大为15GB</string>
-    <string name="global_action_reboot_more">高级</string>
+    <string name="screenrecord_longer_timeout_switch_label">扩展录屏文件大小\n调整录屏文件最大为 15GB</string>
+    <string name="screenrecord_hevc_switch_label">启用 HEVC</string>
 
     <!-- Power menu reboot -->
     <string name="global_action_reboot">重启</string>
     <string name="global_action_reboot_sub">系统</string>
     <string name="global_action_reboot_recovery">恢复模式</string>
     <string name="global_action_reboot_bootloader">引导模式</string>
-    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_reboot_fastboot">刷机模式</string>
     <string name="global_action_reboot_systemui">系统界面</string>
 
     <!-- DataSwitch Tile -->
     <string name="qs_data_switch_label">切换流量卡</string>
-    <string name="qs_data_switch_toast_0">无SIM卡</string>
-    <string name="qs_data_switch_toast_1">仅有1张SIM卡</string>
-    <string name="qs_data_switch_changed_1">切换到卡1</string>
-    <string name="qs_data_switch_changed_2">切换到卡2</string>
+    <string name="qs_data_switch_toast_0">无 SIM 卡</string>
+    <string name="qs_data_switch_toast_1">仅有 1 张 SIM 卡</string>
+    <string name="qs_data_switch_text_1">卡 1</string>
+    <string name="qs_data_switch_text_2">卡 2</string>
+    <string name="qs_data_switch_changed_1">切换到卡 1</string>
+    <string name="qs_data_switch_changed_2">切换到卡 2</string>
+
+    <!-- Bluetooth dialog -->
+    <string name="turn_on_bluetooth">蓝牙</string>
+    <string name="bluetooth_is_off">蓝牙已关闭</string>
+    <string name="tap_a_device_to_connect">点按设备连接</string>
+
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB 网络共享</string>
 
 </resources>
