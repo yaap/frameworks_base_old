@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2020, Yet Another AOSP Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Caffeine QS Tile -->
+    <string name="quick_settings_caffeine_label">Не вимикати екран</string>
+    <string name="quick_settings_caffeine_label_off">Вимкнено</string>
+    <string name="accessibility_quick_settings_caffeine_off">Кофеїн Вимк</string>
+    <string name="accessibility_quick_settings_caffeine_on">Кофеїн Увімк</string>
+
+    <!-- Compass QS Tile -->
+    <string name="quick_settings_compass_label">Компас</string>
+    <string name="quick_settings_compass_value"><xliff:g id="degrees">%1$.0f</xliff:g>\u00b0 <xliff:g id="direction">%2$s</xliff:g></string>
+    <string name="quick_settings_compass_init">Ініціалізація\u2026</string>
+    <string name="accessibility_quick_settings_compass_off">Компас Вимк</string>
+    <string name="accessibility_quick_settings_compass_on">Компас Увімк</string>
+    <string name="accessibility_quick_settings_compass_changed_off">Компас вимкнено</string>
+    <string name="accessibility_quick_settings_compass_changed_on">Компас увімкнено</string>
+    <string name="quick_settings_compass_N">П</string>
+    <string name="quick_settings_compass_NE">ПС</string>
+    <string name="quick_settings_compass_E">С</string>
+    <string name="quick_settings_compass_SE">ПС</string>
+    <string name="quick_settings_compass_S">П</string>
+    <string name="quick_settings_compass_SW">ПЗ</string>
+    <string name="quick_settings_compass_W">З</string>
+    <string name="quick_settings_compass_NW">ПЗ</string>
+
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Спливаючі повідомлення</string>
+    <string name="accessibility_quick_settings_heads_up_off">Спливаючі повідомлення вимк.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Спливаючі повідомлення увімк.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Спливаючі повідомлення вимкнено.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Спливаючі повідомлення увімкнено.</string>
+
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD увімк.</string>
+    <string name="quick_settings_aod_on_charge_label">AOD на заряджанні</string>
+    <string name="quick_settings_aod_off_label">AOD вимк.</string>
+
+    <!-- Gaming Mode -->
+    <string name="gaming_mode_tile_title">Ігровий Режим</string>
+    <string name="gaming_mode_dialog_title">Ігровий Режим</string>
+    <string name="gaming_mode_dialog_message">Потрібне початкове налаштування!\nЗатисніть плитку для переходу до налаштувань</string>
+    <string name="accessibility_quick_settings_gaming_mode_on">Ігровий Режим увімкнено</string>
+    <string name="accessibility_quick_settings_gaming_mode_off">Ігровий Режим вимкнено</string>
+    <string name="gaming_mode_for">для:</string>
+    <string name="gaming_mode_headsup">Спливаючих повідомлень</string>
+    <string name="gaming_mode_zen">Режиму Не турбувати</string>
+    <string name="gaming_mode_ringer">Дзвінка</string>
+    <string name="gaming_mode_vibrate">Вібрації</string>
+    <string name="gaming_mode_silent">Без звуку</string>
+    <string name="gaming_mode_night_light">Нічного підсвічування</string>
+    <string name="gaming_mode_battery_saver">Енергозбереження</string>
+    <string name="gaming_mode_brightness">Яскравості</string>
+    <string name="gaming_mode_media">Гучності медіа</string>
+
+    <!-- Screen record -->
+    <!-- Label for notification action to delete a screen recording file [CHAR LIMIT=35] -->
+    <string name="screenrecord_delete_label">Видалити</string>
+    <!-- A toast message shown after successfully deleting a screen recording [CHAR LIMIT=NONE] -->
+    <string name="screenrecord_delete_description">Запис екрану видалено</string>
+    <string name="screenrecord_stopdot_label">Показувати кнопку стоп-коло\nЗатисніть, щоб пересунути</string>
+    <string name="screenrecord_lowquality_label">Знижена якість</string>
+    <string name="screenrecord_longer_timeout_switch_label">Вище ліміт розміру файлу\nОбмеження до 15ГБ</string>
+    <string name="screenrecord_hevc_switch_label">Увімкнути HEVC</string>
+
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Перезавантаження</string>
+    <string name="global_action_reboot_sub">Система</string>
+    <string name="global_action_reboot_recovery">Відновлення</string>
+    <string name="global_action_reboot_bootloader">Бутлоадер</string>
+    <string name="global_action_reboot_fastboot">Фастбут</string>
+    <string name="global_action_reboot_systemui">SystemUI</string>
+    <string name="global_action_reboot_more">Перезавантаження в..</string>
+
+    <!-- DataSwitch Tile -->
+    <string name="qs_data_switch_label">Змінити SIM для Інтернету</string>
+    <string name="qs_data_switch_toast_0">SIM не вставлено</string>
+    <string name="qs_data_switch_toast_1">Вставлена тільки одна SIM</string>
+    <string name="qs_data_switch_text_1">SIM 1</string>
+    <string name="qs_data_switch_text_2">SIM 2</string>
+    <string name="qs_data_switch_changed_1">Змінити використання Інтернету з SIM 1.</string>
+    <string name="qs_data_switch_changed_2">Змінити використання Інтернету з SIM 2.</string>
+
+    <!-- Bluetooth dialog -->
+    <string name="turn_on_bluetooth">Увімкнути Bluetooth</string>
+    <string name="bluetooth_is_off">Bluetooth вимкнено</string>
+    <string name="tap_a_device_to_connect">Торкніться пристрою для підключення</string>
+
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB-модем</string>
+
+</resources>
