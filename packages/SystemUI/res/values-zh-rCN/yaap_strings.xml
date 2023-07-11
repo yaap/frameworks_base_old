@@ -66,6 +66,7 @@
     <string name="gaming_mode_silent">静音</string>
     <string name="gaming_mode_night_light">护眼模式</string>
     <string name="gaming_mode_battery_saver">省电模式</string>
+    <string name="gaming_mode_bluetooth">蓝牙</string>
     <string name="gaming_mode_brightness">自动亮度</string>
     <string name="gaming_mode_media">媒体音量</string>
 
@@ -84,6 +85,7 @@
     <string name="global_action_reboot_bootloader">引导模式</string>
     <string name="global_action_reboot_fastboot">刷机模式</string>
     <string name="global_action_reboot_systemui">系统界面</string>
+    <string name="global_action_reboot_more">高级选项</string>
 
     <!-- DataSwitch Tile -->
     <string name="qs_data_switch_label">切换流量卡</string>
