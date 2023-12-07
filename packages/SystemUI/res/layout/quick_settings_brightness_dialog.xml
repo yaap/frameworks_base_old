@@ -36,6 +36,7 @@
             android:paddingEnd="0dp"
             android:progressDrawable="@drawable/brightness_progress_drawable"
             android:splitTrack="false"
+            android:clickable="true"
         />
 
     <ImageButton

@@ -235,7 +235,7 @@ public class BluetoothTile extends SecureQSTile<BooleanState> {
                 listenToMetadata(device);
             } else {
                 stopListeningToStaleDeviceMetadata();
-                batteryLevel = device.getBatteryLevel();
+                batteryLevel = device.getMinBatteryLevelWithMemberDevices();
             }
 
             if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {

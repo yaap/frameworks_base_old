@@ -41,6 +41,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.leak.RotationUtils;
@@ -143,6 +144,9 @@ public class PhoneStatusBarView extends FrameLayout {
         mDisplayCutout = null;
     }
 
+    // Per b/300629388, we let the PhoneStatusBarView detect onConfigurationChanged to
+    // updateResources, instead of letting the PhoneStatusBarViewController detect onConfigChanged
+    // then notify PhoneStatusBarView.
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -153,6 +157,10 @@ public class PhoneStatusBarView extends FrameLayout {
             updateLayoutForCutout();
             requestLayout();
         }
+    }
+
+    void onDensityOrFontScaleChanged() {
+        mClockController.onDensityOrFontScaleChanged();
     }
 
     @Override
@@ -240,25 +248,29 @@ public class PhoneStatusBarView extends FrameLayout {
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         layoutParams.height = mStatusBarHeight - waterfallTopInset;
+        updatePaddings();
+        setLayoutParams(layoutParams);
+    }
 
-        int statusBarPaddingTop = getResources().getDimensionPixelSize(
-                R.dimen.status_bar_padding_top);
+    private void updatePaddings() {
         int statusBarPaddingStart = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_padding_start);
-        int statusBarPaddingEnd = getResources().getDimensionPixelSize(
-                R.dimen.status_bar_padding_end);
 
-        View sbContents = findViewById(R.id.status_bar_contents);
-        sbContents.setPaddingRelative(
+        findViewById(R.id.status_bar_contents).setPaddingRelative(
                 statusBarPaddingStart,
-                statusBarPaddingTop,
-                statusBarPaddingEnd,
+                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_top),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end),
                 0);
 
         findViewById(R.id.notification_lights_out)
                 .setPaddingRelative(0, statusBarPaddingStart, 0, 0);
 
-        setLayoutParams(layoutParams);
+        findViewById(R.id.system_icons).setPaddingRelative(
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_start),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_top),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_end),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_bottom)
+        );
     }
 
     private void updateLayoutForCutout() {

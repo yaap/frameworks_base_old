@@ -24,13 +24,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
-import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
-import android.view.ViewGroup;
 import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
@@ -39,19 +36,14 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.display.data.repository.DisplayMetricsRepository;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.NotificationShadeWindowViewController;
-import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
-import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Compile;
@@ -69,7 +61,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     String TAG = "CentralSurfaces";
     boolean DEBUG = false;
     boolean SPEW = false;
-    boolean DUMPTRUCK = true; // extra dumpsys info
     boolean DEBUG_GESTURES = false;
     boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     boolean DEBUG_CAMERA_LIFT = false;
@@ -77,6 +68,7 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean DEBUG_WAKEUP_DELAY = Compile.IS_DEBUG;
     // additional instrumentation for testing purposes; intended to be left on during development
     boolean CHATTY = DEBUG;
+    boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
     String ACTION_FAKE_ARTWORK = "fake_artwork";
     int FADE_KEYGUARD_START_DELAY = 100;
     int FADE_KEYGUARD_DURATION = 300;
@@ -193,14 +185,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
         return contextForUser.getPackageManager();
     }
 
-    void animateExpandNotificationsPanel();
-
-    void animateExpandSettingsPanel(@Nullable String subpanel);
-
-    void collapsePanelOnMainThread();
-
-    void togglePanel();
-
     void start();
 
     boolean updateIsKeyguard();
@@ -211,63 +195,37 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @Override
     Lifecycle getLifecycle();
 
-    /**
-     * Wakes up the device if the device was dozing.
-     */
-    void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason);
-
-    NotificationShadeWindowView getNotificationShadeWindowView();
-
-    NotificationShadeWindowViewController getNotificationShadeWindowViewController();
-
-    /** */
-    ShadeViewController getShadeViewController();
-
     /** Get the Keyguard Message Area that displays auth messages. */
     AuthKeyguardMessageArea getKeyguardMessageArea();
 
     int getStatusBarHeight();
 
-    void updateQsExpansionEnabled();
-
-    boolean isShadeDisabled();
-
     boolean isLaunchingActivityOverLockscreen();
 
-    boolean isWakeUpComingFromTouch();
-
     void onKeyguardViewManagerStatesUpdated();
-
-    ViewGroup getNotificationScrollLayout();
 
     boolean isPulsing();
 
     boolean isOccluded();
 
-    //TODO: These can / should probably be moved to NotificationPresenter or ShadeController
-    void onLaunchAnimationCancelled(boolean isLaunchForActivity);
-
-    void onLaunchAnimationEnd(boolean launchIsFullScreen);
-
-    boolean shouldAnimateLaunch(boolean isActivityIntent, boolean showOverLockscreen);
-
-    boolean shouldAnimateLaunch(boolean isActivityIntent);
-
     boolean isDeviceInVrMode();
 
     NotificationPresenter getPresenter();
 
-    void postAnimateCollapsePanels();
-
-    void postAnimateForceCollapsePanels();
-
-    void postAnimateOpenPanels();
-
-    boolean isPanelExpanded();
-
+    /**
+     * Used to dispatch initial touch events before crossing the threshold to pull down the
+     * notification shade. After that, since the launcher window is set to slippery, input
+     * frameworks take care of routing the events to the notification shade.
+     */
     void onInputFocusTransfer(boolean start, boolean cancel, float velocity);
 
-    void animateCollapseQuickSettings();
+    /**
+     * Dispatches status bar motion event to the notification shade. This is different from
+     * {@link #onInputFocusTransfer(boolean, boolean, float)} as it doesn't rely on setting the
+     * launcher window slippery to allow the frameworks to route those events after passing the
+     * initial threshold.
+     */
+    default void onStatusBarTrackpadEvent(MotionEvent event) {}
 
     /** */
     boolean getCommandQueuePanelsEnabled();
@@ -288,17 +246,15 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @Override
     void dump(PrintWriter pwOriginal, String[] args);
 
-    void createAndAddWindows(@Nullable RegisterStatusBarResult result);
-
+    /** @deprecated Use {@link DisplayMetricsRepository} instead. */
+    @Deprecated
     float getDisplayWidth();
 
+    /** @deprecated Use {@link DisplayMetricsRepository} instead. */
+    @Deprecated
     float getDisplayHeight();
 
     void readyForKeyguardDone();
-
-    void resetUserExpandedStates();
-
-    void setLockscreenUser(int newUserId);
 
     void showKeyguard();
 
@@ -321,25 +277,13 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void userActivity();
 
-    boolean interceptMediaKey(KeyEvent event);
-
-    boolean dispatchKeyEventPreIme(KeyEvent event);
-
-    boolean onMenuPressed();
-
     void endAffordanceLaunch();
 
     /** Should the keyguard be hidden immediately in response to a back press/gesture. */
     boolean shouldKeyguardHideImmediately();
 
-    boolean onBackPressed();
-
-    boolean onSpacePressed();
-
     void showBouncerWithDimissAndCancelIfKeyguard(OnDismissAction performAction,
             Runnable cancelAction);
-
-    LightRevealScrim getLightRevealScrim();
 
     // TODO: Figure out way to remove these.
     NavigationBarView getNavigationBarView();
@@ -351,10 +295,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     void showPinningEscapeToast();
 
     void setBouncerShowing(boolean bouncerShowing);
-
-    void setBouncerShowingOverDream(boolean bouncerShowingOverDream);
-
-    void collapseShade();
 
     int getWakefulnessState();
 
@@ -388,9 +328,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isDeviceInteractive();
 
-    void setNotificationSnoozed(StatusBarNotification sbn,
-            NotificationSwipeActionHelper.SnoozeOption snoozeOption);
-
     void awakenDreams();
 
     void clearNotificationEffects();
@@ -405,14 +342,10 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void updateNotificationPanelTouchState();
 
-    int getDisplayId();
-
     int getRotation();
 
     @VisibleForTesting
     void setBarStateForTest(int state);
-
-    void wakeUpForFullScreenIntent();
 
     void showTransientUnchecked();
 
@@ -428,14 +361,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void resendMessage(Object msg);
 
-    int getDisabled1();
-
-    void setDisabled1(int disabled);
-
-    int getDisabled2();
-
-    void setDisabled2(int disabled);
-
     void setLastCameraLaunchSource(int source);
 
     void setLaunchCameraOnFinishedGoingToSleep(boolean launch);
@@ -448,8 +373,8 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     QSPanelController getQSPanelController();
 
-    boolean areNotificationAlertsDisabled();
-
+    /** @deprecated Use {@link DisplayMetricsRepository} instead. */
+    @Deprecated
     float getDisplayDensity();
 
     void extendDozePulse();

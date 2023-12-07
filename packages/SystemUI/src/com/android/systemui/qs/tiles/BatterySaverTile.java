@@ -161,7 +161,6 @@ public class BatterySaverTile extends SecureQSTile<BooleanState> implements
         state.contentDescription = state.label;
         state.value = mPowerSave;
         state.expandedAccessibilityClassName = Switch.class.getName();
-        state.showRippleEffect = mSetting.getValue() == 0;
     }
 
     @Override

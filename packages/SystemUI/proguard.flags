@@ -1,11 +1,6 @@
 -include proguard_common.flags
 
--keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.SystemUIInitializerImpl {
-    *;
-}
-
--keep class com.android.systemui.tv.TvSystemUIInitializer {
     *;
 }
 

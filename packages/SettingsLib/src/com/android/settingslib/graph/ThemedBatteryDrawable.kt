@@ -356,7 +356,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         return batteryLevel
     }
 
-    override fun onBoundsChange(bounds: Rect?) {
+    override fun onBoundsChange(bounds: Rect) {
         super.onBoundsChange(bounds)
         updateSize()
     }

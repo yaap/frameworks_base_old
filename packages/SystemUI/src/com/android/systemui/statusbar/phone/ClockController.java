@@ -129,4 +129,9 @@ public class ClockController implements TunerService.Tunable {
     public void removeDarkReceiver() {
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mActiveClock);
     }
+
+    public void onDensityOrFontScaleChanged() {
+        updateActiveClock();
+        mActiveClock.onDensityOrFontScaleChanged();
+    }
 }

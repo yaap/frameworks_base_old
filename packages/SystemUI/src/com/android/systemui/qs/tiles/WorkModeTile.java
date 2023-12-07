@@ -147,6 +147,9 @@ public class WorkModeTile extends SecureQSTile<BooleanState> implements
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.secondaryLabel = state.value
+                ? ""
+                : mContext.getString(R.string.quick_settings_work_mode_paused_state);
     }
 
     @Override
