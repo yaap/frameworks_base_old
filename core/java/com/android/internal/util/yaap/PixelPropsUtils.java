@@ -39,6 +39,7 @@ public final class PixelPropsUtils {
     private static final String PACKAGE_GMS = "com.google.android.gms";
     private static final String PROCESS_GMS_UNSTABLE = PACKAGE_GMS + ".unstable";
     private static final String PROCESS_GMS_PERSISTENT = PACKAGE_GMS + ".persistent";
+    private static final String VERSION_PREFIX = "VERSION.";
 
     private static final Resources mResources;
     static {
@@ -61,7 +62,7 @@ public final class PixelPropsUtils {
         "MODEL", "SHIELD Android TV",
         "PRODUCT", "foster_e",
         "DEVICE", "foster",
-        "SECURITY_PATCH", "2018-01-05",
+        VERSION_PREFIX + "SECURITY_PATCH", "2018-01-05",
         "FINGERPRINT", "NVIDIA/foster_e/foster:7.0/NRD90M/2427173_1038.2788:user/release-keys"
     ));
 
@@ -172,7 +173,13 @@ public final class PixelPropsUtils {
     private static void setPropValue(String key, Object value) {
         try {
             if (isLoggable()) Log.d(TAG, "Setting prop " + key + " to " + value);
-            final Field field = Build.class.getDeclaredField(key);
+            Field field;
+            if (key.startsWith(VERSION_PREFIX)) {
+                field = Build.VERSION.class.getDeclaredField(
+                        key.substring(VERSION_PREFIX.length()));
+            } else {
+                field = Build.class.getDeclaredField(key);
+            }
             field.setAccessible(true);
             field.set(null, value);
             field.setAccessible(false);
