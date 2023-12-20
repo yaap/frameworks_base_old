@@ -68,6 +68,7 @@
     <string name="gaming_mode_battery_saver">省电模式</string>
     <string name="gaming_mode_bluetooth">蓝牙</string>
     <string name="gaming_mode_brightness">自动亮度</string>
+    <string name="gaming_mode_extra_dim">极暗</string>
     <string name="gaming_mode_media">媒体音量</string>
 
     <!-- Screen record -->
