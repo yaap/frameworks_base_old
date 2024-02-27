@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2023 The Calyx Institute
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <string name="app_name">电池统计查看器</string>
+    <string name="header">电池统计</string>
+    <string name="display_dashboard_summary">查看详细的电池用量统计</string>
+</resources>
