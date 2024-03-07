@@ -86,6 +86,7 @@
     <string name="global_action_reboot_bootloader">引导模式</string>
     <string name="global_action_reboot_fastboot">刷机模式</string>
     <string name="global_action_reboot_systemui">系统界面</string>
+    <string name="global_action_panic">紧急情况</string>
     <string name="global_action_reboot_more">高级选项</string>
 
     <!-- DataSwitch Tile -->
