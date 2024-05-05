@@ -87,12 +87,7 @@ public class HeadsUpTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return null;
-    }
-
-    @Override
-    public void handleLongClick(@Nullable View view) {
-        // Do nothing
+        return (new Intent(Settings.ACTION_NOTIFICATION_SETTINGS));
     }
 
     @Override
