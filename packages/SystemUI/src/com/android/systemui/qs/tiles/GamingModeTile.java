@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.ColorDisplayManager;
@@ -54,7 +55,6 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.Prefs;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
@@ -108,6 +108,7 @@ public class GamingModeTile extends QSTileImpl<BooleanState> {
     private final DisplayManager mDisplayManager;
     private final ColorDisplayManager mColorManager;
     private final BluetoothController mBluetoothController;
+    private final SharedPreferences mPrefs;
     // private final boolean mHasHWKeys;
     private boolean mShutdownRegistered;
     private boolean mScreenRegistered;
@@ -159,6 +160,7 @@ public class GamingModeTile extends QSTileImpl<BooleanState> {
         mColorManager = colorManager;
         mBatteryController = batteryController;
         mBluetoothController = bluetoothController;
+        mPrefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
 
         final BrightnessInfo info = mContext.getDisplay().getBrightnessInfo();
         if (info != null) {
@@ -181,7 +183,7 @@ public class GamingModeTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleClick(@Nullable View view) {
-        if (!Prefs.getBoolean(mContext, KEY_DIALOG_SHOWN, false)) {
+        if (!mPrefs.getBoolean(KEY_DIALOG_SHOWN, false)) {
             showGamingModeWhatsThisDialog();
             return;
         }
@@ -193,7 +195,7 @@ public class GamingModeTile extends QSTileImpl<BooleanState> {
     @Override
     public Intent getLongClickIntent() {
         // no need to show it to the user if they already did this
-        Prefs.putBoolean(mContext, KEY_DIALOG_SHOWN, true);
+        mPrefs.edit().putBoolean(KEY_DIALOG_SHOWN, true).apply();
         return SETTINGS_INTENT;
     }
 
@@ -364,7 +366,7 @@ public class GamingModeTile extends QSTileImpl<BooleanState> {
         dialog.setMessage(R.string.gaming_mode_dialog_message);
         dialog.setPositiveButton(com.android.internal.R.string.ok,
                 (DialogInterface.OnClickListener) (dialog1, which) ->
-                    Prefs.putBoolean(mContext, KEY_DIALOG_SHOWN, true));
+                    mPrefs.edit().putBoolean(KEY_DIALOG_SHOWN, true).apply());
         dialog.setShowForAllUsers(true);
         dialog.show();
     }
@@ -401,119 +403,120 @@ public class GamingModeTile extends QSTileImpl<BooleanState> {
     }
 
     private void saveSettingsState() {
-        Prefs.putInt(mContext, KEY_HEADSUP_STATE, Settings.Global.getInt(mResolver,
+        SharedPreferences.Editor editor = mPrefs.edit();
+        editor.putInt(KEY_HEADSUP_STATE, Settings.Global.getInt(mResolver,
                 Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED, 1));
-        Prefs.putInt(mContext, KEY_ZEN_STATE, Settings.Global.getInt(mResolver,
+        editor.putInt(KEY_ZEN_STATE, Settings.Global.getInt(mResolver,
                 Settings.Global.ZEN_MODE, 0) != 0 ? 1 : 0);
-        Prefs.putInt(mContext, KEY_RINGER_MODE, mAudio.getRingerModeInternal());
-        // Prefs.putInt(mContext, KEY_NAVBAR_STATE, Settings.System.getInt(mResolver,
+        editor.putInt(KEY_RINGER_MODE, mAudio.getRingerModeInternal());
+        // editor.putInt(KEY_NAVBAR_STATE, Settings.System.getInt(mResolver,
         //         Settings.System.FORCE_SHOW_NAVBAR, 1));
-        // Prefs.putInt(mContext, KEY_HW_KEYS_STATE, Settings.Secure.getInt(mResolver,
+        // editor.putInt(KEY_HW_KEYS_STATE, Settings.Secure.getInt(mResolver,
         //         Settings.Secure.HARDWARE_KEYS_DISABLE, 0));
-        Prefs.putInt(mContext, KEY_NIGHT_LIGHT,
-                mColorManager.isNightDisplayActivated() ? 1 : 0);
-        Prefs.putInt(mContext, KEY_NIGHT_LIGHT_AUTO,
-                mColorManager.getNightDisplayAutoMode());
-        Prefs.putInt(mContext, KEY_BATTERY_SAVER, mBatteryController.isPowerSave() ? 1 : 0);
-        Prefs.putInt(mContext, KEY_BATTERY_SAVER_MODE, Settings.Global.getInt(mResolver,
+        editor.putInt(KEY_NIGHT_LIGHT, mColorManager.isNightDisplayActivated() ? 1 : 0);
+        editor.putInt(KEY_NIGHT_LIGHT_AUTO, mColorManager.getNightDisplayAutoMode());
+        editor.putInt(KEY_BATTERY_SAVER, mBatteryController.isPowerSave() ? 1 : 0);
+        editor.putInt(KEY_BATTERY_SAVER_MODE, Settings.Global.getInt(mResolver,
                 Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
                 PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE));
-        Prefs.putInt(mContext, KEY_BATTERY_SAVER_LEVEL, Settings.Global.getInt(mResolver,
+        editor.putInt(KEY_BATTERY_SAVER_LEVEL, Settings.Global.getInt(mResolver,
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0));
-        Prefs.putInt(mContext, KEY_BLUETOOTH, mBluetoothController.isBluetoothEnabled() ? 1 : 0);
-        Prefs.putInt(mContext, KEY_EXTRA_DIM, mReduceBrightColorsController.isReduceBrightColorsActivated() ? 1 : 0);
-        Prefs.putInt(mContext, KEY_EXTRA_DIM_SCHEDULE, Settings.Secure.getInt(mResolver,
+        editor.putInt(KEY_BLUETOOTH, mBluetoothController.isBluetoothEnabled() ? 1 : 0);
+        editor.putInt(KEY_EXTRA_DIM,
+                mReduceBrightColorsController.isReduceBrightColorsActivated() ? 1 : 0);
+        editor.putInt(KEY_EXTRA_DIM_SCHEDULE, Settings.Secure.getInt(mResolver,
                 Settings.Secure.EXTRA_DIM_AUTO_MODE, 0));
-        Prefs.putInt(mContext, KEY_BRIGHTNESS_STATE, Settings.System.getInt(mResolver,
+        editor.putInt(KEY_BRIGHTNESS_STATE, Settings.System.getInt(mResolver,
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC));
-        Prefs.putInt(mContext, KEY_BRIGHTNESS_LEVEL,
+        editor.putInt(KEY_BRIGHTNESS_LEVEL,
                 Math.round(mDisplayManager.getBrightness(mContext.getDisplayId()) * 100f));
         // save current volume as percentage
         // we can restore it that way even if vol steps was changed in runtime
         final int max = mAudio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         final int curr = mAudio.getStreamVolume(AudioManager.STREAM_MUSIC);
-        Prefs.putInt(mContext, KEY_MEDIA_LEVEL,
-                Math.round((float)curr * 100f / (float)max));
+        editor.putInt(KEY_MEDIA_LEVEL, Math.round((float)curr * 100f / (float)max));
+        // use commit to keep this synced
+        editor.commit();
     }
 
     private void restoreSettingsState() {
         if (mHeadsUpEnabled) {
             Settings.Global.putInt(mResolver,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
-                    Prefs.getInt(mContext, KEY_HEADSUP_STATE, 1));
+                    mPrefs.getInt(KEY_HEADSUP_STATE, 1));
         }
 
         if (mZenEnabled) {
-            mNm.setInterruptionFilter(Prefs.getInt(mContext, KEY_ZEN_STATE, 0) == 1
+            mNm.setInterruptionFilter(mPrefs.getInt(KEY_ZEN_STATE, 0) == 1
                     ? NotificationManager.INTERRUPTION_FILTER_PRIORITY
                     : NotificationManager.INTERRUPTION_FILTER_ALL);
         }
 
         if (mRingerMode != 0) {
-            mAudio.setRingerModeInternal(Prefs.getInt(mContext,
+            mAudio.setRingerModeInternal(mPrefs.getInt(
                     KEY_RINGER_MODE, AudioManager.RINGER_MODE_NORMAL));
         }
 
         // if (mNavBarEnabled) {
         //     Settings.System.putInt(mResolver,
         //             Settings.System.FORCE_SHOW_NAVBAR,
-        //             Prefs.getInt(mContext, KEY_NAVBAR_STATE, 1));
+        //             mPrefs.getInt(KEY_NAVBAR_STATE, 1));
         // }
         //
         // if (mHwKeysEnabled) {
         //     Settings.Secure.putInt(mResolver,
         //             Settings.Secure.HARDWARE_KEYS_DISABLE,
-        //             Prefs.getInt(mContext, KEY_HW_KEYS_STATE, 0));
+        //             mPrefs.getInt(KEY_HW_KEYS_STATE, 0));
         // }
 
         if (mNightLightEnabled) {
             mColorManager.setNightDisplayActivated(
-                    Prefs.getInt(mContext, KEY_NIGHT_LIGHT, 0) == 1);
+                    mPrefs.getInt(KEY_NIGHT_LIGHT, 0) == 1);
             mColorManager.setNightDisplayAutoMode(
-                    Prefs.getInt(mContext, KEY_NIGHT_LIGHT_AUTO, 0));
+                    mPrefs.getInt(KEY_NIGHT_LIGHT_AUTO, 0));
         }
 
         if (mBatterySaverEnabled) {
-            final int prevMode = Prefs.getInt(mContext, KEY_BATTERY_SAVER_MODE,
+            final int prevMode = mPrefs.getInt(KEY_BATTERY_SAVER_MODE,
                     PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
-            final int prevLevel = Prefs.getInt(mContext, KEY_BATTERY_SAVER_LEVEL, 0);
+            final int prevLevel = mPrefs.getInt(KEY_BATTERY_SAVER_LEVEL, 0);
             Settings.Global.putInt(mResolver,
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, prevLevel);
             Settings.Global.putInt(mResolver,
                     Settings.Global.AUTOMATIC_POWER_SAVE_MODE, prevMode);
             mBatteryController.setPowerSaveMode(
-                    Prefs.getInt(mContext, KEY_BATTERY_SAVER, 0) == 1);
+                    mPrefs.getInt(KEY_BATTERY_SAVER, 0) == 1);
         }
 
         if (mBluetoothEnabled) {
             mBluetoothController.setBluetoothEnabled(
-                Prefs.getInt(mContext, KEY_BLUETOOTH, 0) == 1);
+                mPrefs.getInt(KEY_BLUETOOTH, 0) == 1);
         }
 
         if (mExtraDimEnabled) {
             mReduceBrightColorsController.setReduceBrightColorsActivated(
-                    Prefs.getInt(mContext, KEY_EXTRA_DIM, 0) == 1);
-            final int prevMode = Prefs.getInt(mContext, KEY_EXTRA_DIM_SCHEDULE, 0);
+                    mPrefs.getInt(KEY_EXTRA_DIM, 0) == 1);
+            final int prevMode = mPrefs.getInt(KEY_EXTRA_DIM_SCHEDULE, 0);
             Settings.Secure.putInt(mResolver,
                     Settings.Secure.EXTRA_DIM_AUTO_MODE, prevMode);
         }
 
         if (mBrightnessEnabled) {
-            final int prevMode = Prefs.getInt(mContext, KEY_BRIGHTNESS_STATE,
+            final int prevMode = mPrefs.getInt(KEY_BRIGHTNESS_STATE,
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
             Settings.System.putInt(mResolver,
                     Settings.System.SCREEN_BRIGHTNESS_MODE, prevMode);
             if (prevMode != Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                     && mBrightnessLevel != 0) {
                 mDisplayManager.setBrightness(mContext.getDisplayId(),
-                        Prefs.getInt(mContext, KEY_BRIGHTNESS_LEVEL, 0) / 100f);
+                        mPrefs.getInt(KEY_BRIGHTNESS_LEVEL, 0) / 100f);
             }
         }
 
         if (mMediaEnabled) {
             final int max = mAudio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-            final int prevVol = Prefs.getInt(mContext, KEY_MEDIA_LEVEL, 80);
+            final int prevVol = mPrefs.getInt(KEY_MEDIA_LEVEL, 80);
             mAudio.setStreamVolume(AudioManager.STREAM_MUSIC,
                     Math.round((float)max * (float)prevVol / 100f),
                     AudioManager.FLAG_SHOW_UI);
