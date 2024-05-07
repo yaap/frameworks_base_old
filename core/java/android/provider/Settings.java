@@ -19567,6 +19567,14 @@ public final class Settings {
         public static final String BLUETOOTH_OFF_TIMEOUT = "bluetooth_off_timeout";
 
         /**
+         * Whether gaming macro is currently enabled
+         * Not for backup
+         * @hide
+         */
+        @Readable
+        public static final String GAMING_MACRO_ENABLED = "gaming_macro_enabled";
+
+        /**
          * Settings migrated from Wear OS settings provider.
          * @hide
          */

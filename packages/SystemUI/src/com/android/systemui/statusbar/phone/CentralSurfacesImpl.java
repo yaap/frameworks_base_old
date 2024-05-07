@@ -57,6 +57,7 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Point;
 import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.display.ColorDisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -186,6 +187,7 @@ import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CircleReveal;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.GamingMacro;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcutListSearch;
 import com.android.systemui.statusbar.KeyboardShortcuts;
@@ -220,6 +222,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BurnInProtectionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -240,6 +243,7 @@ import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.volume.VolumeComponent;
@@ -573,6 +577,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final UserSwitcherController mUserSwitcherController;
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
     protected final BatteryController mBatteryController;
+    private final BluetoothController mBluetoothController;
+    private final ColorDisplayManager mColorManager;
     private UiModeManager mUiModeManager;
     private LogMaker mStatusBarStateLog;
     protected final NotificationIconAreaController mNotificationIconAreaController;
@@ -607,6 +613,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final SystemSettings mSystemSettings;
     private final SecureSettings mSecureSettings;
+    private final GlobalSettings mGlobalSettings;
+
+    private GamingMacro mGamingMacro = null;
 
     /**
      * Public constructor for CentralSurfaces.
@@ -725,7 +734,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             SceneContainerFlags sceneContainerFlags,
             BurnInProtectionController burnInProtectionController,
             SystemSettings systemSettings,
-            SecureSettings secureSettings
+            SecureSettings secureSettings,
+            GlobalSettings globalSettings,
+            BluetoothController bluetoothController,
+            ColorDisplayManager colorManager
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -842,6 +854,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mSystemSettings = systemSettings;
         mSecureSettings = secureSettings;
+        mGlobalSettings = globalSettings;
+        mBluetoothController = bluetoothController;
+        mColorManager = colorManager;
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
@@ -928,6 +943,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mSbSettingsObserver.update();
         mSbSettingsObserver.observe();
+        mGamingSettingsObserver.update();
+        mGamingSettingsObserver.observe();
 
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
@@ -3008,6 +3025,48 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // Won't fail unless the squere root of -1 is a real number
             }
         }
+    }
+
+    private final GamingSettingsObserver mGamingSettingsObserver = new GamingSettingsObserver();
+
+    private class GamingSettingsObserver extends ContentObserver {
+        GamingSettingsObserver() {
+            super(new Handler(Looper.getMainLooper()));
+        }
+
+        void observe() {
+            mGlobalSettings.registerContentObserver(Settings.Global.GAMING_MACRO_ENABLED, this);
+        }
+
+        void update() {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.GAMING_MACRO_ENABLED, 0);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            switch (uri.getLastPathSegment()) {
+                case Settings.Global.GAMING_MACRO_ENABLED:
+                    setGamingMacro();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void setGamingMacro() {
+        final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.GAMING_MACRO_ENABLED, 0) == 1;
+        getGamingMacro().setEnabled(enabled);
+    }
+
+    private GamingMacro getGamingMacro() {
+        if (mGamingMacro == null) {
+            mGamingMacro = new GamingMacro(mContext, mColorManager,
+                    mBatteryController, mBluetoothController);
+        }
+        return mGamingMacro;
     }
 
     private final BroadcastReceiver mBannerActionBroadcastReceiver = new BroadcastReceiver() {
