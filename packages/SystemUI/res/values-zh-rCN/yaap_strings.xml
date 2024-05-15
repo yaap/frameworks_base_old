@@ -76,6 +76,8 @@
     <string name="screenrecord_delete_description">录屏已删除</string>
     <string name="screenrecord_stopdot_label">显示停止圆点\n长按移除</string>
     <string name="screenrecord_hevc_switch_label">启用 HEVC</string>
+    <string name="screenrecord_limit_reaching">屏幕录制将达到大小限制</string>
+    <string name="screenrecord_limit_reached">屏幕录制已停止\n文件以达到最大大小： 15GB</string>
 
     <!-- Power menu reboot -->
     <string name="global_action_reboot">重启</string>
