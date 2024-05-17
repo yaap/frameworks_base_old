@@ -88,6 +88,7 @@ public class OmniJawsClient {
 
     private static final String WEATHER_UPDATE = SERVICE_PACKAGE + ".WEATHER_UPDATE";
     private static final String WEATHER_ERROR = SERVICE_PACKAGE + ".WEATHER_ERROR";
+    private static final String FORCE_UPDATE = SERVICE_PACKAGE + ".FORCE_UPDATE";
 
     private static final DecimalFormat sNoDigitsFormat = new DecimalFormat("0");
 
@@ -180,6 +181,14 @@ public class OmniJawsClient {
             Intent settings = new Intent(Intent.ACTION_MAIN)
                     .setClassName(SERVICE_PACKAGE, SERVICE_PACKAGE + ".WeatherActivity");
             return settings;
+        }
+        return null;
+    }
+
+    public Intent getForceUpdateIntent() {
+        if (isOmniJawsServiceInstalled()) {
+            return new Intent(FORCE_UPDATE)
+                    .setPackage(SERVICE_PACKAGE);
         }
         return null;
     }

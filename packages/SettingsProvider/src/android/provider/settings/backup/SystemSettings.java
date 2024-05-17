@@ -168,6 +168,7 @@ public class SystemSettings {
         Settings.System.LOCKSCREEN_WEATHER_PROVIDER,
         Settings.System.LOCKSCREEN_WEATHER_LOCATION,
         Settings.System.LOCKSCREEN_WEATHER_TEXT,
+        Settings.System.LOCKSCREEN_WEATHER_CLICK_UPDATES,
         Settings.System.QS_WIFI_AUTO_ON,
         Settings.System.QS_BT_AUTO_ON,
     };

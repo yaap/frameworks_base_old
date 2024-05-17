@@ -6576,6 +6576,12 @@ public final class Settings {
         public static final String LOCKSCREEN_WEATHER_TEXT = "lockscreen_weather_text";
 
         /**
+         * Whether clicking on the weather view updates the weather instead of launching the activity
+         * @hide
+         */
+        public static final String LOCKSCREEN_WEATHER_CLICK_UPDATES = "lockscreen_weather_click_updates";
+
+        /**
          * Force full screen for devices with cutout
          * @hide
          */

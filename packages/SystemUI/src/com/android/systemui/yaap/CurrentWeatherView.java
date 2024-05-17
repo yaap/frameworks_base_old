@@ -16,6 +16,7 @@
 package com.android.systemui.yaap;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -28,11 +29,15 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.util.yaap.OmniJawsClient;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
 
 public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.OmniJawsObserver {
 
     static final String TAG = "SystemUI:CurrentWeatherView";
+
+    private static final String PACKAGE_NAME = "org.omnirom.omnijaws";
+    private static final String WEATHER_ACTIVITY = ".WeatherActivity";
 
     private ImageView mCurrentImage;
     private OmniJawsClient mWeatherClient;
@@ -45,8 +50,10 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
 
     private boolean mShowWeatherLocation;
     private boolean mShowWeatherText;
+    private boolean mClickToUpdate;
 
     private Context mContext;
+    private ActivityStarter mActivityStarter;
 
     public CurrentWeatherView(Context context) {
         this(context, null);
@@ -77,6 +84,10 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
         }
     }
 
+    public void setActivityStarter(ActivityStarter starter) {
+        mActivityStarter = starter;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -88,6 +99,15 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
             mSettingsObserver = new SettingsObserver(new Handler());
             mSettingsObserver.observe();
         }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        if (mSettingsObserver != null) {
+            mSettingsObserver.unobserve();
+            mSettingsObserver = null;
+        }
+        super.onDetachedFromWindow();
     }
 
     private void setErrorView() {
@@ -157,6 +177,21 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
         }
     }
 
+    private void updateClickAction() {
+        if (mClickToUpdate) {
+            setOnClickListener(v -> {
+                mContext.sendBroadcast(mWeatherClient.getForceUpdateIntent());
+            });
+            return;
+        }
+        setOnClickListener(v -> {
+            if (mActivityStarter == null) return;
+            Intent intent = mWeatherClient.getWeatherActivityIntent()
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
+        });
+    }
+
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
             super(handler);
@@ -168,6 +203,9 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
                     UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LOCKSCREEN_WEATHER_TEXT), false, this,
+                    UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_WEATHER_CLICK_UPDATES), false, this,
                     UserHandle.USER_ALL);
             updateWeatherSettings();
         }
@@ -183,8 +221,12 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
             mShowWeatherText = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.LOCKSCREEN_WEATHER_TEXT,
                     1, UserHandle.USER_CURRENT) != 0;
+            mClickToUpdate = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.LOCKSCREEN_WEATHER_CLICK_UPDATES,
+                    0, UserHandle.USER_CURRENT) != 0;
             mLeftText.setVisibility(mShowWeatherLocation ? View.VISIBLE : View.GONE);
             mWeatherText.setVisibility(mShowWeatherText ? View.VISIBLE : View.GONE);
+            updateClickAction();
         }
 
         @Override
