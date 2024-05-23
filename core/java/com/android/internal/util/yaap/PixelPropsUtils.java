@@ -55,6 +55,7 @@ public final class PixelPropsUtils {
     private static final String cert_fp = mResources.getString(R.string.cert_fp);
     private static final String cert_model = mResources.getString(R.string.cert_model);
     private static final String cert_spl = mResources.getString(R.string.cert_spl);
+    private static final String cert_manufacturer = mResources.getString(R.string.cert_manufacturer);
     private static final int cert_sdk = mResources.getInteger(R.integer.cert_sdk);
     private static final String build_device = mResources.getString(R.string.build_device);
     private static final String build_fp = mResources.getString(R.string.build_fp);
@@ -67,10 +68,12 @@ public final class PixelPropsUtils {
         String[] sections = cert_fp.split("/");
         tMap.put("ID", sections[3]);
         tMap.put("BRAND", sections[0]);
-        tMap.put("MANUFACTURER", sections[0]);
+        tMap.put("MANUFACTURER", cert_manufacturer);
         tMap.put("MODEL", cert_model);
         tMap.put("PRODUCT", sections[1]);
         tMap.put("DEVICE", cert_device);
+        tMap.put(VERSION_PREFIX + "RELEASE", sections[2].split(":")[1]);
+        tMap.put(VERSION_PREFIX + "INCREMENTAL", sections[4].split(":")[0]);
         tMap.put(VERSION_PREFIX + "SECURITY_PATCH", cert_spl);
         tMap.put(VERSION_PREFIX + "DEVICE_INITIAL_SDK_INT", cert_sdk);
         tMap.put("FINGERPRINT", cert_fp);

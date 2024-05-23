@@ -26,6 +26,7 @@
     <string name="build_device" translatable="false"></string>
     <string name="build_fp" translatable="false"></string>
     <string name="build_model" translatable="false"></string>
+    <string name="cert_manufacturer" translatable="false"></string>
 
     <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
