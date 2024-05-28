@@ -90,18 +90,15 @@ public abstract class AbstractUptimePreferenceController extends AbstractPrefere
     }
 
     private void updateTimes() {
-        long ut = Math.max((SystemClock.elapsedRealtime() / 1000), 1);
-
-        float deepSleepRatio = Math.max((float) (SystemClock.elapsedRealtime() - SystemClock.uptimeMillis()), 0f)
-                / SystemClock.elapsedRealtime();
-        int deepSleepPercent = Math.round(deepSleepRatio * 100);
-
-        final StringBuilder summary = new StringBuilder();
-        summary.append(DateUtils.formatElapsedTime(SystemClock.elapsedRealtime() / 1000));
-        summary.append(" ");
-        summary.append(mContext.getString(R.string.status_deep_sleep, deepSleepPercent, "%"));
-
-        mUptime.setSummary(summary.toString());
+        final long realtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        final float deepSleepTime = Math.max((float) (realtime - uptime), 0f);
+        final int deepSleepPercent = Math.round((deepSleepTime / realtime) * 100f);
+        final String formattedElapsed = DateUtils.formatElapsedTime(realtime / 1000);
+        final String formattedDeepSleep =
+                mContext.getString(R.string.status_deep_sleep, deepSleepPercent, "%");
+        final String summary = formattedElapsed + " " + formattedDeepSleep;
+        mUptime.setSummary(summary);
     }
 
     private static class MyHandler extends Handler {
