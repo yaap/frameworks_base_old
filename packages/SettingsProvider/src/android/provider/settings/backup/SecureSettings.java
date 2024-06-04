@@ -273,6 +273,7 @@ public class SecureSettings {
         Settings.Secure.DOZE_FOR_NOTIFICATIONS,
         Settings.Secure.MEDIA_CONTROLS_ALWAYS_SHOW_TIME,
         Settings.Secure.MEDIA_CONTROLS_SQUIGGLE,
+        Settings.Secure.MEDIA_CONTROLS_ACTIONS,
         Settings.Secure.TOUCH_SENSITIVITY_ENABLED,
         Settings.Secure.SCREEN_OFF_UDFPS_ENABLED,
         Settings.Secure.DOZE_DOUBLE_TAP_GESTURE_AMBIENT,

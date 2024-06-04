@@ -12943,6 +12943,12 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_SQUIGGLE = "media_controls_squiggle";
 
         /**
+         * The amount of custom actions that apps are allowed to add in the player UI
+         * @hide
+         */
+        public static final String MEDIA_CONTROLS_ACTIONS = "media_controls_actions";
+
+        /**
          * Whether to increase touch sensitivity
          * @hide
          */

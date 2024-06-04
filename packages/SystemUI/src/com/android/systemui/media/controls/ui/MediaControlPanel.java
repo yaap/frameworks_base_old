@@ -261,6 +261,7 @@ public class MediaControlPanel {
 
     private boolean mAlwaysOnTime;
     private boolean mShowSquiggle;
+    private int mActionsLimit = 5;
 
     private final SettingsObserver mSettingsObserver = new SettingsObserver();
     private class SettingsObserver extends ContentObserver {
@@ -274,6 +275,9 @@ public class MediaControlPanel {
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.MEDIA_CONTROLS_SQUIGGLE),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.MEDIA_CONTROLS_ACTIONS),
                     false, this, UserHandle.USER_ALL);
         }
 
@@ -300,12 +304,19 @@ public class MediaControlPanel {
                         mMediaCarouselController.updatePlayers(true);
                     }
                     break;
+                case Settings.Secure.MEDIA_CONTROLS_ACTIONS:
+                    updateShowActions();
+                    if (mMediaCarouselController != null) {
+                        mMediaCarouselController.updatePlayers(true);
+                    }
+                    break;
             }
         }
 
         void update() {
             updateAlwaysOnTime();
             updateShowSquiggle();
+            updateShowActions();
         }
 
         private void updateAlwaysOnTime() {
@@ -316,6 +327,11 @@ public class MediaControlPanel {
         private void updateShowSquiggle() {
             mShowSquiggle = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.MEDIA_CONTROLS_SQUIGGLE, 0) == 1;
+        }
+
+        private void updateShowActions() {
+            mActionsLimit = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.MEDIA_CONTROLS_ACTIONS, 5);
         }
     }
 
@@ -1134,9 +1150,12 @@ public class MediaControlPanel {
                 setVisibleAndAlpha(expandedSet, b.getId(), false);
             }
 
+            int limit = mActionsLimit;
             for (int id : SEMANTIC_ACTIONS_ALL) {
                 ImageButton button = mMediaViewHolder.getAction(id);
                 MediaAction action = semanticActions.getActionById(id);
+                if (id == R.id.action0 || id == R.id.action1)
+                    if (limit-- <= 0) action = null;
                 setSemanticButton(button, action, semanticActions);
             }
         } else {
@@ -1148,7 +1167,9 @@ public class MediaControlPanel {
 
             // Set all the generic buttons
             List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
-            List<MediaAction> actions = data.getActions();
+            List<MediaAction> actionsFull = data.getActions();
+            List<MediaAction> actions = actionsFull.subList(
+                    0, Math.min(actionsFull.size(), mActionsLimit));
             int i = 0;
             for (; i < actions.size() && i < genericButtons.size(); i++) {
                 boolean showInCompact = actionsWhenCollapsed.contains(i);
