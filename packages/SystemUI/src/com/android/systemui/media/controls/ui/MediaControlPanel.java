@@ -272,6 +272,9 @@ public class MediaControlPanel {
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.MEDIA_CONTROLS_ALWAYS_SHOW_TIME),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.MEDIA_CONTROLS_SQUIGGLE),
+                    false, this, UserHandle.USER_ALL);
         }
 
         void stop() {
@@ -292,6 +295,9 @@ public class MediaControlPanel {
                     updateShowSquiggle();
                     if (mMediaViewHolder != null) {
                         mMediaViewHolder.setSquiggleEnabled(mShowSquiggle);
+                    }
+                    if (mMediaCarouselController != null) {
+                        mMediaCarouselController.updatePlayers(true);
                     }
                     break;
             }
