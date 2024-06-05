@@ -260,6 +260,7 @@ public class MediaControlPanel {
     private boolean mButtonClicked = false;
 
     private boolean mAlwaysOnTime;
+    private boolean mTimeAsNext;
     private boolean mShowSquiggle;
     private int mActionsLimit = 5;
 
@@ -272,6 +273,9 @@ public class MediaControlPanel {
         void observe() {
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.MEDIA_CONTROLS_ALWAYS_SHOW_TIME),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.MEDIA_CONTROLS_TIME_AS_NEXT),
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.MEDIA_CONTROLS_SQUIGGLE),
@@ -290,31 +294,30 @@ public class MediaControlPanel {
             switch (uri.getLastPathSegment()) {
                 case Settings.Secure.MEDIA_CONTROLS_ALWAYS_SHOW_TIME:
                     updateAlwaysOnTime();
-                    if (mSeekBarObserver != null)
-                        mSeekBarObserver.setAlwaysOnTime(mAlwaysOnTime);
-                    mMainExecutor.execute(() ->
-                            updateDisplayForScrubbingChange(mMediaData.getSemanticActions()));
+                    if (mSeekBarObserver == null) break;
+                    mSeekBarObserver.setAlwaysOnTime(mAlwaysOnTime);
+                    updateDisplayForScrubbing();
+                    break;
+                case Settings.Secure.MEDIA_CONTROLS_TIME_AS_NEXT:
+                    updateTimeAsNext();
+                    updateDisplayForScrubbing();
                     break;
                 case Settings.Secure.MEDIA_CONTROLS_SQUIGGLE:
                     updateShowSquiggle();
-                    if (mMediaViewHolder != null) {
-                        mMediaViewHolder.setSquiggleEnabled(mShowSquiggle);
-                    }
-                    if (mMediaCarouselController != null) {
-                        mMediaCarouselController.updatePlayers(true);
-                    }
+                    if (mMediaViewHolder == null) break;
+                    mMediaViewHolder.setSquiggleEnabled(mShowSquiggle);
+                    updatePlayers();
                     break;
                 case Settings.Secure.MEDIA_CONTROLS_ACTIONS:
                     updateShowActions();
-                    if (mMediaCarouselController != null) {
-                        mMediaCarouselController.updatePlayers(true);
-                    }
+                    updatePlayers();
                     break;
             }
         }
 
         void update() {
             updateAlwaysOnTime();
+            updateTimeAsNext();
             updateShowSquiggle();
             updateShowActions();
         }
@@ -322,6 +325,11 @@ public class MediaControlPanel {
         private void updateAlwaysOnTime() {
             mAlwaysOnTime = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.MEDIA_CONTROLS_ALWAYS_SHOW_TIME, 0) == 1;
+        }
+
+        private void updateTimeAsNext() {
+            mTimeAsNext = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.MEDIA_CONTROLS_TIME_AS_NEXT, 0) == 1;
         }
 
         private void updateShowSquiggle() {
@@ -332,6 +340,18 @@ public class MediaControlPanel {
         private void updateShowActions() {
             mActionsLimit = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.MEDIA_CONTROLS_ACTIONS, 5);
+        }
+
+        private void updatePlayers() {
+            if (mMediaCarouselController == null) return;
+            mMediaCarouselController.updatePlayers(true);
+        }
+
+        private void updateDisplayForScrubbing() {
+            if (mMainExecutor == null) return;
+            if (mMediaData == null) return;
+            mMainExecutor.execute(() ->
+                    updateDisplayForScrubbingChange(mMediaData.getSemanticActions()));
         }
     }
 
@@ -1298,7 +1318,7 @@ public class MediaControlPanel {
         }
     }
 
-    private RippleAnimation createTouchRippleAnimation(ImageButton button) {
+    private RippleAnimation createTouchRippleAnimation(View button) {
         float maxSize = mMediaViewHolder.getMultiRippleView().getWidth() * 2;
         return new RippleAnimation(
                 new RippleAnimationConfig(
@@ -1362,9 +1382,9 @@ public class MediaControlPanel {
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         boolean showInCompact = SEMANTIC_ACTIONS_COMPACT.contains(buttonId);
         boolean hideWhenScrubbing = SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.contains(buttonId);
-        boolean shouldBeHiddenDueToScrubbing =
-                scrubbingTimeViewsEnabled(semanticActions) && hideWhenScrubbing
-                && mIsScrubbing && !mAlwaysOnTime;
+        boolean shouldBeHiddenDueToScrubbing = hideWhenScrubbing &&
+                (mTimeAsNext && mAlwaysOnTime || scrubbingTimeViewsEnabled(semanticActions)
+                && mIsScrubbing && !mAlwaysOnTime);
         boolean visible = mediaAction != null && !shouldBeHiddenDueToScrubbing;
 
         int notVisibleValue;
@@ -1394,14 +1414,48 @@ public class MediaControlPanel {
 
     private void bindScrubbingTime(MediaData data) {
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
-        int elapsedTimeId = mMediaViewHolder.getScrubbingElapsedTimeView().getId();
-        int totalTimeId = mMediaViewHolder.getScrubbingTotalTimeView().getId();
+        TextView elapsedTime = mMediaViewHolder.getScrubbingElapsedTimeView();
+        TextView totalTime = mMediaViewHolder.getScrubbingTotalTimeView();
 
         boolean visible = scrubbingTimeViewsEnabled(data.getSemanticActions())
                 && (mIsScrubbing || mAlwaysOnTime);
-        setVisibleAndAlpha(expandedSet, elapsedTimeId, visible);
-        setVisibleAndAlpha(expandedSet, totalTimeId, visible);
+        setVisibleAndAlpha(expandedSet, elapsedTime.getId(), visible);
+        setVisibleAndAlpha(expandedSet, totalTime.getId(), visible);
         // Collapsed view is always GONE as set in XML, so doesn't need to be updated dynamically
+
+        if (mAlwaysOnTime && mTimeAsNext) {
+            registerTimeAsNextClickListener(elapsedTime,
+                    data.getSemanticActions().getActionById(R.id.actionPrev));
+            registerTimeAsNextClickListener(totalTime,
+                    data.getSemanticActions().getActionById(R.id.actionNext));
+        } else {
+            elapsedTime.setOnClickListener(null);
+            elapsedTime.setClickable(false);
+            elapsedTime.setFocusable(false);
+            totalTime.setOnClickListener(null);
+            totalTime.setClickable(false);
+            totalTime.setFocusable(false);
+        }
+    }
+
+    private void registerTimeAsNextClickListener(TextView view, MediaAction action) {
+        view.setClickable(true);
+        view.setFocusable(true);
+        view.setOnClickListener(v -> {
+            if (!mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
+                mLogger.logTapAction(view.getId(), mUid, mPackageName, mInstanceId);
+                logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
+                // Used to determine whether to play turbulence noise.
+                mWasPlaying = isPlaying();
+                mButtonClicked = true;
+
+                action.getAction().run();
+
+                if (mFeatureFlags.isEnabled(Flags.UMO_SURFACE_RIPPLE)) {
+                    mMultiRippleController.play(createTouchRippleAnimation(view));
+                }
+            }
+        });
     }
 
     private boolean scrubbingTimeViewsEnabled(@Nullable MediaButton semanticActions) {

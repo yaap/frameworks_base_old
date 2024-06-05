@@ -12937,6 +12937,12 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_ALWAYS_SHOW_TIME = "media_controls_always_show_time";
 
         /**
+         * Whether to show the time instead iof the next & previous buttons
+         * @hide
+         */
+        public static final String MEDIA_CONTROLS_TIME_AS_NEXT = "media_controls_time_as_next";
+
+        /**
          * Whether to always show squiggle progress bar on media controls
          * @hide
          */

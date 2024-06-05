@@ -272,6 +272,7 @@ public class SecureSettings {
         Settings.Secure.QS_SHOW_AUTO_BRIGHTNESS_BUTTON,
         Settings.Secure.DOZE_FOR_NOTIFICATIONS,
         Settings.Secure.MEDIA_CONTROLS_ALWAYS_SHOW_TIME,
+        Settings.Secure.MEDIA_CONTROLS_TIME_AS_NEXT,
         Settings.Secure.MEDIA_CONTROLS_SQUIGGLE,
         Settings.Secure.MEDIA_CONTROLS_ACTIONS,
         Settings.Secure.TOUCH_SENSITIVITY_ENABLED,
