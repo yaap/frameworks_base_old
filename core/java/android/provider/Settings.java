@@ -6686,6 +6686,16 @@ public final class Settings {
         public static final String UNLIMIT_SCREENRECORD = "unlimit_screenrecord";
 
         /**
+         * Whether to disallow the usage of
+         * {@link com.android.server.wallpaper.WallpaperManagerService#setWallpaperDimAmountForUid}
+         * Forces wallpaper dim to 0
+         * Not for backup - dev option
+         * @hide
+         */
+        @Readable
+        public static final String BLOCK_WALLPAPER_DIMMING = "block_wallpaper_dimming";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
