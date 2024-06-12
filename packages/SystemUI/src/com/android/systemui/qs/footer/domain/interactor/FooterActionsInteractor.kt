@@ -178,7 +178,7 @@ constructor(
         activityStarter.startActivity(
             Intent(Settings.ACTION_SETTINGS),
             true /* dismissShade */,
-            expandable.activityLaunchController(
+            expandable.activityTransitionController(
                 InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON
             ),
         )
@@ -196,7 +196,7 @@ constructor(
         activityStarter.startActivity(
             Intent(Settings.ACTION_RUNNING_SERVICES_SETTING),
             true /* dismissShade */,
-            expandable.activityLaunchController(
+            expandable.activityTransitionController(
                 InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON
             ),
         )

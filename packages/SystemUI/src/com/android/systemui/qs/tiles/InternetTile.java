@@ -52,8 +52,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.qs.tiles.dialog.InternetDialogManager;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
@@ -61,6 +60,7 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.connectivity.WifiIcons;
 import com.android.systemui.statusbar.connectivity.WifiIndicators;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 
@@ -84,7 +84,7 @@ public class InternetTile extends SecureQSTile<QSTile.BooleanState> {
     private int mLastTileState = LAST_STATE_UNKNOWN;
 
     protected final InternetSignalCallback mSignalCallback = new InternetSignalCallback();
-    private final InternetDialogFactory mInternetDialogFactory;
+    private final InternetDialogManager mInternetDialogManager;
     final Handler mHandler;
 
     @Inject
@@ -100,12 +100,12 @@ public class InternetTile extends SecureQSTile<QSTile.BooleanState> {
             QSLogger qsLogger,
             NetworkController networkController,
             AccessPointController accessPointController,
-            InternetDialogFactory internetDialogFactory,
+            InternetDialogManager internetDialogManager,
             KeyguardStateController keyguardStateController
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger, keyguardStateController);
-        mInternetDialogFactory = internetDialogFactory;
+        mInternetDialogManager = internetDialogManager;
         mHandler = mainHandler;
         mController = networkController;
         mAccessPointController = accessPointController;
@@ -135,7 +135,7 @@ public class InternetTile extends SecureQSTile<QSTile.BooleanState> {
         if (checkKeyguard(view, keyguardShowing)) {
             return;
         }
-        mHandler.post(() -> mInternetDialogFactory.create(true,
+        mHandler.post(() -> mInternetDialogManager.create(true,
                 mAccessPointController.canConfigMobileData(),
                 mAccessPointController.canConfigWifi(), view, getAutoOn()));
     }

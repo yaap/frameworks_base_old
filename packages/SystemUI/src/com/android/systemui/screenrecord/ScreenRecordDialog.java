@@ -45,8 +45,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Prefs;
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;

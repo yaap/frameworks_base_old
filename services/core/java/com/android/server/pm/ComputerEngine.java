@@ -69,6 +69,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -78,6 +79,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.ComponentInfo;
+import android.content.pm.Flags;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.InstantAppResolveInfo;
@@ -592,7 +594,7 @@ public class ComputerEngine implements Computer {
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                             mInjector.getCompatibility(), mComponentResolver,
-                            list, false, intent, resolvedType, flags, filterCallingUid);
+                            list, false, intent, resolvedType, filterCallingUid);
                 }
             }
         } else {
@@ -622,7 +624,7 @@ public class ComputerEngine implements Computer {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                     mInjector.getCompatibility(), mComponentResolver,
-                    list, false, originalIntent, resolvedType, flags, filterCallingUid);
+                    list, false, originalIntent, resolvedType, filterCallingUid);
         }
 
         return skipPostResolution ? list : applyPostResolutionFilter(
@@ -706,7 +708,7 @@ public class ComputerEngine implements Computer {
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                             mInjector.getCompatibility(), mComponentResolver,
-                            list, false, intent, resolvedType, flags, callingUid);
+                            list, false, intent, resolvedType, callingUid);
                 }
             }
         } else {
@@ -718,7 +720,7 @@ public class ComputerEngine implements Computer {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                     mInjector.getCompatibility(), mComponentResolver,
-                    list, false, originalIntent, resolvedType, flags, callingUid);
+                    list, false, originalIntent, resolvedType, callingUid);
         }
 
         return list;
@@ -1549,6 +1551,13 @@ public class ComputerEngine implements Computer {
             packageInfo.packageName = packageInfo.applicationInfo.packageName =
                     resolveExternalPackageName(p);
 
+            if (Flags.provideInfoOfApkInApex()) {
+                final String apexModuleName =  ps.getApexModuleName();
+                if (apexModuleName != null) {
+                    packageInfo.setApexPackageName(
+                            mApexManager.getActivePackageNameForApexModuleName(apexModuleName));
+                }
+            }
             return packageInfo;
         } else if ((flags & (MATCH_UNINSTALLED_PACKAGES | MATCH_ARCHIVED_PACKAGES)) != 0
                 && PackageUserStateUtils.isAvailable(state, flags)) {
@@ -3456,26 +3465,33 @@ public class ComputerEngine implements Computer {
                                 }
                             }
                         } else {
-                            if (allowSetMutation) {
-                                Slog.i(TAG,
-                                        "Result set changed, dropping preferred activity "
-                                                + "for " + intent + " type "
-                                                + resolvedType);
-                                if (DEBUG_PREFERRED) {
-                                    Slog.v(TAG,
-                                            "Removing preferred activity since set changed "
-                                                    + pa.mPref.mComponent);
+                            final boolean isHomeActivity = ACTION_MAIN.equals(intent.getAction())
+                                    && intent.hasCategory(CATEGORY_HOME);
+                            if (!Flags.improveHomeAppBehavior() || !isHomeActivity) {
+                                // Don't reset the preferred activity just for the home intent, we
+                                // should respect the default home app even though there any new
+                                // home activity is enabled.
+                                if (allowSetMutation) {
+                                    Slog.i(TAG,
+                                            "Result set changed, dropping preferred activity "
+                                                    + "for " + intent + " type "
+                                                    + resolvedType);
+                                    if (DEBUG_PREFERRED) {
+                                        Slog.v(TAG,
+                                                "Removing preferred activity since set changed "
+                                                        + pa.mPref.mComponent);
+                                    }
+                                    pir.removeFilter(pa);
+                                    // Re-add the filter as a "last chosen" entry (!always)
+                                    PreferredActivity lastChosen = new PreferredActivity(
+                                            pa, pa.mPref.mMatch, null, pa.mPref.mComponent,
+                                            false);
+                                    pir.addFilter(this, lastChosen);
+                                    result.mChanged = true;
                                 }
-                                pir.removeFilter(pa);
-                                // Re-add the filter as a "last chosen" entry (!always)
-                                PreferredActivity lastChosen = new PreferredActivity(
-                                        pa, pa.mPref.mMatch, null, pa.mPref.mComponent,
-                                        false);
-                                pir.addFilter(this, lastChosen);
-                                result.mChanged = true;
+                                result.mPreferredResolveInfo = null;
+                                return result;
                             }
-                            result.mPreferredResolveInfo = null;
-                            return result;
                         }
                     }
 
@@ -4626,7 +4642,8 @@ public class ComputerEngine implements Computer {
         for (int i=0; i<permissions.length; i++) {
             final String permission = permissions[i];
             if (mPermissionManager.checkPermission(ps.getPackageName(), permission,
-                    Context.DEVICE_ID_DEFAULT, userId) == PERMISSION_GRANTED) {
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId)
+                    == PERMISSION_GRANTED) {
                 tmp[i] = true;
                 numMatch++;
             } else {

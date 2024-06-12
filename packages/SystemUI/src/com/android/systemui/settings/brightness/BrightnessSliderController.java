@@ -31,19 +31,17 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.res.R;
 import com.android.systemui.classifier.Classifier;
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.haptics.slider.SeekableSliderEventProducer;
+import com.android.systemui.haptics.slider.HapticSliderViewBinder;
+import com.android.systemui.haptics.slider.SeekableSliderHapticPlugin;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.time.SystemClock;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * {@code ViewController} for a {@code BrightnessSliderView}
@@ -63,25 +61,19 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     private boolean mTracking;
     private final FalsingManager mFalsingManager;
     private final UiEventLogger mUiEventLogger;
-    private final BrightnessSliderHapticPlugin mBrightnessSliderHapticPlugin;
+
+    private final SeekableSliderHapticPlugin mBrightnessSliderHapticPlugin;
 
     private ImageView mIconView;
 
     private final Gefingerpoken mOnInterceptListener = new Gefingerpoken() {
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
+            mBrightnessSliderHapticPlugin.onTouchEvent(ev);
             int action = ev.getActionMasked();
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 mFalsingManager.isFalseTouch(Classifier.BRIGHTNESS_SLIDER);
-                if (mBrightnessSliderHapticPlugin.getVelocityTracker() != null) {
-                    mBrightnessSliderHapticPlugin.getVelocityTracker().clear();
-                }
-            } else if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
-                if (mBrightnessSliderHapticPlugin.getVelocityTracker() != null) {
-                    mBrightnessSliderHapticPlugin.getVelocityTracker().addMovement(ev);
-                }
             }
-
             return false;
         }
 
@@ -96,7 +88,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             ImageView icon,
             FalsingManager falsingManager,
             UiEventLogger uiEventLogger,
-            BrightnessSliderHapticPlugin brightnessSliderHapticPlugin) {
+            SeekableSliderHapticPlugin brightnessSliderHapticPlugin) {
         super(brightnessSliderView);
         mIconView = icon;
         mFalsingManager = falsingManager;
@@ -119,7 +111,6 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     protected void onViewAttached() {
         mView.setOnSeekBarChangeListener(mSeekListener);
         mView.setOnInterceptListener(mOnInterceptListener);
-        mBrightnessSliderHapticPlugin.start();
     }
 
     @Override
@@ -127,7 +118,6 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         mView.setOnSeekBarChangeListener(null);
         mView.setOnDispatchTouchEventListener(null);
         mView.setOnInterceptListener(null);
-        mBrightnessSliderHapticPlugin.stop();
     }
 
     @Override
@@ -232,10 +222,8 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (mListener != null) {
                 mListener.onChanged(mTracking, progress, false);
-                SeekableSliderEventProducer eventProducer =
-                        mBrightnessSliderHapticPlugin.getSeekableSliderEventProducer();
-                if (eventProducer != null) {
-                    eventProducer.onProgressChanged(seekBar, progress, fromUser);
+                if (fromUser) {
+                    mBrightnessSliderHapticPlugin.onProgressChanged(seekBar, progress, fromUser);
                 }
             }
         }
@@ -243,14 +231,10 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
             mTracking = true;
-            mUiEventLogger.log(BrightnessSliderEvent.SLIDER_STARTED_TRACKING_TOUCH);
+            mUiEventLogger.log(BrightnessSliderEvent.BRIGHTNESS_SLIDER_STARTED_TRACKING_TOUCH);
             if (mListener != null) {
                 mListener.onChanged(mTracking, getValue(), false);
-                SeekableSliderEventProducer eventProducer =
-                        mBrightnessSliderHapticPlugin.getSeekableSliderEventProducer();
-                if (eventProducer != null) {
-                    eventProducer.onStartTrackingTouch(seekBar);
-                }
+                mBrightnessSliderHapticPlugin.onStartTrackingTouch(seekBar);
             }
 
             if (mMirrorController != null) {
@@ -262,14 +246,10 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
             mTracking = false;
-            mUiEventLogger.log(BrightnessSliderEvent.SLIDER_STOPPED_TRACKING_TOUCH);
+            mUiEventLogger.log(BrightnessSliderEvent.BRIGHTNESS_SLIDER_STOPPED_TRACKING_TOUCH);
             if (mListener != null) {
                 mListener.onChanged(mTracking, getValue(), true);
-                SeekableSliderEventProducer eventProducer =
-                        mBrightnessSliderHapticPlugin.getSeekableSliderEventProducer();
-                if (eventProducer != null) {
-                    eventProducer.onStopTrackingTouch(seekBar);
-                }
+                mBrightnessSliderHapticPlugin.onStopTrackingTouch(seekBar);
             }
 
             if (mMirrorController != null) {
@@ -287,21 +267,18 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         private final UiEventLogger mUiEventLogger;
         private final VibratorHelper mVibratorHelper;
         private final SystemClock mSystemClock;
-        private final CoroutineDispatcher mMainDispatcher;
 
         @Inject
         public Factory(
                 FalsingManager falsingManager,
                 UiEventLogger uiEventLogger,
                 VibratorHelper vibratorHelper,
-                SystemClock clock,
-                @Main CoroutineDispatcher mainDispatcher
+                SystemClock clock
         ) {
             mFalsingManager = falsingManager;
             mUiEventLogger = uiEventLogger;
             mVibratorHelper = vibratorHelper;
             mSystemClock = clock;
-            mMainDispatcher = mainDispatcher;
         }
 
         /**
@@ -318,15 +295,11 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             BrightnessSliderView root = (BrightnessSliderView) LayoutInflater.from(context)
                     .inflate(layout, viewRoot, false);
             ImageView icon = (ImageView) root.findViewById(R.id.brightness_icon);
-            BrightnessSliderHapticPlugin plugin;
-            if (hapticBrightnessSlider()) {
-                plugin = new BrightnessSliderHapticPluginImpl(
+            SeekableSliderHapticPlugin plugin = new SeekableSliderHapticPlugin(
                     mVibratorHelper,
-                    mSystemClock,
-                    mMainDispatcher
-                );
-            } else {
-                plugin = new BrightnessSliderHapticPlugin() {};
+                    mSystemClock);
+            if (hapticBrightnessSlider()) {
+                HapticSliderViewBinder.bind(viewRoot, plugin);
             }
             return new BrightnessSliderController(root, icon, mFalsingManager, mUiEventLogger, plugin);
         }

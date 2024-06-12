@@ -83,11 +83,7 @@ import android.view.InsetsFrameProvider;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.SurfaceControl;
-import android.view.SurfaceControl.Transaction;
 import android.view.View;
-import android.view.ViewRootImpl;
-import android.view.ViewRootImpl.SurfaceChangedCallback;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
@@ -268,6 +264,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private boolean mImeVisible;
     private final Rect mSamplingBounds = new Rect();
     private final Binder mInsetsSourceOwner = new Binder();
+    private final NavBarButtonClickLogger mNavBarButtonClickLogger;
+    private final NavbarOrientationTrackingLogger mNavbarOrientationTrackingLogger;
 
     @com.android.internal.annotations.VisibleForTesting
     public enum NavBarActionEvent implements UiEventLogger.UiEventEnum {
@@ -465,24 +463,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 }
             };
 
-    private final ViewRootImpl.SurfaceChangedCallback mSurfaceChangedCallback =
-            new SurfaceChangedCallback() {
-            @Override
-            public void surfaceCreated(Transaction t) {
-                notifyNavigationBarSurface();
-            }
-
-            @Override
-            public void surfaceDestroyed() {
-                notifyNavigationBarSurface();
-            }
-
-            @Override
-            public void surfaceReplaced(Transaction t) {
-                notifyNavigationBarSurface();
-            }
-    };
-
     private boolean mScreenPinningActive = false;
     private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
@@ -538,7 +518,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             UserContextProvider userContextProvider,
             WakefulnessLifecycle wakefulnessLifecycle,
             TaskStackChangeListeners taskStackChangeListeners,
-            DisplayTracker displayTracker) {
+            DisplayTracker displayTracker,
+            NavBarButtonClickLogger navBarButtonClickLogger,
+            NavbarOrientationTrackingLogger navbarOrientationTrackingLogger) {
         super(navigationBarView);
         mFrame = navigationBarFrame;
         mContext = context;
@@ -580,6 +562,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mTaskStackChangeListeners = taskStackChangeListeners;
         mDisplayTracker = displayTracker;
         mEdgeBackGestureHandler = navBarHelper.getEdgeBackGestureHandler();
+        mNavBarButtonClickLogger = navBarButtonClickLogger;
+        mNavbarOrientationTrackingLogger = navbarOrientationTrackingLogger;
 
         mNavColorSampleMargin = getResources()
                 .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
@@ -744,8 +728,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
         mView.getViewTreeObserver().addOnComputeInternalInsetsListener(
                 mOnComputeInternalInsetsListener);
-        mView.getViewRootImpl().addSurfaceChangedCallback(mSurfaceChangedCallback);
-        notifyNavigationBarSurface();
 
         mPipOptional.ifPresent(mView::addPipExclusionBoundsChangeListener);
         mBackAnimation.ifPresent(mView::registerBackAnimation);
@@ -808,12 +790,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mHandler.removeCallbacks(mEnableLayoutTransitions);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mPipOptional.ifPresent(mView::removePipExclusionBoundsChangeListener);
-        ViewRootImpl viewRoot = mView.getViewRootImpl();
-        if (viewRoot != null) {
-            viewRoot.removeSurfaceChangedCallback(mSurfaceChangedCallback);
-        }
         mFrame = null;
-        notifyNavigationBarSurface();
     }
 
     // TODO: Remove this when we update nav bar recreation
@@ -874,17 +851,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             mView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(true);
             mView.getHomeButton().setOnLongClickListener(this::onHomeLongClick);
         }
-    }
-
-    private void notifyNavigationBarSurface() {
-        ViewRootImpl viewRoot = mView.getViewRootImpl();
-        SurfaceControl surface = mView.getParent() != null 
-                && viewRoot != null
-                && viewRoot.getSurfaceControl() != null
-                && viewRoot.getSurfaceControl().isValid()
-                        ? viewRoot.getSurfaceControl()
-                        : null;
-        mOverviewProxyService.onNavigationBarSurfaceChanged(surface);
     }
 
     private int deltaRotation(int oldRotation, int newRotation) {
@@ -1155,6 +1121,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
         ButtonDispatcher homeButton = mView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
+        homeButton.setNavBarButtonClickLogger(mNavBarButtonClickLogger);
+
+        ButtonDispatcher backButton = mView.getBackButton();
+        backButton.setNavBarButtonClickLogger(mNavBarButtonClickLogger);
 
         reconfigureHomeLongClick();
 
@@ -1267,6 +1237,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onRecentsClick(View v) {
+        mNavBarButtonClickLogger.logRecentsButtonClick();
+
         if (LatencyTracker.isEnabled(mContext)) {
             LatencyTracker.getInstance(mContext).onActionStart(
                     LatencyTracker.ACTION_TOGGLE_RECENTS);
@@ -1276,6 +1248,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onImeSwitcherClick(View v) {
+        mNavBarButtonClickLogger.logImeSwitcherClick();
         mInputMethodManager.showInputMethodPickerFromSystem(
                 true /* showAuxiliarySubtypes */, mDisplayId);
         mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
@@ -1365,6 +1338,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onAccessibilityClick(View v) {
+        mNavBarButtonClickLogger.logAccessibilityButtonClick();
         final Display display = v.getDisplay();
         mAccessibilityManager.notifyAccessibilityButtonClicked(
                 display != null ? display.getDisplayId() : mDisplayTracker.getDefaultDisplayId());

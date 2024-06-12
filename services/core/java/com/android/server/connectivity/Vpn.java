@@ -1303,7 +1303,7 @@ public class Vpn {
             }
 
             try {
-                mNms.denyProtect(mOwnerUID);
+                mNetd.networkSetProtectDeny(mOwnerUID);
             } catch (Exception e) {
                 Log.wtf(TAG, "Failed to disallow UID " + mOwnerUID + " to call protect() " + e);
             }
@@ -1313,7 +1313,7 @@ public class Vpn {
             mOwnerUID = getAppUid(mContext, newPackage, mUserId);
             mIsPackageTargetingAtLeastQ = doesPackageTargetAtLeastQ(newPackage);
             try {
-                mNms.allowProtect(mOwnerUID);
+                mNetd.networkSetProtectAllow(mOwnerUID);
             } catch (Exception e) {
                 Log.wtf(TAG, "Failed to allow UID " + mOwnerUID + " to call protect() " + e);
             }

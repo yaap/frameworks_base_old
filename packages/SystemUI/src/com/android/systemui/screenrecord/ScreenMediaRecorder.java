@@ -23,10 +23,12 @@ import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC;
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC_AND_INTERNAL;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodec;
@@ -88,7 +90,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     private Surface mInputSurface;
     private VirtualDisplay mVirtualDisplay;
     private MediaRecorder mMediaRecorder;
-    private int mUser;
+    private int mUid;
     private ScreenRecordingMuxer mMuxer;
     private ScreenInternalAudioRecorder mAudio;
     private ScreenRecordingAudioSource mAudioSource;
@@ -109,12 +111,12 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     ScreenMediaRecorderListener mListener;
 
     public ScreenMediaRecorder(Context context, Handler handler,
-            int user, ScreenRecordingAudioSource audioSource,
+            int uid, ScreenRecordingAudioSource audioSource,
             MediaProjectionCaptureTarget captureRegion,
             ScreenMediaRecorderListener listener) {
         mContext = context;
         mHandler = handler;
-        mUser = user;
+        mUid = uid;
         mCaptureRegion = captureRegion;
         mListener = listener;
         mAudioSource = audioSource;
@@ -148,7 +150,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         IMediaProjectionManager mediaService =
                 IMediaProjectionManager.Stub.asInterface(b);
         IMediaProjection proj = null;
-        proj = mediaService.createProjection(mUser, mContext.getPackageName(),
+        proj = mediaService.createProjection(mUid, mContext.getPackageName(),
                     MediaProjectionManager.TYPE_SCREEN_CAPTURE, false);
         IMediaProjection projection = IMediaProjection.Stub.asInterface(proj.asBinder());
         if (mCaptureRegion != null) {
@@ -457,11 +459,24 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         Files.copy(mTempVideoFile.toPath(), os);
         os.close();
         if (mTempAudioFile != null) mTempAudioFile.delete();
-        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-        Size size = new Size(metrics.widthPixels, metrics.heightPixels);
-        SavedRecording recording = new SavedRecording(itemUri, mTempVideoFile, size);
+        SavedRecording recording = new SavedRecording(
+                itemUri, mTempVideoFile, getRequiredThumbnailSize());
         mTempVideoFile.delete();
         return recording;
+    }
+
+    /**
+     * Returns the required {@code Size} of the thumbnail.
+     */
+    private Size getRequiredThumbnailSize() {
+        boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+        int thumbnailIconHeight = mContext.getResources().getDimensionPixelSize(isLowRam
+                ? com.android.internal.R.dimen.notification_big_picture_max_height_low_ram
+                : com.android.internal.R.dimen.notification_big_picture_max_height);
+        int thumbnailIconWidth = mContext.getResources().getDimensionPixelSize(isLowRam
+                ? com.android.internal.R.dimen.notification_big_picture_max_width_low_ram
+                : com.android.internal.R.dimen.notification_big_picture_max_width);
+        return new Size(thumbnailIconWidth, thumbnailIconHeight);
     }
 
     /**
@@ -482,13 +497,14 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     public class SavedRecording {
 
         private Uri mUri;
-        private Bitmap mThumbnailBitmap;
+        private Icon mThumbnailIcon;
 
         protected SavedRecording(Uri uri, File file, Size thumbnailSize) {
             mUri = uri;
             try {
-                mThumbnailBitmap = ThumbnailUtils.createVideoThumbnail(
+                Bitmap thumbnailBitmap = ThumbnailUtils.createVideoThumbnail(
                         file, thumbnailSize, null);
+                mThumbnailIcon = Icon.createWithBitmap(thumbnailBitmap);
             } catch (IOException e) {
                 Log.e(TAG, "Error creating thumbnail", e);
             }
@@ -498,8 +514,8 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
             return mUri;
         }
 
-        public @Nullable Bitmap getThumbnail() {
-            return mThumbnailBitmap;
+        public @Nullable Icon getThumbnail() {
+            return mThumbnailIcon;
         }
     }
 

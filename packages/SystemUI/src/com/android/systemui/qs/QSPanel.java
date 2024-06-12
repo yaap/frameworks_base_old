@@ -262,6 +262,7 @@ public class QSPanel extends LinearLayout {
     public void setBrightnessView(@NonNull View view) {
         if (mBrightnessView != null) {
             removeView(mBrightnessView);
+            mChildrenLayoutTop.remove(mBrightnessView);
             mMovableContentStartIndex--;
         }
         addView(view, 0);
@@ -468,7 +469,7 @@ public class QSPanel extends LinearLayout {
         setPaddingRelative(getPaddingStart(),
                 mSceneContainerEnabled ? 0 : paddingTop,
                 getPaddingEnd(),
-                paddingBottom);
+                mSceneContainerEnabled ? 0 : paddingBottom);
     }
 
     void addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
