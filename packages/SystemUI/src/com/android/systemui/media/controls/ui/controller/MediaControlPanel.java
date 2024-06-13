@@ -1487,24 +1487,32 @@ public class MediaControlPanel {
         setVisibleAndAlpha(expandedSet, totalTime.getId(), visible);
         // Collapsed view is always GONE as set in XML, so doesn't need to be updated dynamically
 
+        updateTimeAsNextListeners(data, elapsedTime, totalTime);
+    }
+
+    private void updateTimeAsNextListeners(MediaData data, TextView elapsedTime, TextView totalTime) {
+        if (data == null || data.getSemanticActions() == null) return;
+
+        MediaAction elapsedAction = null;
+        MediaAction totalAction = null;
+
         if (mAlwaysOnTime && mTimeAsNext) {
-            registerTimeAsNextClickListener(elapsedTime,
-                    data.getSemanticActions().getActionById(R.id.actionPrev));
-            registerTimeAsNextClickListener(totalTime,
-                    data.getSemanticActions().getActionById(R.id.actionNext));
-        } else {
-            elapsedTime.setOnClickListener(null);
-            elapsedTime.setClickable(false);
-            elapsedTime.setFocusable(false);
-            totalTime.setOnClickListener(null);
-            totalTime.setClickable(false);
-            totalTime.setFocusable(false);
+            elapsedAction = data.getSemanticActions().getActionById(R.id.actionPrev);
+            totalAction = data.getSemanticActions().getActionById(R.id.actionNext);
         }
+
+        registerTimeAsNextClickListener(elapsedTime, elapsedAction);
+        registerTimeAsNextClickListener(totalTime, totalAction);
     }
 
     private void registerTimeAsNextClickListener(TextView view, MediaAction action) {
-        view.setClickable(true);
-        view.setFocusable(true);
+        final boolean isEnabled = action != null;
+        view.setClickable(isEnabled);
+        view.setFocusable(isEnabled);
+        if (!isEnabled) {
+            view.setOnClickListener(null);
+            return;
+        }
         view.setOnClickListener(v -> {
             if (!mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
                 mLogger.logTapAction(view.getId(), mUid, mPackageName, mInstanceId);
