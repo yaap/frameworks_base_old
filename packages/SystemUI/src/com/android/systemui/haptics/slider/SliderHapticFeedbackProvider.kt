@@ -59,12 +59,22 @@ class SliderHapticFeedbackProvider(
     private val thresholdUntilNextDragCallMillis =
         lowTickDurationMs * config.numberOfLowTicks + config.deltaMillisForDragInterval
 
+    private val isPrimitiveTickSupported = vibratorHelper.areAllPrimitivesSupported(
+        VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
+    private val isPrimitiveClickSupported = vibratorHelper.areAllPrimitivesSupported(
+        VibrationEffect.Composition.PRIMITIVE_CLICK)
+
     /**
      * Vibrate when the handle reaches either bookend with a certain velocity.
      *
      * @param[absoluteVelocity] Velocity of the handle when it reached the bookend.
      */
     private fun vibrateOnEdgeCollision(absoluteVelocity: Float) {
+        if (!isPrimitiveClickSupported) {
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            vibratorHelper.vibrate(effect)
+            return
+        }
         val powerScale = scaleOnEdgeCollision(absoluteVelocity)
         val vibration =
             VibrationEffect.startComposition()
@@ -111,12 +121,19 @@ class SliderHapticFeedbackProvider(
 
         val powerScale = scaleOnDragTexture(absoluteVelocity, normalizedSliderProgress)
 
-        // Trigger the vibration composition
-        val composition = VibrationEffect.startComposition()
-        repeat(config.numberOfLowTicks) {
-            composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, powerScale)
+        if (isPrimitiveTickSupported) {
+            // Trigger the vibration composition
+            val composition = VibrationEffect.startComposition()
+            repeat(config.numberOfLowTicks) {
+                composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, powerScale)
+            }
+            vibratorHelper.vibrate(composition.compose(), VIBRATION_ATTRIBUTES_PIPELINING)
+        } else {
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+            repeat(config.numberOfLowTicks) {
+                vibratorHelper.vibrate(effect, VIBRATION_ATTRIBUTES_PIPELINING)
+            }
         }
-        vibratorHelper.vibrate(composition.compose(), VIBRATION_ATTRIBUTES_PIPELINING)
         dragTextureLastTime = currentTime
         dragTextureLastProgress = normalizedSliderProgress
     }
