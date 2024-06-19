@@ -6827,6 +6827,20 @@ public final class Settings {
         public static final String BLOCK_WALLPAPER_DIMMING = "block_wallpaper_dimming";
 
         /**
+         * Whether to enable brightness slider haptic feedbacks
+         * @hide
+         */
+        @Readable
+        public static final String BRIGHTNESS_SLIDER_HAPTICS = "brightness_slider_haptics";
+
+        /**
+         * Whether to enable volume dialog slider haptic feedbacks
+         * @hide
+         */
+        @Readable
+        public static final String VOLUME_PANEL_HAPTICS = "volume_panel_haptics";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *

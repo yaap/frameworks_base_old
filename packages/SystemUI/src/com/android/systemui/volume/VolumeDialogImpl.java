@@ -26,6 +26,7 @@ import static android.media.AudioManager.STREAM_MUSIC;
 import static android.media.AudioManager.STREAM_NOTIFICATION;
 import static android.media.AudioManager.STREAM_RING;
 import static android.media.AudioManager.STREAM_VOICE_CALL;
+import static android.provider.Settings.System.VOLUME_PANEL_HAPTICS;
 import static android.provider.Settings.System.VOLUME_PANEL_ON_LEFT;
 import static android.provider.Settings.System.VOLUME_PANEL_ON_LEFT_LAND;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
@@ -297,6 +298,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     // Volume panel placement left or right
     private boolean mVolumePanelOnLeft;
     private boolean mVolumePanelOnLeftLand;
+    // User setting for haptics
+    private boolean mHapticsEnabled = true;
 
     private final boolean mUseBackgroundBlur;
     private Consumer<Boolean> mCrossWindowBlurEnabledListener;
@@ -338,6 +341,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             mContext.getContentResolver().registerContentObserver(
                     Settings.System.getUriFor(VOLUME_PANEL_ON_LEFT_LAND),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(VOLUME_PANEL_HAPTICS),
+                    false, this, UserHandle.USER_ALL);
         }
 
         void stop() {
@@ -357,6 +363,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             mVolumePanelOnLeftLand = mVolumePanelOnLeft &&
                     Settings.System.getInt(mContext.getContentResolver(),
                     VOLUME_PANEL_ON_LEFT_LAND, def ? 1 : 0) == 1;
+            mHapticsEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                    VOLUME_PANEL_HAPTICS, 1) == 1;
             mHandler.post(() -> {
                 mControllerCallbackH.onConfigurationChanged();
             });
@@ -2524,7 +2532,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         @Override
         public void onVolumeChangedFromKey() {
             VolumeRow activeRow = getActiveRow();
-            if (activeRow.mHapticPlugin != null) {
+            if (activeRow.mHapticPlugin != null && mHapticsEnabled) {
                 activeRow.mHapticPlugin.onKeyDown();
             }
         }
@@ -2630,7 +2638,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             if (mRow.ss == null) return;
             if (getActiveRow().equals(mRow)
                     && mRow.slider.getVisibility() == VISIBLE
-                    && mRow.mHapticPlugin != null) {
+                    && mRow.mHapticPlugin != null && mHapticsEnabled) {
                 mRow.mHapticPlugin.onProgressChanged(seekBar, progress, fromUser);
                 if (!fromUser) {
                     // Consider a change from program as the volume key being continuously pressed

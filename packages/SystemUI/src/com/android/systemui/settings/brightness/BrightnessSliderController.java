@@ -19,6 +19,9 @@ package com.android.systemui.settings.brightness;
 import static com.android.systemui.Flags.hapticBrightnessSlider;
 
 import android.content.Context;
+import android.database.ContentObserver;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -66,6 +69,35 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
 
     private ImageView mIconView;
 
+    private boolean mHapticsEnabled = true;
+
+    private final SettingsObserver mSettingsObserver = new SettingsObserver();
+    private class SettingsObserver extends ContentObserver {
+        SettingsObserver() {
+            super(mView.getHandler());
+        }
+
+        void observe() {
+            mView.getContext().getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.BRIGHTNESS_SLIDER_HAPTICS),
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        void stop() {
+            mView.getContext().getContentResolver().unregisterContentObserver(this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        void update() {
+            mHapticsEnabled = Settings.System.getInt(mView.getContext().getContentResolver(),
+                    Settings.System.BRIGHTNESS_SLIDER_HAPTICS, 1) == 1;
+        }
+    }
+
     private final Gefingerpoken mOnInterceptListener = new Gefingerpoken() {
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -111,6 +143,8 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     protected void onViewAttached() {
         mView.setOnSeekBarChangeListener(mSeekListener);
         mView.setOnInterceptListener(mOnInterceptListener);
+        mSettingsObserver.observe();
+        mSettingsObserver.update();
     }
 
     @Override
@@ -118,6 +152,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         mView.setOnSeekBarChangeListener(null);
         mView.setOnDispatchTouchEventListener(null);
         mView.setOnInterceptListener(null);
+        mSettingsObserver.stop();
     }
 
     @Override
@@ -222,7 +257,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (mListener != null) {
                 mListener.onChanged(mTracking, progress, false);
-                if (fromUser) {
+                if (fromUser && mHapticsEnabled) {
                     mBrightnessSliderHapticPlugin.onProgressChanged(seekBar, progress, fromUser);
                 }
             }
