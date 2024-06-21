@@ -84,4 +84,8 @@
     <java-symbol type="string" name="poweroff_alarm_title" />
     <java-symbol type="string" name="poweroff_alarm_body" />
     <java-symbol type="drawable" name="ic_alarm_on" />
+
+    <!-- Slider vibrations fallbacks - set either to non positive to disable
+         maximum duration in ms the slider vibrations scale to from 0 -->
+    <java-symbol type="integer" name="config_sliderVibFallbackDuration" />
 </resources>

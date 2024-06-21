@@ -63,6 +63,7 @@ class SliderHapticFeedbackProvider(
         VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
     private val isPrimitiveClickSupported = vibratorHelper.areAllPrimitivesSupported(
         VibrationEffect.Composition.PRIMITIVE_CLICK)
+    private val maxDurationFallback = vibratorHelper.getMaxDurationFallback()
 
     /**
      * Vibrate when the handle reaches either bookend with a certain velocity.
@@ -70,12 +71,14 @@ class SliderHapticFeedbackProvider(
      * @param[absoluteVelocity] Velocity of the handle when it reached the bookend.
      */
     private fun vibrateOnEdgeCollision(absoluteVelocity: Float) {
-        if (!isPrimitiveClickSupported) {
-            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
-            vibratorHelper.vibrate(effect)
+        val powerScale = scaleOnEdgeCollision(absoluteVelocity)
+        if (!isPrimitiveClickSupported && maxDurationFallback > 0) {
+            val effect = VibrationEffect.createOneShot(
+                powerToDuration(powerScale, maxDurationFallback),
+                VibrationEffect.MAX_AMPLITUDE)
+            vibratorHelper.vibrate(effect, VIBRATION_ATTRIBUTES_PIPELINING)
             return
         }
-        val powerScale = scaleOnEdgeCollision(absoluteVelocity)
         val vibration =
             VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, powerScale)
@@ -128,8 +131,10 @@ class SliderHapticFeedbackProvider(
                 composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, powerScale)
             }
             vibratorHelper.vibrate(composition.compose(), VIBRATION_ATTRIBUTES_PIPELINING)
-        } else {
-            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+        } else if (maxDurationFallback > 0) {
+            val effect = VibrationEffect.createOneShot(
+                powerToDuration(powerScale, maxDurationFallback),
+                VibrationEffect.MAX_AMPLITUDE)
             repeat(config.numberOfLowTicks) {
                 vibratorHelper.vibrate(effect, VIBRATION_ATTRIBUTES_PIPELINING)
             }
@@ -217,5 +222,9 @@ class SliderHapticFeedbackProvider(
                 .setFlags(VibrationAttributes.FLAG_PIPELINED_EFFECT)
                 .build()
         private const val UNITS_SECOND = 1000
+
+        private fun powerToDuration(power: Float, maxDuration: Long): Long {
+            return Math.round(Math.max(maxDuration * power, 1f)).toLong()
+        }
     }
 }

@@ -41,7 +41,7 @@ class VibratorHelperTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        vibratorHelper = VibratorHelper(vibrator, executor)
+        vibratorHelper = VibratorHelper(vibrator, executor, view.getContext())
         whenever(vibrator.hasVibrator()).thenReturn(true)
     }
 
