@@ -6477,13 +6477,6 @@ public final class Settings {
         public static final String VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
 
         /**
-         * Volume dialog timeout. Value in seconds
-         * @hide
-         */
-        @Readable
-        public static final String VOLUME_DIALOG_TIMEOUT = "volume_dialog_timeout";
-
-        /**
          * Whether the torch launch gesture to double tap or long press the power button when the
          * screen is off should be enabled. *
          * 0: disabled
