@@ -258,6 +258,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         mThemedDrawable.setBatteryLevel(level);
         mCircleDrawable.setCharging(pluggedIn);
         mCircleDrawable.setBatteryLevel(level);
+        updateShowPercent(); // required for % text only when charging
         updatePercentText();
 
         if (newStatusBarIcons()) {
