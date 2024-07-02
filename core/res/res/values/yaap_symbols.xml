@@ -24,9 +24,6 @@
     <java-symbol type="string" name="cert_model" />
     <java-symbol type="string" name="cert_spl" />
     <java-symbol type="integer" name="cert_sdk" />
-    <java-symbol type="string" name="build_device" />
-    <java-symbol type="string" name="build_fp" />
-    <java-symbol type="string" name="build_model" />
     <java-symbol type="string" name="cert_manufacturer" />
 
      <!-- Package Manager -->
