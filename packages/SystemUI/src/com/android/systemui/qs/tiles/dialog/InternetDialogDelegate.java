@@ -389,11 +389,8 @@ public class InternetDialogDelegate implements
             }
         });
         mMobileNetworkLayout.setOnLongClickListener(v -> {
-            if (!mInternetDialogController.isDeviceLocked()) {
-                mInternetDialogController.launchMobileNetworkSettings(v, mDefaultDataSubId);
-                return true;
-            }
-            return false;
+            mInternetDialogController.launchMobileNetworkSettings(v, mDefaultDataSubId);
+            return true;
         });
         mConnectedWifListLayout.setOnClickListener(this::onClickConnectedWifi);
         mSeeAllLayout.setOnClickListener(this::onClickSeeMoreButton);
