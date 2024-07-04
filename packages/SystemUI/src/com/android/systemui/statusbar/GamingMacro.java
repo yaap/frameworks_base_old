@@ -74,10 +74,12 @@ public class GamingMacro {
     private final AudioManager mAudio;
     private final NotificationManager mNm;
     private final ContentResolver mResolver;
-    private final ShutdownBroadcastReciever mShutdownBroadcastReciever;
+    private final ShutdownBroadcastReceiver mShutdownBroadcastReceiver;
     private final ScreenBroadcastReceiver mScreenBroadcastReceiver;
+    private final BatteryBroadcastReceiver mBatteryBroadcastReceiver;
     private final BatteryController mBatteryController;
     private final DisplayManager mDisplayManager;
+    private final PowerManager mPowerManager;
     private final PowerManagerInternal mPowerManagerInternal;
     private final ColorDisplayManager mColorManager;
     private final BluetoothController mBluetoothController;
@@ -85,6 +87,7 @@ public class GamingMacro {
     // private final boolean mHasHWKeys;
     private boolean mShutdownRegistered;
     private boolean mScreenRegistered;
+    private boolean mBatteryRegistered;
 
     // user settings
     private boolean mHeadsUpEnabled;
@@ -99,6 +102,7 @@ public class GamingMacro {
     private boolean mBrightnessEnabled;
     private boolean mMediaEnabled;
     private boolean mScreenOffEnabled;
+    private boolean mBatterySaverDisables;
 
     private int mRingerMode = 0;
     private int mBrightnessLevel = 80;
@@ -117,6 +121,7 @@ public class GamingMacro {
         mAudio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mNm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mDisplayManager = (DisplayManager) context.getSystemService(DisplayManager.class);
+        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mColorManager = colorManager;
         mBatteryController = batteryController;
@@ -133,8 +138,9 @@ public class GamingMacro {
         // Configuration c = context.getResources().getConfiguration();
         // mHasHWKeys = c.navigation != Configuration.NAVIGATION_NONAV;
 
-        mShutdownBroadcastReciever = new ShutdownBroadcastReciever();
+        mShutdownBroadcastReceiver = new ShutdownBroadcastReceiver();
         mScreenBroadcastReceiver = new ScreenBroadcastReceiver();
+        mBatteryBroadcastReceiver = new BatteryBroadcastReceiver();
     }
 
     public void setEnabled(boolean enabled) {
@@ -249,9 +255,16 @@ public class GamingMacro {
                 mScreenRegistered = true;
             }
 
+            if (mBatterySaverDisables && !mBatterySaverEnabled) {
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+                mContext.registerReceiver(mBatteryBroadcastReceiver, filter);
+                mBatteryRegistered = true;
+            }
+
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_SHUTDOWN);
-            mContext.registerReceiver(mShutdownBroadcastReciever, filter);
+            mContext.registerReceiver(mShutdownBroadcastReceiver, filter);
             mShutdownRegistered = true;
 
         } else {
@@ -260,8 +273,12 @@ public class GamingMacro {
                 mContext.unregisterReceiver(mScreenBroadcastReceiver);
                 mScreenRegistered = false;
             }
+            if (mBatteryRegistered) {
+                mContext.unregisterReceiver(mBatteryBroadcastReceiver);
+                mBatteryRegistered = false;
+            }
             if (mShutdownRegistered) {
-                mContext.unregisterReceiver(mShutdownBroadcastReciever);
+                mContext.unregisterReceiver(mShutdownBroadcastReceiver);
                 mShutdownRegistered = false;
             }
         }
@@ -299,6 +316,8 @@ public class GamingMacro {
                 Settings.System.GAMING_MODE_MEDIA, 80);
         mScreenOffEnabled = Settings.System.getInt(mResolver,
                 Settings.System.GAMING_MODE_SCREEN_OFF, 0) == 1;
+        mBatterySaverDisables = Settings.System.getInt(mResolver,
+                Settings.System.GAMING_MODE_BATTERY_SAVER_DISABLES, 0) == 1;
     }
 
     private void saveSettingsState() {
@@ -459,17 +478,27 @@ public class GamingMacro {
     private class ScreenBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                setEnabled(false);
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                Settings.Global.putInt(mResolver, Settings.Global.GAMING_MACRO_ENABLED, 0);
             }
         }
     }
 
-    private class ShutdownBroadcastReciever extends BroadcastReceiver {
+    private class BatteryBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
-                setEnabled(false);
+            if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(intent.getAction())
+                    && mPowerManager.isPowerSaveMode()) {
+                Settings.Global.putInt(mResolver, Settings.Global.GAMING_MACRO_ENABLED, 0);
+            }
+        }
+    }
+
+    private class ShutdownBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
+                Settings.Global.putInt(mResolver, Settings.Global.GAMING_MACRO_ENABLED, 0);
             }
         }
     }

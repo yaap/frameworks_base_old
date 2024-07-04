@@ -140,6 +140,7 @@ public class SystemSettings {
                 Settings.System.GAMING_MODE_MEDIA_ENABLED,
                 Settings.System.GAMING_MODE_MEDIA,
                 Settings.System.GAMING_MODE_SCREEN_OFF,
+                Settings.System.GAMING_MODE_BATTERY_SAVER_DISABLES,
                 Settings.System.NOTIFICATION_HEADERS,
                 Settings.System.RINGTONE_VIBRATION_PATTERN,
                 Settings.System.CUSTOM_RINGTONE_VIBRATION_PATTERN,

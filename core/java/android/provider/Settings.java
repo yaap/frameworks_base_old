@@ -6436,6 +6436,13 @@ public final class Settings {
         public static final String GAMING_MODE_SCREEN_OFF = "gaming_mode_screen_off";
 
         /**
+         * Whether gaming mode turns off when battery saver activates
+         * @hide
+         */
+        @Readable
+        public static final String GAMING_MODE_BATTERY_SAVER_DISABLES = "gaming_mode_battery_saver_disables";
+
+        /**
          * Controls whether to show notification headers
          * @hide
          */
