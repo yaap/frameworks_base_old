@@ -77,6 +77,7 @@
     <string name="gaming_mode_silent">silent</string>
     <string name="gaming_mode_night_light">Night Light</string>
     <string name="gaming_mode_battery_saver">Battery Saver</string>
+    <string name="gaming_mode_power">Power mode</string>
     <string name="gaming_mode_bluetooth">Bluetooth</string>
     <string name="gaming_mode_brightness">Brightness</string>
     <string name="gaming_mode_extra_dim">Extra dim</string>

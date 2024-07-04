@@ -6378,6 +6378,14 @@ public final class Settings {
         public static final String GAMING_MODE_BATTERY_SCHEDULE = "gaming_mode_battery_schedule";
 
         /**
+         * Whether to {@link android.os.PowerManagerInternal#setPowerMode}
+         * to {@link android.hardware.power.Mode#GAME} when gaming mode is on
+         * @hide
+         */
+        @Readable
+        public static final String GAMING_MODE_POWER = "gaming_mode_power";
+
+        /**
          * Whether to enable bluetooth when gaming mode is on
          * @hide
          */

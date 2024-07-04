@@ -132,6 +132,7 @@ public class SystemSettings {
                 Settings.System.GAMING_MODE_HW_BUTTONS,
                 Settings.System.GAMING_MODE_NIGHT_LIGHT,
                 Settings.System.GAMING_MODE_BATTERY_SCHEDULE,
+                Settings.System.GAMING_MODE_POWER,
                 Settings.System.GAMING_MODE_BLUETOOTH,
                 Settings.System.GAMING_MODE_EXTRA_DIM,
                 Settings.System.GAMING_MODE_BRIGHTNESS_ENABLED,

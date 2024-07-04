@@ -33,11 +33,14 @@ import android.content.res.Resources;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.power.Mode;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.media.AudioManager;
 import android.provider.Settings;
 
+import com.android.server.LocalServices;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -75,6 +78,7 @@ public class GamingMacro {
     private final ScreenBroadcastReceiver mScreenBroadcastReceiver;
     private final BatteryController mBatteryController;
     private final DisplayManager mDisplayManager;
+    private final PowerManagerInternal mPowerManagerInternal;
     private final ColorDisplayManager mColorManager;
     private final BluetoothController mBluetoothController;
     private final SharedPreferences mPrefs;
@@ -89,6 +93,7 @@ public class GamingMacro {
     // private boolean mHwKeysEnabled;
     private boolean mNightLightEnabled;
     private boolean mBatterySaverEnabled;
+    private boolean mPowerEnabled;
     private boolean mBluetoothEnabled;
     private boolean mExtraDimEnabled;
     private boolean mBrightnessEnabled;
@@ -112,6 +117,7 @@ public class GamingMacro {
         mAudio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mNm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mDisplayManager = (DisplayManager) context.getSystemService(DisplayManager.class);
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mColorManager = colorManager;
         mBatteryController = batteryController;
         mBluetoothController = bluetoothController;
@@ -195,6 +201,11 @@ public class GamingMacro {
                 enabledStrings.add(mContext.getString(R.string.gaming_mode_battery_saver));
             }
 
+            if (mPowerEnabled && mPowerManagerInternal != null) {
+                mPowerManagerInternal.setPowerMode(Mode.GAME, true);
+                enabledStrings.add(mContext.getString(R.string.gaming_mode_power));
+            }
+
             if (mBluetoothEnabled) {
                 mBluetoothController.setBluetoothEnabled(true);
                 enabledStrings.add(mContext.getString(R.string.gaming_mode_bluetooth));
@@ -272,6 +283,8 @@ public class GamingMacro {
                 Settings.System.GAMING_MODE_NIGHT_LIGHT, 0) == 1;
         mBatterySaverEnabled = Settings.System.getInt(mResolver,
                 Settings.System.GAMING_MODE_BATTERY_SCHEDULE, 0) == 1;
+        mPowerEnabled = Settings.System.getInt(mResolver,
+                Settings.System.GAMING_MODE_POWER, 1) == 1;
         mBluetoothEnabled = Settings.System.getInt(mResolver,
                 Settings.System.GAMING_MODE_BLUETOOTH, 0) == 1;
         mExtraDimEnabled = Settings.System.getInt(mResolver,
@@ -373,6 +386,11 @@ public class GamingMacro {
                     Settings.Global.AUTOMATIC_POWER_SAVE_MODE, prevMode);
             mBatteryController.setPowerSaveMode(
                     mPrefs.getInt(KEY_BATTERY_SAVER, 0) == 1);
+        }
+
+        if (mPowerManagerInternal != null) {
+            // disabling regardless of setting
+            mPowerManagerInternal.setPowerMode(Mode.GAME, false);
         }
 
         if (mBluetoothEnabled) {
