@@ -6443,6 +6443,14 @@ public final class Settings {
         public static final String GAMING_MODE_BATTERY_SAVER_DISABLES = "gaming_mode_battery_saver_disables";
 
         /**
+         * Apps gaming macro should automatically activate for
+         * package name list delimeted by comma
+         * @hide
+         */
+        @Readable
+        public static final String GAMING_MODE_APPS = "gaming_mode_apps";
+
+        /**
          * Controls whether to show notification headers
          * @hide
          */
@@ -19971,7 +19979,7 @@ public final class Settings {
         public static final String BLUETOOTH_OFF_TIMEOUT = "bluetooth_off_timeout";
 
         /**
-         * Whether gaming macro is currently enabled
+         * Whether gaming macro is currently activated
          * Not for backup
          * @hide
          */

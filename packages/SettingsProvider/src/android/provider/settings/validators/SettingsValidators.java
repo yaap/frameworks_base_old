@@ -217,6 +217,9 @@ public class SettingsValidators {
     static final Validator COMMA_SEPARATED_COMPONENT_LIST_VALIDATOR =
             new ComponentNameListValidator(",");
 
+    static final Validator COMMA_SEPARATED_PACKAGE_LIST_VALIDATOR_EMPTY =
+            new PackageNameListValidatorEmpty(",");
+
     static final Validator PERCENTAGE_INTEGER_VALIDATOR =
             new InclusiveIntegerRangeValidator(0, 100);
 

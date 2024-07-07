@@ -39,6 +39,8 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
+import android.app.IActivityTaskManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -46,6 +48,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskInfo;
+import android.app.TaskStackListener;
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
@@ -68,6 +71,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -622,6 +626,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final SecureSettings mSecureSettings;
     private final GlobalSettings mGlobalSettings;
 
+    private final IActivityTaskManager mActivityTaskManager;
+    private final HandlerThread mGamingHandlerThread;
+    private final Object mGameLock = new Object();
+    private Handler mGamingHandler;
+    private ArraySet<String> mGameList = new ArraySet<>();
+    private ArraySet<Integer> mRunningTaskIds = new ArraySet<>();
+    private boolean mGamingMacroActive = false;
     private GamingMacro mGamingMacro = null;
 
     /**
@@ -887,6 +898,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         mBurnInProtectionController.setStatusBar(this);
+
+        mGamingHandlerThread = new HandlerThread("GamingHandlerThread");
+        mActivityTaskManager = ActivityTaskManager.getService();
     }
 
     private void initBubbles(Bubbles bubbles) {
@@ -3046,11 +3060,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         void observe() {
             mGlobalSettings.registerContentObserver(Settings.Global.GAMING_MACRO_ENABLED, this);
+            mSystemSettings.registerContentObserver(Settings.System.GAMING_MODE_APPS, this);
         }
 
         void update() {
             Settings.Global.putInt(mContext.getContentResolver(),
                     Settings.Global.GAMING_MACRO_ENABLED, 0);
+            updateGameList();
         }
 
         @Override
@@ -3059,16 +3075,105 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 case Settings.Global.GAMING_MACRO_ENABLED:
                     setGamingMacro();
                     break;
+                case Settings.System.GAMING_MODE_APPS:
+                    updateGameList();
+                    break;
                 default:
                     break;
             }
         }
     }
 
+    private void updateGameList() {
+        synchronized (mGameLock) {
+            mGameList.clear();
+            String gamesValue = Settings.System.getString(mContext.getContentResolver(),
+                    Settings.System.GAMING_MODE_APPS);
+            if (gamesValue != null && !gamesValue.isEmpty()) {
+                String[] games = gamesValue.split(",");
+                for (String game : games) {
+                    mGameList.add(game);
+                }
+            }
+            if (!mGameList.isEmpty() && !mTaskStackListenerRegistered) {
+                try {
+                    mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+                    mTaskStackListenerRegistered = true;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to register task stack listener", e);
+                }
+            } else if (mGameList.isEmpty() && mTaskStackListenerRegistered) {
+                try {
+                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+                    mTaskStackListenerRegistered = false;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to unregister task stack listener", e);
+                }
+            }
+        }
+    }
+
+    private boolean mTaskStackListenerRegistered = false;
+    private final TaskStackListener mTaskStackListener = new TaskStackListener() {
+        @Override
+        public void onTaskCreated(int taskId, ComponentName componentName) throws RemoteException {
+            synchronized (mGameLock) {
+                if (componentName == null) {
+                    return;
+                }
+
+                String pckName = componentName.getPackageName();
+                if (mGameList.contains(pckName) && !mRunningTaskIds.contains(taskId)) {
+                    mRunningTaskIds.add(taskId);
+                    setGamingMacro(true);
+                }
+            }
+        }
+
+        @Override
+        public void onTaskRemoved(int taskId) throws RemoteException {
+            synchronized (mGameLock) {
+                if (!mRunningTaskIds.contains(taskId))
+                    return;
+
+                mRunningTaskIds.remove(taskId);
+                setGamingMacro(false);
+            }
+        }
+
+        @Override
+        public void onTaskFocusChanged(int taskId, boolean focused) {
+            synchronized (mGameLock) {
+                if (!mRunningTaskIds.contains(taskId))
+                    return;
+
+                setGamingMacro(focused);
+            }
+        }
+    };
+
     private void setGamingMacro() {
-        final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.GAMING_MACRO_ENABLED, 0) == 1;
-        getGamingMacro().setEnabled(enabled);
+        synchronized (mGameLock) {
+            final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.GAMING_MACRO_ENABLED, 0) == 1;
+            if (enabled != mGamingMacroActive) {
+                getGamingHandler().post(() -> getGamingMacro().setEnabled(enabled));
+                mGamingMacroActive = enabled;
+            }
+        }
+    }
+
+    private void setGamingMacro(boolean enabled) {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.GAMING_MACRO_ENABLED, enabled ? 1 : 0);
+    }
+
+    private Handler getGamingHandler() {
+        if (mGamingHandler == null) {
+            mGamingHandlerThread.start();
+            mGamingHandler = new Handler(mGamingHandlerThread.getLooper());
+        }
+        return mGamingHandler;
     }
 
     private GamingMacro getGamingMacro() {

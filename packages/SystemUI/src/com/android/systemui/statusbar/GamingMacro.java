@@ -143,7 +143,11 @@ public class GamingMacro {
         mBatteryBroadcastReceiver = new BatteryBroadcastReceiver();
     }
 
-    public void setEnabled(boolean enabled) {
+    /**
+     * Activates/Deactivates the macro
+     * Only call externally!
+     */
+    public synchronized void setEnabled(boolean enabled) {
         ArrayList<String> enabledStrings = new ArrayList<>();
         if (enabled) {
             saveSettingsState();
