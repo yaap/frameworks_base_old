@@ -44,4 +44,7 @@
     <!-- Allow devices override audio panel location to the left side -->
     <bool name="config_audioPanelOnLeftSide">false</bool>
 
+    <!-- Whether to enable HEVC toggle for screenrecord -->
+    <bool name="config_screenRecordHEVC">true</bool>
+
 </resources>
