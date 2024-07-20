@@ -42,7 +42,8 @@ public class SystemNotificationChannels {
     public static String CAR_MODE = "CAR_MODE";
     public static String ACCOUNT = "ACCOUNT";
     public static String DEVELOPER = "DEVELOPER";
-    public static String DEVELOPER_IMPORTANT = "DEVELOPER_IMPORTANT";
+    public static String DEVELOPER_IMPORTANT = "DEVELOPER_IMPORTANT_1";
+    public static String DEVELOPER_IMPORTANT_OLD = "DEVELOPER_IMPORTANT";
     public static String UPDATES = "UPDATES";
     public static String NETWORK_STATUS = "NETWORK_STATUS";
     public static String NETWORK_ALERTS = "NETWORK_ALERTS";
@@ -56,7 +57,8 @@ public class SystemNotificationChannels {
     public static String DEVICE_ADMIN = "DEVICE_ADMIN_ALERTS";
     public static String ALERTS = "ALERTS";
     public static String RETAIL_MODE = "RETAIL_MODE";
-    public static String USB = "USB";
+    public static String USB = "USB_1";
+    public static String USB_OLD = "USB";
     public static String FOREGROUND_SERVICE = "FOREGROUND_SERVICE";
     public static String HEAVY_WEIGHT_APP = "HEAVY_WEIGHT_APP";
     /**
@@ -105,7 +107,7 @@ public class SystemNotificationChannels {
         final NotificationChannel developerImportant = new NotificationChannel(
                 DEVELOPER_IMPORTANT,
                 context.getString(R.string.notification_channel_developer_important),
-                NotificationManager.IMPORTANCE_MIN);
+                NotificationManager.IMPORTANCE_LOW);
         developer.setBlockable(true);
         channelsList.add(developerImportant);
 
@@ -163,7 +165,7 @@ public class SystemNotificationChannels {
         final NotificationChannel usb = new NotificationChannel(
                 USB,
                 context.getString(R.string.notification_channel_usb),
-                NotificationManager.IMPORTANCE_MIN);
+                NotificationManager.IMPORTANCE_LOW);
         channelsList.add(usb);
 
         NotificationChannel foregroundChannel = new NotificationChannel(
@@ -234,6 +236,8 @@ public class SystemNotificationChannels {
         nm.deleteNotificationChannel(VIRTUAL_KEYBOARD);
         nm.deleteNotificationChannel(DEVICE_ADMIN_DEPRECATED);
         nm.deleteNotificationChannel(SYSTEM_CHANGES_DEPRECATED);
+        nm.deleteNotificationChannel(DEVELOPER_IMPORTANT_OLD);
+        nm.deleteNotificationChannel(USB_OLD);
     }
 
     public static void createAccountChannelForPackage(String pkg, int uid, Context context) {
