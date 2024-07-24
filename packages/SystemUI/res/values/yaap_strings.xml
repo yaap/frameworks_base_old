@@ -129,4 +129,8 @@
     <string name="weather_condition_wind">Windy</string>
     <string name="weather_condition_mist">Misty</string>
 
+    <!-- QS footer text dialog -->
+    <string name="qs_footer_dialog_title">QS Footer Text</string>
+    <string name="qs_footer_dialog_toast">Long press to change text</string>
+
 </resources>

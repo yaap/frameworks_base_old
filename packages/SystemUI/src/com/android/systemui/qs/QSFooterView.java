@@ -96,13 +96,9 @@ public class QSFooterView extends FrameLayout {
                         Settings.System.QS_FOOTER_TEXT_STRING,
                         UserHandle.USER_CURRENT);
         if (mShouldShowBuildText) {
-            if (text == null || text.isEmpty()) {
-                mBuildText.setText("YAAP");
-                mBuildText.setVisibility(View.VISIBLE);
-            } else {
-                mBuildText.setText(text);
-                mBuildText.setVisibility(View.VISIBLE);
-            }
+            mBuildText.setText(text == null || text.isEmpty() ? "YAAP" : text);
+            mBuildText.setVisibility(View.VISIBLE);
+            mBuildText.setSelected(true);
         } else {
             mBuildText.setVisibility(View.GONE);
         }

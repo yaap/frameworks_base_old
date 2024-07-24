@@ -18,8 +18,16 @@ package com.android.systemui.qs;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
+import android.provider.Settings;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +37,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.retail.domain.interactor.RetailModeInteractor;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -47,6 +56,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final FalsingManager mFalsingManager;
     private final ActivityStarter mActivityStarter;
     private final RetailModeInteractor mRetailModeInteractor;
+    private final SystemUIDialog.Factory mSystemUIDialogFactory;
 
     @Inject
     QSFooterViewController(QSFooterView view,
@@ -54,7 +64,8 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
             FalsingManager falsingManager,
             ActivityStarter activityStarter,
             QSPanelController qsPanelController,
-            RetailModeInteractor retailModeInteractor
+            RetailModeInteractor retailModeInteractor,
+            SystemUIDialog.Factory systemUIDialogFactory
     ) {
         super(view);
         mUserTracker = userTracker;
@@ -62,6 +73,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mFalsingManager = falsingManager;
         mActivityStarter = activityStarter;
         mRetailModeInteractor = retailModeInteractor;
+        mSystemUIDialogFactory = systemUIDialogFactory;
 
         mBuildText = mView.findViewById(R.id.build);
         mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
@@ -71,17 +83,17 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     @Override
     protected void onViewAttached() {
         mBuildText.setOnLongClickListener(view -> {
-            CharSequence buildText = mBuildText.getText();
-            if (!TextUtils.isEmpty(buildText)) {
-                ClipboardManager service =
-                        mUserTracker.getUserContext().getSystemService(ClipboardManager.class);
-                String label = getResources().getString(R.string.build_number_clip_data_label);
-                service.setPrimaryClip(ClipData.newPlainText(label, buildText));
-                Toast.makeText(getContext(), R.string.build_number_copy_toast, Toast.LENGTH_SHORT)
-                        .show();
-                return true;
-            }
-            return false;
+            mActivityStarter.executeRunnableDismissingKeyguard(() -> showFooterEditDialog(),
+                    null, /* cancelAction */
+                    true, /* dismissShade */
+                    true, /* afterKeyguardGone */
+                    false /* deferred */);
+            return true;
+        });
+
+        mBuildText.setOnClickListener(view -> {
+            Toast.makeText(getContext(), R.string.qs_footer_dialog_toast, Toast.LENGTH_SHORT)
+                    .show();
         });
 
         mEditButton.setOnClickListener(view -> {
@@ -124,5 +136,56 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     @Override
     public void disable(int state1, int state2, boolean animate) {
         mView.disable(state2);
+    }
+
+    private void showFooterEditDialog() {
+        final InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        final SystemUIDialog dialog = mSystemUIDialogFactory.create();
+        final EditText editText = new EditText(getContext());
+
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        editText.setLayoutParams(lp);
+        editText.setHint("YAAP");
+        editText.setText(mBuildText.getText(), TextView.BufferType.EDITABLE);
+        editText.setSelectAllOnFocus(true);
+        editText.setSingleLine(true);
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setRawInputType(InputType.TYPE_CLASS_TEXT);
+        editText.setOnEditorActionListener((view, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                setFooterText(editText.getText().toString());
+                dialog.dismiss();
+            }
+            return true;
+        });
+
+        dialog.setTitle(R.string.qs_footer_dialog_title);
+        dialog.setPositiveButton(com.android.internal.R.string.ok,
+                (d, w) -> setFooterText(editText.getText().toString()));
+        dialog.setOnShowListener(d -> {
+            editText.requestFocus();
+        });
+        SystemUIDialog.registerDismissListener(dialog, () -> {
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+            }
+        });
+        dialog.setNegativeButton(R.string.cancel, null);
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.setView(editText);
+        dialog.getWindow().clearFlags(
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        dialog.show();
+    }
+
+    private void setFooterText(String text) {
+        Settings.System.putString(getContext().getContentResolver(),
+                Settings.System.QS_FOOTER_TEXT_STRING, text);
     }
 }
