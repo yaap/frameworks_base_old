@@ -66,7 +66,9 @@
     <string name="gaming_mode_silent">Без звуку</string>
     <string name="gaming_mode_night_light">Нічного підсвічування</string>
     <string name="gaming_mode_battery_saver">Енергозбереження</string>
+    <string name="gaming_mode_power">Режиму потужності</string>
     <string name="gaming_mode_brightness">Яскравості</string>
+    <string name="gaming_mode_extra_dim">Додаткового затемнення</string>
     <string name="gaming_mode_media">Гучності медіа</string>
 
     <!-- Screen record -->
@@ -74,8 +76,18 @@
     <string name="screenrecord_delete_label">Видалити</string>
     <!-- A toast message shown after successfully deleting a screen recording [CHAR LIMIT=NONE] -->
     <string name="screenrecord_delete_description">Запис екрану видалено</string>
-    <string name="screenrecord_stopdot_label">Показувати кнопку стоп-коло\nЗатисніть, щоб пересунути</string>
+    <string name="screenrecord_stopdot_label">Показати стоп-крапку</string>
+    <string name="screenrecord_stopdot_summary">Натисніть і утримуйте, щоб перемістити</string>
+    <string name="screenrecord_lowquality_label">Якість</string>
+    <string name="screenrecord_lowquality_high">Найвища</string>
+    <string name="screenrecord_lowquality_medium">Середня</string>
+    <string name="screenrecord_lowquality_low">Низька</string>
+    <string name="screenrecord_skip_time_label">Пропустити таймер</string>
+    <string name="screenrecord_skip_time_summary">Пропустити 3 секунди очікування</string>
     <string name="screenrecord_hevc_switch_label">Увімкнути HEVC</string>
+    <string name="screenrecord_hevc_switch_summary">Використання більш ефективного кодування відео HEVC</string>
+    <string name="screenrecord_limit_reaching">Запис екрану до обмеження розміру файлу</string>
+    <string name="screenrecord_limit_reached">Запис екрану зупинено\nПеревищено розмір файлу (15GB)</string>
 
     <!-- Power menu reboot -->
     <string name="global_action_reboot">Перезавантаження</string>
@@ -102,5 +114,18 @@
 
     <!-- USB tethering QS tile -->
     <string name="quick_settings_usb_tether_label">USB-модем</string>
+
+    <!-- Weather -->
+    <string name="weather_condition_clouds">Хмарно</string>
+    <string name="weather_condition_rain">Дощ</string>
+    <string name="weather_condition_clear">Сонячно</string>
+    <string name="weather_condition_storm">Шторм</string>
+    <string name="weather_condition_snow">Сніжно</string>
+    <string name="weather_condition_wind">Вітряно</string>
+    <string name="weather_condition_mist">Туман</string>
+
+    <!-- QS footer text dialog -->
+    <string name="qs_footer_dialog_title">Текст нижнього колонтитула швидких налаштувань</string>
+    <string name="qs_footer_dialog_toast">Утримуйте, щоб змінити текст</string>
 
 </resources>
