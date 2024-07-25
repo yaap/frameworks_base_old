@@ -160,7 +160,8 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
-        p.typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
+        p.typeface = Typeface.create(
+            Typeface.create("sans-serif-condensed", Typeface.NORMAL), 500, false)
         p.textAlign = Paint.Align.CENTER
     }
 
@@ -256,7 +257,7 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
         c.restore()
 
         if (!charging && batteryLevel < 100 && showPercent) {
-            textPaint.textSize = bounds.width() * 0.42f
+            textPaint.textSize = bounds.width() * 0.45f
             val textHeight = +textPaint.fontMetrics.ascent
             val pctX = (bounds.width() + textHeight) * getTextXRatio()
             val pctY = bounds.height()  * 0.8f
@@ -307,7 +308,7 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     }
 
     open fun getTextXRatio(): Float {
-        return 0.8f
+        return 0.9f
     }
 
     private fun batteryColorForLevel(level: Int): Int {

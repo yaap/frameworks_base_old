@@ -40,9 +40,9 @@
     <dimen name="bluetooth_dialog_active_device_bottom_margin">4dp</dimen>
 
     <!-- Height of the landscape battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height_landscape">20dp</dimen>
+    <dimen name="status_bar_battery_icon_height_landscape">19dp</dimen>
 
     <!-- Width of the landscape battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_width_landscape">22dp</dimen>
+    <dimen name="status_bar_battery_icon_width_landscape">28dp</dimen>
 
 </resources>
