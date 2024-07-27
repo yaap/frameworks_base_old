@@ -83,9 +83,6 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     // updated whenever level changes
     private var levelColor: Int = Color.MAGENTA
 
-    // Dual tone implies that battery level is a clipped overlay over top of the whole shape
-    private var dualTone = false
-
     private var batteryLevel = 0
 
     private val invalidateRunnable: () -> Unit = {
@@ -150,15 +147,6 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
         p.blendMode = BlendMode.SRC
     }
 
-    // Only used if dualTone is set to true
-    private val dualToneBackgroundFill = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
-        p.color = frameColor
-        p.alpha = 85 // ~0.3 alpha by default
-        p.isDither = true
-        p.strokeWidth = 0f
-        p.style = Paint.Style.FILL_AND_STROKE
-    }
-
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
         p.typeface = Typeface.create(
             Typeface.create("sans-serif-condensed", Typeface.NORMAL), 500, false)
@@ -200,10 +188,7 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
 
         // The perimeter should never change
         unifiedPath.addPath(scaledPerimeter)
-        // If drawing dual tone, the level is used only to clip the whole drawable path
-        if (!dualTone) {
-            unifiedPath.op(levelPath, Path.Op.UNION)
-        }
+        unifiedPath.op(levelPath, Path.Op.UNION)
 
         fillPaint.color = levelColor
 
@@ -216,27 +201,16 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
             }
         }
 
-        if (dualTone) {
-            // Dual tone means we draw the shape again, clipped to the charge level
-            c.drawPath(unifiedPath, dualToneBackgroundFill)
-            c.save()
-            drawClipedRectDual(c, fillFraction)
-            c.drawPath(unifiedPath, fillPaint)
-            c.restore()
-        } else {
-            // Non dual-tone means we draw the perimeter (with the level fill), and potentially
-            // draw the fill again with a critical color
-            fillPaint.color = fillColor
-            c.drawPath(unifiedPath, fillPaint)
-            fillPaint.color = levelColor
+        fillPaint.color = fillColor
+        c.drawPath(unifiedPath, fillPaint)
+        fillPaint.color = levelColor
 
-            // Show colorError below this level
-            if (batteryLevel <= Companion.CRITICAL_LEVEL && !charging) {
-                c.save()
-                c.clipPath(scaledFill)
-                c.drawPath(levelPath, fillPaint)
-                c.restore()
-            }
+        // Show colorError below this level
+        if (batteryLevel <= Companion.CRITICAL_LEVEL && !charging) {
+            c.save()
+            c.clipPath(scaledFill)
+            c.drawPath(levelPath, fillPaint)
+            c.restore()
         }
 
         if (charging) {
@@ -292,14 +266,6 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
                      2.0f), Path.Direction.CCW)
     }
 
-    open fun drawClipedRectDual(c: Canvas, fillFraction: Float) {
-        c.clipRect(
-                bounds.left - bounds.width() * fillFraction,
-                0f,
-                bounds.right.toFloat(),
-                bounds.left.toFloat())
-    }
-
     open fun drawClipedRect(c: Canvas, fillFraction: Float) {
         c.clipRect(fillRect.right,
                 fillRect.top,
@@ -351,7 +317,6 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     override fun setColorFilter(colorFilter: ColorFilter?) {
         fillPaint.colorFilter = colorFilter
         fillColorStrokePaint.colorFilter = colorFilter
-        dualToneBackgroundFill.colorFilter = colorFilter
     }
 
     /**
@@ -398,13 +363,12 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     }
 
     fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
-        fillColor = if (dualTone) fgColor else singleToneColor
+        fillColor = singleToneColor
 
         fillPaint.color = fillColor
         fillColorStrokePaint.color = fillColor
 
         backgroundColor = bgColor
-        dualToneBackgroundFill.color = bgColor
 
         // Also update the level color, since fillColor may have changed
         levelColor = batteryColorForLevel(batteryLevel)
@@ -456,9 +420,6 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
         boltPath.set(PathParser.createPathFromPathData(getBoltPathString()))
 
         plusPath.set(PathParser.createPathFromPathData(getPlusPathString()))
-
-        dualTone = context.resources.getBoolean(
-                com.android.internal.R.bool.config_batterymeterDualTone)
     }
 
     open fun getPathString(): String {

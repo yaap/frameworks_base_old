@@ -49,14 +49,6 @@ open class RLandscapeBatteryDrawable(context: Context, frameColor: Int) :
                      2.0f), Path.Direction.CCW)
     }
 
-    override fun drawClipedRectDual(c: Canvas, fillFraction: Float) {
-        c.clipRect(
-                bounds.left.toFloat(),
-                0f,
-                bounds.right + bounds.width() * fillFraction,
-                bounds.left.toFloat())
-    }
-
     override fun drawClipedRect(c: Canvas, fillFraction: Float) {
         c.clipRect(fillRect.left,
                 fillRect.top ,
