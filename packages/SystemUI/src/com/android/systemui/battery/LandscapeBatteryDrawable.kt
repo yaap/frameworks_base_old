@@ -148,19 +148,19 @@ open class LandscapeBatteryDrawable(
         p.color = frameColor
         p.alpha = 255
         p.isDither = true
-        p.strokeWidth = 5f
+        p.strokeWidth = 1f
         p.style = Paint.Style.STROKE
         p.blendMode = BlendMode.SRC
-        p.strokeMiter = 5f
+        p.strokeMiter = 1f
         p.strokeJoin = Paint.Join.ROUND
     }
 
     private val fillColorStrokeProtection = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
         p.isDither = true
-        p.strokeWidth = 5f
+        p.strokeWidth = 1f
         p.style = Paint.Style.STROKE
-        p.blendMode = BlendMode.CLEAR
-        p.strokeMiter = 5f
+        p.blendMode = BlendMode.SRC
+        p.strokeMiter = 1f
         p.strokeJoin = Paint.Join.ROUND
     }
 
@@ -376,12 +376,12 @@ open class LandscapeBatteryDrawable(
         val fillColorObj = Color.valueOf(fillColor)
 
         fillPaint.color = fillColor
-        fillColorStrokePaint.color = fillColor
+        fillColorStrokePaint.color = fillColor.toInt().inv() or 0xFF000000.toInt()
 
-        val alpha = 0.75f * fillColorObj.alpha()
-        val red = Math.max(0.8f * fillColorObj.red(), 0.2f)
-        val green = Math.max(0.8f * fillColorObj.green(), 0.2f)
-        val blue = Math.max(0.8f * fillColorObj.blue(), 0.2f)
+        val alpha = 0.7f * fillColorObj.alpha()
+        val red = Math.max(0.7f * fillColorObj.red(), 0.3f)
+        val green = Math.max(0.7f * fillColorObj.green(), 0.3f)
+        val blue = Math.max(0.7f * fillColorObj.blue(), 0.3f)
         backgroundColor = Color.argb(alpha, red, green, blue)
 
         // Also update the level color, since fillColor may have changed
