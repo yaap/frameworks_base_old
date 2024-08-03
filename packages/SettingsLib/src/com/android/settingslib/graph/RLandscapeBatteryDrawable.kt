@@ -49,13 +49,6 @@ open class RLandscapeBatteryDrawable(context: Context, frameColor: Int) :
                      2.0f), Path.Direction.CCW)
     }
 
-    override fun drawClipedRect(c: Canvas, fillFraction: Float) {
-        c.clipRect(fillRect.left,
-                fillRect.top ,
-                fillRect.right - (fillRect.width() * (1 - fillFraction)),
-                fillRect.bottom)
-    }
-
     override fun getPathString(): String {
         return context.resources.getString(
                 com.android.internal.R.string.config_batterymeterRLandPerimeterPath)

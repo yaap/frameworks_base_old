@@ -50,6 +50,7 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     // Fill will cover the whole bounding rect of the fillMask, and be masked by the path
     private val fillMask = Path()
     private val scaledFill = Path()
+    private val scaledBgFill = Path()
     // Based off of the mask, the fill will interpolate across this space
     protected val fillRect = RectF()
     // Top of this rect changes based on level, 100% == fillRect
@@ -60,6 +61,9 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     private val padding = Rect()
     // The net result of fill + perimeter paths
     private val unifiedPath = Path()
+    // Background fill path and rect
+    private val bgRect = RectF()
+    private val bgPath = Path()
 
     // Bolt path (used while charging)
     private val boltPath = Path()
@@ -181,8 +185,11 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     override fun draw(c: Canvas) {
         c.saveLayer(null, null)
         unifiedPath.reset()
+        bgPath.reset()
+        bgRect.set(fillRect)
         levelPath.reset()
         levelRect.set(fillRect)
+        drawBgRect()
         val fillFraction = batteryLevel / 100f
         drawLevelRect(fillFraction)
 
@@ -200,6 +207,9 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
                 c.drawPath(scaledBolt, fillPaint)
             }
         }
+
+        fillPaint.color = backgroundColor
+        c.drawPath(bgPath, fillPaint)
 
         fillPaint.color = fillColor
         c.drawPath(unifiedPath, fillPaint)
@@ -236,15 +246,21 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
             val pctX = (bounds.width() + textHeight) * getTextXRatio()
             val pctY = bounds.height()  * 0.8f
 
-            textPaint.color = fillColor
-            c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
-
             textPaint.color = fillColor.toInt().inv() or 0xFF000000.toInt()
-            c.save()
-            drawClipedRect(c, fillFraction)
             c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
-            c.restore()
         }
+    }
+
+    private fun drawBgRect() {
+        bgPath.addRoundRect(bgRect,
+        floatArrayOf(2.0f,
+                     2.0f,
+                     2.0f,
+                     2.0f,
+                     2.0f,
+                     2.0f,
+                     2.0f,
+                     2.0f), Path.Direction.CCW)
     }
 
     open fun drawLevelRect(fillFraction: Float) {
@@ -264,13 +280,6 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
                      2.0f,
                      2.0f,
                      2.0f), Path.Direction.CCW)
-    }
-
-    open fun drawClipedRect(c: Canvas, fillFraction: Float) {
-        c.clipRect(fillRect.right,
-                fillRect.top,
-                fillRect.left + (fillRect.width() * (1 - fillFraction)),
-                fillRect.bottom)
     }
 
     open fun getTextXRatio(): Float {
@@ -364,11 +373,16 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
 
     fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
         fillColor = singleToneColor
+        val fillColorObj = Color.valueOf(fillColor)
 
         fillPaint.color = fillColor
         fillColorStrokePaint.color = fillColor
 
-        backgroundColor = bgColor
+        val alpha = 0.75f * fillColorObj.alpha()
+        val red = Math.max(0.8f * fillColorObj.red(), 0.2f)
+        val green = Math.max(0.8f * fillColorObj.green(), 0.2f)
+        val blue = Math.max(0.8f * fillColorObj.blue(), 0.2f)
+        backgroundColor = Color.argb(alpha, red, green, blue)
 
         // Also update the level color, since fillColor may have changed
         levelColor = batteryColorForLevel(batteryLevel)
