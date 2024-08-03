@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2017 The Android Open Source Project
  * Copyright (C) 2019 The LineageOS Project
+ * Copyright (C) 2024 Yet Another AOSP Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.settingslib.graph
+package com.android.systemui.battery
 
 import android.content.Context
 import android.content.res.Resources
@@ -26,7 +27,9 @@ import com.android.settingslib.Utils
 import kotlin.math.max
 import kotlin.math.min
 
-class CircleBatteryDrawable(private val context: Context, frameColor: Int) : Drawable() {
+class CircleBatteryDrawable(
+    context: Context, frameColor: Int
+) : AccessorizedBatteryDrawable(context, frameColor) {
     private val criticalLevel: Int
     private val warningString: String
     private val framePaint: Paint
@@ -57,34 +60,45 @@ class CircleBatteryDrawable(private val context: Context, frameColor: Int) : Dra
 
     override fun getIntrinsicWidth() = intrinsicWidth
 
-    var charging = false
-        set(value) {
-            field = value
-            postInvalidate()
-        }
+    private var charging = false
+    private var powerSaveEnabled = false
+    private var showPercent = false
+    private var batteryLevel = -1
 
-    var powerSaveEnabled = false
-        set(value) {
-            field = value
-            postInvalidate()
-        }
+    override fun getCharging(): Boolean {
+        return charging
+    }
 
-    var showPercent = false
-        set(value) {
-            field = value
-            postInvalidate()
-        }
+    override fun setCharging(c: Boolean) {
+        charging = c
+        postInvalidate()
+    }
 
-    var batteryLevel = -1
-        set(value) {
-            field = value
-            postInvalidate()
-        }
+    override fun getPowerSaveEnabled(): Boolean {
+        return powerSaveEnabled
+    }
 
-    // an approximation of View.postInvalidate()
-    private fun postInvalidate() {
-        unscheduleSelf { invalidateSelf() }
-        scheduleSelf({ invalidateSelf() }, 0)
+    override fun setPowerSaveEnabled(enabled: Boolean) {
+        powerSaveEnabled = enabled
+        postInvalidate()
+    }
+
+    override fun getShowPercent(): Boolean {
+        return showPercent
+    }
+
+    override fun setShowPercent(show: Boolean) {
+        showPercent = show
+        postInvalidate()
+    }
+
+    override fun getBatteryLevel(): Int {
+        return batteryLevel
+    }
+
+    override fun setBatteryLevel(level: Int) {
+        batteryLevel = level
+        postInvalidate()
     }
 
     override fun setBounds(left: Int, top: Int, right: Int, bottom: Int) {
@@ -139,7 +153,7 @@ class CircleBatteryDrawable(private val context: Context, frameColor: Int) : Dra
         else
             getColorForLevel(level)
 
-    fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
+    override fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
         val fillColor = if (dualTone) fgColor else singleToneColor
         val fillColorObj = Color.valueOf(fillColor)
 
@@ -228,9 +242,6 @@ class CircleBatteryDrawable(private val context: Context, frameColor: Int) : Dra
         }
     }
 
-    // Some stuff required by Drawable.
-    override fun setAlpha(alpha: Int) {}
-
     override fun setColorFilter(colorFilter: ColorFilter?) {
         framePaint.colorFilter = colorFilter
         batteryPaint.colorFilter = colorFilter
@@ -238,8 +249,6 @@ class CircleBatteryDrawable(private val context: Context, frameColor: Int) : Dra
         boltPaint.colorFilter = colorFilter
         plusPaint.colorFilter = colorFilter
     }
-
-    override fun getOpacity() = PixelFormat.UNKNOWN
 
     companion object {
         private fun loadPoints(

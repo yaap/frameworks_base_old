@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2020-2024 crDroid Android Project
+ * Copyright (C) 2024 Yet Another AOSP Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -12,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.settingslib.graph
+package com.android.systemui.battery
 
 import android.content.Context
 import android.graphics.BlendMode
@@ -37,7 +38,9 @@ import com.android.settingslib.Utils
  * A battery meter drawable that respects paths configured in
  * frameworks/base/core/res/res/values/config.xml to allow for an easily overrideable battery icon
  */
-open class LandscapeBatteryDrawable(protected val context: Context, frameColor: Int) : Drawable() {
+open class LandscapeBatteryDrawable(
+    context: Context, frameColor: Int
+) : AccessorizedBatteryDrawable(context, frameColor) {
 
     // Need to load:
     // 1. perimeter shape
@@ -96,23 +99,50 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
     open var criticalLevel: Int = context.resources.getInteger(
             com.android.internal.R.integer.config_criticalBatteryWarningLevel)
 
-    var charging = false
-        set(value) {
-            field = value
-            postInvalidate()
-        }
+    private var charging = false
+    private var powerSaveEnabled = false
+    private var showPercent = false
 
-    var powerSaveEnabled = false
-        set(value) {
-            field = value
-            postInvalidate()
-        }
+    override fun getCharging(): Boolean {
+        return charging
+    }
 
-    var showPercent = false
-        set(value) {
-            field = value
-            postInvalidate()
-        }
+    override fun setCharging(c: Boolean) {
+        charging = c
+        postInvalidate()
+    }
+
+    override fun getPowerSaveEnabled(): Boolean {
+        return powerSaveEnabled
+    }
+
+    override fun setPowerSaveEnabled(enabled: Boolean) {
+        powerSaveEnabled = enabled
+        postInvalidate()
+    }
+
+    override fun getShowPercent(): Boolean {
+        return showPercent
+    }
+
+    override fun setShowPercent(show: Boolean) {
+        showPercent = show
+        postInvalidate()
+    }
+
+    /**
+     * Set the fill level
+     */
+    override fun setBatteryLevel(l: Int) {
+        invertFillIcon = if (l >= 67) true else if (l <= 33) false else invertFillIcon
+        batteryLevel = l
+        levelColor = batteryColorForLevel(batteryLevel)
+        invalidateSelf()
+    }
+
+    override fun getBatteryLevel(): Int {
+        return batteryLevel
+    }
 
     private val fillColorStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
         p.color = frameColor
@@ -314,25 +344,9 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
         return color
     }
 
-    /**
-     * Alpha is unused internally, and should be defined in the colors passed to {@link setColors}.
-     * Further, setting an alpha for a dual tone battery meter doesn't make sense without bounds
-     * defining the minimum background fill alpha. This is because fill + background must be equal
-     * to the net alpha passed in here.
-     */
-    override fun setAlpha(alpha: Int) {
-    }
-
     override fun setColorFilter(colorFilter: ColorFilter?) {
         fillPaint.colorFilter = colorFilter
         fillColorStrokePaint.colorFilter = colorFilter
-    }
-
-    /**
-     * Deprecated, but required by Drawable
-     */
-    override fun getOpacity(): Int {
-        return PixelFormat.OPAQUE
     }
 
     override fun getIntrinsicHeight(): Int {
@@ -341,20 +355,6 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
 
     override fun getIntrinsicWidth(): Int {
         return intrinsicWidth
-    }
-
-    /**
-     * Set the fill level
-     */
-    public open fun setBatteryLevel(l: Int) {
-        invertFillIcon = if (l >= 67) true else if (l <= 33) false else invertFillIcon
-        batteryLevel = l
-        levelColor = batteryColorForLevel(batteryLevel)
-        invalidateSelf()
-    }
-
-    public fun getBatteryLevel(): Int {
-        return batteryLevel
     }
 
     override fun onBoundsChange(bounds: Rect) {
@@ -371,7 +371,7 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
         updateSize()
     }
 
-    fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
+    override fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
         fillColor = singleToneColor
         val fillColorObj = Color.valueOf(fillColor)
 
@@ -388,11 +388,6 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
         levelColor = batteryColorForLevel(batteryLevel)
 
         invalidateSelf()
-    }
-
-    private fun postInvalidate() {
-        unscheduleSelf(invalidateRunnable)
-        scheduleSelf(invalidateRunnable, 0)
     }
 
     private fun updateSize() {
@@ -420,7 +415,7 @@ open class LandscapeBatteryDrawable(protected val context: Context, frameColor: 
         fillColorStrokeProtection.strokeWidth = scaledStrokeWidth
     }
 
-    open fun loadPaths() {
+    private fun loadPaths() {
         perimeterPath.set(PathParser.createPathFromPathData(getPathString()))
         perimeterPath.computeBounds(RectF(), true)
 

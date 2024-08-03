@@ -43,9 +43,9 @@ import com.android.systemui.battery.BatterySpecs.SHIELD_TOP_OFFSET
  *
  * For now, it adds a shield in the bottom-right corner when [displayShield] is true.
  */
-class AccessorizedBatteryDrawable(
-    private val context: Context,
-    frameColor: Int,
+open class AccessorizedBatteryDrawable(
+    protected val context: Context,
+    protected val frameColor: Int,
 ) : DrawableWrapper(ThemedBatteryDrawable(context, frameColor)) {
     private val mainBatteryDrawable: ThemedBatteryDrawable
         get() = drawable as ThemedBatteryDrawable
@@ -86,11 +86,7 @@ class AccessorizedBatteryDrawable(
         updateSizes()
     }
 
-    var displayShield: Boolean = false
-        set(value) {
-            field = value
-            postInvalidate()
-        }
+    private var displayShield: Boolean = false
 
     private fun updateSizes() {
         val b = bounds
@@ -174,43 +170,60 @@ class AccessorizedBatteryDrawable(
     }
 
     /** Sets whether the battery is currently charging. */
-    fun setCharging(charging: Boolean) {
+    open fun setCharging(charging: Boolean) {
         mainBatteryDrawable.charging = charging
     }
 
     /** Returns whether the battery is currently charging. */
-    fun getCharging(): Boolean {
+    open fun getCharging(): Boolean {
         return mainBatteryDrawable.charging
     }
 
     /** Sets the current level (out of 100) of the battery. */
-    fun setBatteryLevel(level: Int) {
+    open fun setBatteryLevel(level: Int) {
         mainBatteryDrawable.setBatteryLevel(level)
     }
 
+    open fun getBatteryLevel(): Int {
+        return mainBatteryDrawable.getBatteryLevel()
+    }
+
     /** Sets whether power save is enabled. */
-    fun setPowerSaveEnabled(powerSaveEnabled: Boolean) {
+    open fun setPowerSaveEnabled(powerSaveEnabled: Boolean) {
         mainBatteryDrawable.powerSaveEnabled = powerSaveEnabled
     }
 
     /** Returns whether power save is currently enabled. */
-    fun getPowerSaveEnabled(): Boolean {
+    open fun getPowerSaveEnabled(): Boolean {
         return mainBatteryDrawable.powerSaveEnabled
     }
 
     /** Sets the colors to use for the icon. */
-    fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
+    open fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
         shieldPaint.color = if (dualTone) fgColor else singleToneColor
         mainBatteryDrawable.setColors(fgColor, bgColor, singleToneColor)
     }
 
     /** Sets whether to show % next to the drawable */
-    fun setShowPercent(show: Boolean) {
+    open fun setShowPercent(show: Boolean) {
         mainBatteryDrawable.showPercent = show;
     }
 
+    open fun getShowPercent(): Boolean {
+        return mainBatteryDrawable.showPercent;
+    }
+
+    open fun getDisplayShield(): Boolean {
+        return displayShield
+    }
+
+    open fun setDisplayShield(display: Boolean) {
+        displayShield = display
+        postInvalidate()
+    }
+
     /** Notifies this drawable that the density might have changed. */
-    fun notifyDensityChanged() {
+    open fun notifyDensityChanged() {
         density = context.resources.displayMetrics.density
     }
 
@@ -221,7 +234,7 @@ class AccessorizedBatteryDrawable(
 
     private val invalidateRunnable: () -> Unit = { invalidateSelf() }
 
-    private fun postInvalidate() {
+    protected fun postInvalidate() {
         unscheduleSelf(invalidateRunnable)
         scheduleSelf(invalidateRunnable, 0)
     }
