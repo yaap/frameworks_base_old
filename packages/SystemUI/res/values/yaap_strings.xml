@@ -69,19 +69,7 @@
     <string name="gaming_mode_dialog_message">This tile requires an initial setup.\nLong pressing the tile will take you to a settings page with more info</string>
     <string name="accessibility_quick_settings_gaming_mode_on">Gaming macros are on</string>
     <string name="accessibility_quick_settings_gaming_mode_off">Gaming macros are off</string>
-    <string name="gaming_mode_for">for:</string>
-    <string name="gaming_mode_headsup">Heads Up</string>
-    <string name="gaming_mode_zen">DND</string>
-    <string name="gaming_mode_ringer">Ringer</string>
-    <string name="gaming_mode_vibrate">vibrate</string>
-    <string name="gaming_mode_silent">silent</string>
-    <string name="gaming_mode_night_light">Night Light</string>
-    <string name="gaming_mode_battery_saver">Battery Saver</string>
-    <string name="gaming_mode_power">Power mode</string>
-    <string name="gaming_mode_bluetooth">Bluetooth</string>
-    <string name="gaming_mode_brightness">Brightness</string>
-    <string name="gaming_mode_extra_dim">Extra dim</string>
-    <string name="gaming_mode_media">Media Volume</string>
+    <string name="gaming_mode_notification_content">Gaming Macro is on. Press to configure.</string>
 
     <!-- Screen record delete action -->
     <!-- Label for notification action to delete a screen recording file [CHAR LIMIT=35] -->

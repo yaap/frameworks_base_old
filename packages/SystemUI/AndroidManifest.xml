@@ -1140,5 +1140,9 @@
                 android:name="android.service.dream"
                 android:resource="@xml/home_controls_dream_metadata" />
         </service>
+
+        <!-- Callback for deactivating gaming macro -->
+        <receiver android:name=".statusbar.GamingStopBroadcastReceiver"
+                  android:exported="false" />
     </application>
 </manifest>

@@ -58,16 +58,6 @@
     <string name="gaming_mode_dialog_message">Требуется первоначальная настройка!\nЗажмите плитку для перехода к настройкам</string>
     <string name="accessibility_quick_settings_gaming_mode_on">Игровой режим включён</string>
     <string name="accessibility_quick_settings_gaming_mode_off">Игровой режим выключен</string>
-    <string name="gaming_mode_for">для:</string>
-    <string name="gaming_mode_headsup">Всплывающих уведомлений</string>
-    <string name="gaming_mode_zen">Режима Не Беспокоить</string>
-    <string name="gaming_mode_ringer">Звонка</string>
-    <string name="gaming_mode_vibrate">Вибрации</string>
-    <string name="gaming_mode_silent">Без звука</string>
-    <string name="gaming_mode_night_light">Ночной подсветки</string>
-    <string name="gaming_mode_battery_saver">Эергосбережения</string>
-    <string name="gaming_mode_brightness">Яркости</string>
-    <string name="gaming_mode_media">Громоксти Медиа</string>
 
     <!-- Screen record -->
     <!-- Label for notification action to delete a screen recording file [CHAR LIMIT=35] -->

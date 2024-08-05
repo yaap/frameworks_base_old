@@ -58,18 +58,6 @@
     <string name="gaming_mode_dialog_message">Потрібне початкове налаштування!\nЗатисніть плитку для переходу до налаштувань</string>
     <string name="accessibility_quick_settings_gaming_mode_on">Ігровий Режим увімкнено</string>
     <string name="accessibility_quick_settings_gaming_mode_off">Ігровий Режим вимкнено</string>
-    <string name="gaming_mode_for">для:</string>
-    <string name="gaming_mode_headsup">Спливаючих повідомлень</string>
-    <string name="gaming_mode_zen">Режиму Не турбувати</string>
-    <string name="gaming_mode_ringer">Дзвінка</string>
-    <string name="gaming_mode_vibrate">Вібрації</string>
-    <string name="gaming_mode_silent">Без звуку</string>
-    <string name="gaming_mode_night_light">Нічного підсвічування</string>
-    <string name="gaming_mode_battery_saver">Енергозбереження</string>
-    <string name="gaming_mode_power">Режиму потужності</string>
-    <string name="gaming_mode_brightness">Яскравості</string>
-    <string name="gaming_mode_extra_dim">Додаткового затемнення</string>
-    <string name="gaming_mode_media">Гучності медіа</string>
 
     <!-- Screen record -->
     <!-- Label for notification action to delete a screen recording file [CHAR LIMIT=35] -->

@@ -58,18 +58,6 @@
     <string name="gaming_mode_dialog_message">请先进行初始化设置。\n长按进入详细设置页面</string>
     <string name="accessibility_quick_settings_gaming_mode_on">游戏模式 开</string>
     <string name="accessibility_quick_settings_gaming_mode_off">游戏模式 关</string>
-    <string name="gaming_mode_for">\n选项:</string>
-    <string name="gaming_mode_headsup">浮动通知</string>
-    <string name="gaming_mode_zen">勿扰</string>
-    <string name="gaming_mode_ringer">响铃</string>
-    <string name="gaming_mode_vibrate">振动</string>
-    <string name="gaming_mode_silent">静音</string>
-    <string name="gaming_mode_night_light">护眼模式</string>
-    <string name="gaming_mode_battery_saver">省电模式</string>
-    <string name="gaming_mode_bluetooth">蓝牙</string>
-    <string name="gaming_mode_brightness">自动亮度</string>
-    <string name="gaming_mode_extra_dim">极暗</string>
-    <string name="gaming_mode_media">媒体音量</string>
 
     <!-- Screen record -->
     <string name="screenrecord_delete_label">删除</string>

@@ -23,6 +23,7 @@ import static com.android.settingslib.display.BrightnessUtils.convertGammaToLine
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -51,6 +52,11 @@ import java.util.ArrayList;
 public class GamingMacro {
     private static final int NOTIFICATION_ID = 10000;
     private static final String CHANNEL_ID = "gaming_mode";
+    private static final String ACTION_STOP = "gaming_macro_stop";
+    private static final Intent SETTINGS_INTENT = new Intent("com.android.settings.GAMING_MODE_SETTINGS");
+    static {
+        SETTINGS_INTENT.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
 
     // saved settings state keys
     private static final String KEY_HEADSUP_STATE = "gaming_mode_state_headsup";
@@ -75,6 +81,7 @@ public class GamingMacro {
     private final NotificationManager mNm;
     private final ContentResolver mResolver;
     private final ShutdownBroadcastReceiver mShutdownBroadcastReceiver;
+    private final GamingStopBroadcastReceiver mStopBroadcastReceiver;
     private final ScreenBroadcastReceiver mScreenBroadcastReceiver;
     private final BatteryBroadcastReceiver mBatteryBroadcastReceiver;
     private final BatteryController mBatteryController;
@@ -88,6 +95,7 @@ public class GamingMacro {
     private boolean mShutdownRegistered;
     private boolean mScreenRegistered;
     private boolean mBatteryRegistered;
+    private boolean mStopRegistered;
 
     // user settings
     private boolean mHeadsUpEnabled;
@@ -139,6 +147,7 @@ public class GamingMacro {
         // mHasHWKeys = c.navigation != Configuration.NAVIGATION_NONAV;
 
         mShutdownBroadcastReceiver = new ShutdownBroadcastReceiver();
+        mStopBroadcastReceiver = new GamingStopBroadcastReceiver();
         mScreenBroadcastReceiver = new ScreenBroadcastReceiver();
         mBatteryBroadcastReceiver = new BatteryBroadcastReceiver();
     }
@@ -148,7 +157,6 @@ public class GamingMacro {
      * Only call externally!
      */
     public synchronized void setEnabled(boolean enabled) {
-        ArrayList<String> enabledStrings = new ArrayList<>();
         if (enabled) {
             saveSettingsState();
             updateUserSettings();
@@ -156,47 +164,37 @@ public class GamingMacro {
             if (mHeadsUpEnabled) {
                 Settings.Global.putInt(mResolver,
                         Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED, 0);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_headsup));
             }
 
             if (mZenEnabled) {
                 mNm.setInterruptionFilter(
                         NotificationManager.INTERRUPTION_FILTER_PRIORITY);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_zen));
             }
 
             if (mRingerMode != 0) {
                 // if we somehow have an invalid setting value stay at the same mode
                 int mode = mAudio.getRingerModeInternal();
-                String modeStr = "invalid";
                 if (mRingerMode == 1) {
                     mode = AudioManager.RINGER_MODE_VIBRATE;
-                    modeStr = mContext.getString(R.string.gaming_mode_vibrate);
                 } else if (mRingerMode == 2) {
                     mode = AudioManager.RINGER_MODE_SILENT;
-                    modeStr = mContext.getString(R.string.gaming_mode_silent);
                 }
                 mAudio.setRingerModeInternal(mode);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_ringer)
-                        + " (" + modeStr + ")");
             }
 
             // if (mNavBarEnabled) {
             //     Settings.System.putInt(mResolver,
             //             Settings.System.FORCE_SHOW_NAVBAR, 0);
-            //     enabledStrings.add(mContext.getString(R.string.gaming_mode_navbar));
             // }
             //
             // if (mHwKeysEnabled && mHasHWKeys) {
             //     Settings.Secure.putInt(mResolver,
             //             Settings.Secure.HARDWARE_KEYS_DISABLE, 1);
-            //     enabledStrings.add(mContext.getString(R.string.gaming_mode_hardware_keys));
             // }
 
             if (mNightLightEnabled) {
                 mColorManager.setNightDisplayActivated(false);
                 mColorManager.setNightDisplayAutoMode(ColorDisplayManager.AUTO_MODE_DISABLED);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_night_light));
             }
 
             if (mBatterySaverEnabled) {
@@ -208,24 +206,20 @@ public class GamingMacro {
                 Settings.Global.putInt(mResolver,
                         Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
                         PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_battery_saver));
             }
 
             if (mPowerEnabled && mPowerManagerInternal != null) {
                 mPowerManagerInternal.setPowerMode(Mode.GAME, true);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_power));
             }
 
             if (mBluetoothEnabled) {
                 mBluetoothController.setBluetoothEnabled(true);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_bluetooth));
             }
 
             if (mExtraDimEnabled) {
                 mColorManager.setReduceBrightColorsActivated(false);
                 Settings.Secure.putInt(mResolver,
                         Settings.Secure.EXTRA_DIM_AUTO_MODE, 0);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_extra_dim));
             }
 
             if (mBrightnessEnabled) {
@@ -241,7 +235,6 @@ public class GamingMacro {
                     mDisplayManager.setBrightness(mContext.getDisplayId(),
                             Math.min(lFloat, mBrightnessMax));
                 }
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_brightness));
             }
 
             if (mMediaEnabled) {
@@ -249,7 +242,6 @@ public class GamingMacro {
                 final int level = Math.round((float)max * ((float)mMediaLevel / 100f));
                 mAudio.setStreamVolume(AudioManager.STREAM_MUSIC, level,
                         AudioManager.FLAG_SHOW_UI);
-                enabledStrings.add(mContext.getString(R.string.gaming_mode_media));
             }
 
             if (mScreenOffEnabled) {
@@ -286,7 +278,7 @@ public class GamingMacro {
                 mShutdownRegistered = false;
             }
         }
-        setNotification(enabled, enabledStrings);
+        setNotification(enabled);
     }
 
     private void updateUserSettings() {
@@ -450,15 +442,9 @@ public class GamingMacro {
         }
     }
 
-    private void setNotification(boolean show, ArrayList<String> strings) {
+    private void setNotification(boolean show) {
         if (show) {
             final Resources res = mContext.getResources();
-            StringBuilder text = new StringBuilder(res.getString(R.string.accessibility_quick_settings_gaming_mode_on));
-            if (!strings.isEmpty()) {
-                text.append(" ").append(res.getString(R.string.gaming_mode_for)).append(" ");
-                text.append(strings.remove(0));
-                for (String str : strings) text.append(", ").append(str);
-            }
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     res.getString(R.string.gaming_mode_tile_title),
@@ -466,16 +452,44 @@ public class GamingMacro {
             channel.setDescription(res.getString(R.string.accessibility_quick_settings_gaming_mode_on));
             channel.enableVibration(false);
             mNm.createNotificationChannel(channel);
+
+            Intent stopIntent = new Intent(mContext, GamingStopBroadcastReceiver.class);
+            stopIntent.setAction(ACTION_STOP);
+            stopIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            PendingIntent stopPI = PendingIntent.getBroadcast(mContext, mContext.getUserId(), stopIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            Notification.Action stopAction = new Notification.Action.Builder(
+                R.drawable.ic_qs_gaming_mode,
+                res.getString(R.string.screenrecord_stop_label),
+                stopPI
+            ).build();
+            if (!mStopRegistered) {
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(ACTION_STOP);
+                mContext.registerReceiver(mStopBroadcastReceiver, filter,
+                        Context.RECEIVER_EXPORTED);
+                mStopRegistered = true;
+            }
+
+            PendingIntent contentPI = PendingIntent.getActivity(
+                    mContext, 0, SETTINGS_INTENT, PendingIntent.FLAG_IMMUTABLE);
             Notification notification = new Notification.Builder(mContext, CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_qs_gaming_mode)
                     .setContentTitle(res.getString(R.string.gaming_mode_tile_title))
-                    .setContentText(text.toString())
+                    .setContentText(res.getString(R.string.gaming_mode_notification_content))
+                    .setContentIntent(contentPI)
+                    .setAutoCancel(false)
                     .setShowWhen(true)
                     .setOngoing(true)
+                    .addAction(stopAction)
                     .build();
             mNm.notifyAsUser(null, NOTIFICATION_ID, notification, UserHandle.CURRENT);
         } else {
             mNm.cancelAsUser(null, NOTIFICATION_ID, UserHandle.CURRENT);
+            if (mStopRegistered) {
+                mContext.unregisterReceiver(mStopBroadcastReceiver);
+                mStopRegistered = false;
+            }
         }
     }
 
