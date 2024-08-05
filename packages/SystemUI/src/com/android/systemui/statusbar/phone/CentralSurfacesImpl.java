@@ -3064,8 +3064,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         void update() {
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.GAMING_MACRO_ENABLED, 0);
+            synchronized (mGameLock) {
+                mGamingMacroActive = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.GAMING_MACRO_ENABLED, 0) == 1;
+                if (mGamingMacroActive)
+                    getGamingMacro().setNotification(true);
+            }
             updateGameList();
         }
 
