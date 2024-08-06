@@ -17,3 +17,6 @@
     public int getWidth(int);
     public void setGoneMargin(int, int, int);
 }
+
+# Preserve line number information for debugging stack traces.
+-keepattributes SourceFile,LineNumberTable

@@ -3,7 +3,7 @@
 # following rules are the minimal set necessary to ensure compatibility.
 # For more details, see:
 # https://r8.googlesource.com/r8/+/refs/heads/master/compatibility-faq.md#r8-full-mode
--keepattributes RuntimeVisible*Annotation*,AnnotationDefault
+-keepattributes RuntimeVisible*Annotation*,AnnotationDefault,SourceFile,LineNumberTable
 
 -keep interface com.android.systemui.plugins.annotations.** {
     *;

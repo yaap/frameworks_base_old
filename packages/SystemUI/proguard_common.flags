@@ -1,6 +1,9 @@
 -include proguard_kotlin.flags
 -keep class com.android.systemui.VendorServices
 
+# Preserve line number information for debugging stack traces.
+-keepattributes SourceFile,LineNumberTable
+
 # Needed to ensure callback field references are kept in their respective
 # owning classes when the downstream callback registrars only store weak refs.
 # Note that we restrict this to SysUISingleton classes, as other registering
