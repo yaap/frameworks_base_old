@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
@@ -116,6 +117,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     private Drawable mUnknownStateDrawable;
 
     private int mBatteryStyle;
+    private int mForegroundColor = Color.WHITE;
+    private int mBackgroundColor = Color.WHITE;
+    private int mSingleToneColor = Color.WHITE;
 
     private DualToneHandler mDualToneHandler;
     private boolean mIsStaticColor = false;
@@ -244,7 +248,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updatePercentView();
-        mThemedDrawable.notifyDensityChanged();
+        if (mThemedDrawable != null)
+            mThemedDrawable.notifyDensityChanged();
     }
 
     public void setColorsFromContext(Context context) {
@@ -756,8 +761,12 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                     getResources().getDimensionPixelOffset(R.dimen.battery_margin_bottom));
             addView(mBatteryIconView, 0, mlp);
             scaleBatteryMeterViews();
+            updateColors(mForegroundColor, mBackgroundColor, mSingleToneColor);
+            onBatteryLevelChanged(mLevel, mPluggedIn);
+            onPowerSaveChanged(mPowerSaveEnabled);
         }
         updateShowPercent();
+        updatePercentText();
     }
 
     @Override
@@ -811,6 +820,10 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
      * @param singleToneColor
      */
     public void updateColors(int foregroundColor, int backgroundColor, int singleToneColor) {
+        mForegroundColor = foregroundColor;
+        mBackgroundColor = backgroundColor;
+        mSingleToneColor = singleToneColor;
+
         if (mThemedDrawable != null)
             mThemedDrawable.setColors(foregroundColor, backgroundColor, singleToneColor);
         mTextColor = singleToneColor;
