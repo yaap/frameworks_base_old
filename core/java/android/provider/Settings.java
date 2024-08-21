@@ -6443,6 +6443,13 @@ public final class Settings {
         public static final String GAMING_MODE_BATTERY_SAVER_DISABLES = "gaming_mode_battery_saver_disables";
 
         /**
+         * Whether gaming mode turns off three finger for screenshot gesture
+         * @hide
+         */
+        @Readable
+        public static final String GAMING_MODE_THREE_FINGER = "gaming_mode_three_finger";
+
+        /**
          * Apps gaming macro should automatically activate for
          * package name list delimeted by comma
          * @hide

@@ -71,6 +71,7 @@ public class GamingMacro {
     private static final String KEY_BATTERY_SAVER_MODE = "gaming_mode_battery_saver_mode";
     private static final String KEY_BATTERY_SAVER_LEVEL = "gaming_mode_battery_saver_level";
     private static final String KEY_BLUETOOTH = "gaming_mode_bluetooth";
+    private static final String KEY_THREE_FINGER = "gaming_mode_three_finger";
     private static final String KEY_EXTRA_DIM = "gaming_mode_extra_dim";
     private static final String KEY_EXTRA_DIM_SCHEDULE = "gaming_mode_extra_dim_schedule";
     private static final String KEY_BRIGHTNESS_STATE = "gaming_mode_state_brightness";
@@ -105,6 +106,7 @@ public class GamingMacro {
     private boolean mBatterySaverEnabled;
     private boolean mPowerEnabled;
     private boolean mBluetoothEnabled;
+    private boolean mThreeFingerEnabled;
     private boolean mExtraDimEnabled;
     private boolean mBrightnessEnabled;
     private boolean mMediaEnabled;
@@ -215,6 +217,11 @@ public class GamingMacro {
                 mBluetoothController.setBluetoothEnabled(true);
             }
 
+            if (mThreeFingerEnabled) {
+                Settings.System.putInt(mResolver,
+                        Settings.System.GAMING_MODE_THREE_FINGER, 0);
+            }
+
             if (mExtraDimEnabled) {
                 mColorManager.setReduceBrightColorsActivated(false);
                 Settings.Secure.putInt(mResolver,
@@ -289,6 +296,8 @@ public class GamingMacro {
                 Settings.System.GAMING_MODE_POWER, 1) == 1;
         mBluetoothEnabled = Settings.System.getInt(mResolver,
                 Settings.System.GAMING_MODE_BLUETOOTH, 0) == 1;
+        mThreeFingerEnabled = Settings.System.getInt(mResolver,
+                Settings.System.GAMING_MODE_THREE_FINGER, 0) == 1;
         mExtraDimEnabled = Settings.System.getInt(mResolver,
                 Settings.System.GAMING_MODE_EXTRA_DIM, 0) == 1;
         mBrightnessEnabled = Settings.System.getInt(mResolver,
@@ -349,6 +358,11 @@ public class GamingMacro {
 
         if (mBluetoothEnabled) {
             editor.putInt(KEY_BLUETOOTH, mBluetoothController.isBluetoothEnabled() ? 1 : 0);
+        }
+
+        if (mThreeFingerEnabled) {
+            editor.putInt(KEY_THREE_FINGER, Settings.System.getInt(mResolver,
+                    Settings.System.GAMING_MODE_THREE_FINGER, 0));
         }
 
         if (mExtraDimEnabled) {
@@ -435,6 +449,12 @@ public class GamingMacro {
         if (mPrefs.contains(KEY_BLUETOOTH)) {
             mBluetoothController.setBluetoothEnabled(
                 mPrefs.getInt(KEY_BLUETOOTH, 0) == 1);
+        }
+
+        if (mPrefs.contains(KEY_THREE_FINGER)) {
+            Settings.System.putInt(mResolver,
+                    Settings.System.GAMING_MODE_THREE_FINGER,
+                    mPrefs.getInt(KEY_THREE_FINGER, 0));
         }
 
         if (mPrefs.contains(KEY_EXTRA_DIM)) {
