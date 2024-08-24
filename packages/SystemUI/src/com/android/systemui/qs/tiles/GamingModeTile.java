@@ -151,7 +151,7 @@ public class GamingModeTile extends QSTileImpl<BooleanState> {
 
     private void showGamingModeWhatsThisDialog() {
         SystemUIDialog dialog = new SystemUIDialog(mContext);
-        dialog.setTitle(R.string.gaming_mode_dialog_title);
+        dialog.setTitle(R.string.gaming_mode_tile_title);
         dialog.setMessage(R.string.gaming_mode_dialog_message);
         dialog.setPositiveButton(com.android.internal.R.string.ok,
                 (DialogInterface.OnClickListener) (dialog1, which) ->

@@ -3161,8 +3161,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.GAMING_MACRO_ENABLED, 0) == 1;
             if (enabled != mGamingMacroActive) {
-                getGamingHandler().post(() -> getGamingMacro().setEnabled(enabled));
-                mGamingMacroActive = enabled;
+                getGamingHandler().post(() -> {
+                    if (!getGamingMacro().setEnabled(enabled)) {
+                        // saving failed. revert to disabled
+                        setGamingMacro(false);
+                        return;
+                    }
+                    mGamingMacroActive = enabled;
+                });
             }
         }
     }

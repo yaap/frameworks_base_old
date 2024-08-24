@@ -54,7 +54,6 @@
 
     <!-- Gaming Mode -->
     <string name="gaming_mode_tile_title">Игровой Режим</string>
-    <string name="gaming_mode_dialog_title">Игровой Режим</string>
     <string name="gaming_mode_dialog_message">Требуется первоначальная настройка!\nЗажмите плитку для перехода к настройкам</string>
     <string name="accessibility_quick_settings_gaming_mode_on">Игровой режим включён</string>
     <string name="accessibility_quick_settings_gaming_mode_off">Игровой режим выключен</string>

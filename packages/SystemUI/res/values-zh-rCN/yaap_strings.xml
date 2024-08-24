@@ -54,7 +54,6 @@
 
     <!-- Gaming Mode -->
     <string name="gaming_mode_tile_title">游戏模式</string>
-    <string name="gaming_mode_dialog_title">游戏模式</string>
     <string name="gaming_mode_dialog_message">请先进行初始化设置。\n长按进入详细设置页面</string>
     <string name="accessibility_quick_settings_gaming_mode_on">游戏模式 开</string>
     <string name="accessibility_quick_settings_gaming_mode_off">游戏模式 关</string>

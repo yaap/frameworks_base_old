@@ -35,10 +35,10 @@ import android.hardware.display.BrightnessInfo;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.power.Mode;
+import android.media.AudioManager;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
-import android.media.AudioManager;
 import android.provider.Settings;
 
 import com.android.server.LocalServices;
@@ -50,7 +50,6 @@ import java.util.ArrayList;
 
 /** A class to set/restore gaming macro **/
 public class GamingMacro {
-    private static final int NOTIFICATION_ID = 10000;
     private static final String TAG = "GamingMacro";
     private static final String CHANNEL_ID = "gaming_mode";
     private static final String ACTION_STOP = "gaming_macro_stop";
@@ -58,6 +57,7 @@ public class GamingMacro {
     static {
         SETTINGS_INTENT.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
+    private static final int NOTIFICATION_ID = TAG.hashCode();
 
     // saved settings state keys
     private static final String KEY_HEADSUP_STATE = "gaming_mode_state_headsup";
@@ -96,6 +96,7 @@ public class GamingMacro {
     private boolean mScreenRegistered;
     private boolean mBatteryRegistered;
     private boolean mStopRegistered;
+    private boolean mIsChannelSetup = false;
 
     // user settings
     private boolean mHeadsUpEnabled;
@@ -157,10 +158,13 @@ public class GamingMacro {
      * Activates/Deactivates the macro
      * Only call externally!
      */
-    public synchronized void setEnabled(boolean enabled) {
+    public synchronized boolean setEnabled(boolean enabled) {
         if (enabled) {
-            saveSettingsState();
             updateUserSettings();
+            if (!saveSettingsState()) {
+                fireSaveErrNotification();
+                return false;
+            }
 
             if (mHeadsUpEnabled) {
                 Settings.Global.putInt(mResolver,
@@ -275,6 +279,7 @@ public class GamingMacro {
             }
         }
         setNotification(enabled);
+        return true;
     }
 
     private void updateUserSettings() {
@@ -314,7 +319,7 @@ public class GamingMacro {
                 Settings.System.GAMING_MODE_BATTERY_SAVER_DISABLES, 0) == 1;
     }
 
-    private void saveSettingsState() {
+    private boolean saveSettingsState() {
         SharedPreferences.Editor editor = mPrefs.edit();
         // remove all keys first. in restore we check which ones exist
         editor.clear();
@@ -389,7 +394,7 @@ public class GamingMacro {
         }
 
         // use commit to keep this synced
-        editor.commit();
+        return editor.commit();
     }
 
     private void restoreSettingsState() {
@@ -486,17 +491,23 @@ public class GamingMacro {
         }
     }
 
+    private void setupChannel() {
+        if (mIsChannelSetup) return;
+        final Resources res = mContext.getResources();
+        NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID,
+                res.getString(R.string.gaming_mode_tile_title),
+                NotificationManager.IMPORTANCE_LOW);
+        channel.setDescription(res.getString(R.string.accessibility_quick_settings_gaming_mode_on));
+        channel.enableVibration(false);
+        mNm.createNotificationChannel(channel);
+        mIsChannelSetup = true;
+    }
+
     public void setNotification(boolean show) {
         if (show) {
+            setupChannel();
             final Resources res = mContext.getResources();
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    res.getString(R.string.gaming_mode_tile_title),
-                    NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription(res.getString(R.string.accessibility_quick_settings_gaming_mode_on));
-            channel.enableVibration(false);
-            mNm.createNotificationChannel(channel);
-
             Intent stopIntent = new Intent(mContext, GamingStopBroadcastReceiver.class);
             stopIntent.setAction(ACTION_STOP);
             stopIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -535,6 +546,20 @@ public class GamingMacro {
                 mStopRegistered = false;
             }
         }
+    }
+
+    private void fireSaveErrNotification() {
+        setupChannel();
+        final Resources res = mContext.getResources();
+        Notification notification = new Notification.Builder(mContext, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_qs_gaming_mode)
+                .setContentTitle(res.getString(R.string.gaming_mode_tile_title))
+                .setContentText(res.getString(R.string.gaming_mode_notification_content))
+                .setAutoCancel(false)
+                .setShowWhen(true)
+                .setOngoing(false)
+                .build();
+        mNm.notifyAsUser(null, NOTIFICATION_ID, notification, UserHandle.CURRENT);
     }
 
     private class ScreenBroadcastReceiver extends BroadcastReceiver {
