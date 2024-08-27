@@ -56,6 +56,7 @@ public class UdfpsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     @Nullable private Runnable mOnIlluminatedRunnable;
     boolean mAwaitingSurfaceToStartIllumination;
     boolean mHasValidSurface;
+    private boolean mEnrolling = false;
 
     private Drawable mUdfpsIconPressed;
 
@@ -141,6 +142,19 @@ public class UdfpsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         Canvas canvas = null;
         try {
             canvas = mHolder.lockCanvas();
+            int addDotSize =
+                getResources().getDimensionPixelSize(R.dimen.udfps_enroll_dot_additional_size);
+            if (addDotSize > 0 && mEnrolling) {
+                float newRadius = ((sensorRect.right - sensorRect.left) / 2) + addDotSize;
+                float centerX = sensorRect.centerX();
+                float centerY = sensorRect.centerY();
+                sensorRect.set(
+                    centerX - newRadius,
+                    centerY - newRadius,
+                    centerX + newRadius,
+                    centerY + newRadius
+                );
+            }
             mUdfpsIconPressed.setBounds(
                     Math.round(sensorRect.left),
                     Math.round(sensorRect.top),
@@ -155,5 +169,9 @@ public class UdfpsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 mHolder.unlockCanvasAndPost(canvas);
             }
         }
+    }
+
+    void setEnrolling(boolean enrolling) {
+        mEnrolling = enrolling;
     }
 }

@@ -126,6 +126,11 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val powerInteractor: PowerInteractor,
         @Application private val scope: CoroutineScope,
 ) {
+    var frame: View? = null
+        private set
+    private var isDimmed = false
+    private var hideOnUndim = false
+
     private val currentStateUpdatedToOffAodOrDozing: Flow<Unit> =
         transitionInteractor.currentKeyguardState
             .filter {
@@ -158,6 +163,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
 
     private var overlayTouchListener: TouchExplorationStateChangeListener? = null
 
+    private val frameworkDimming = context.getResources().getBoolean(
+        R.bool.config_udfpsFrameworkDimming)
     private val coreLayoutParams = WindowManager.LayoutParams(
         WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
         0 /* flags set in computeLayoutParams() */,
@@ -173,6 +180,30 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         // Avoid announcing window title.
         accessibilityTitle = " "
         inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
+    }
+
+    var dimAmount: Float = 0f
+        set(value) {
+            frame?.setBackgroundColor((value * 255).toInt() shl 24)
+            isDimmed = value > 0
+            if (hideOnUndim) {
+                hideFrame()
+            }
+        }
+
+    private val frameLayoutParams = WindowManager.LayoutParams(
+        WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+        Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS
+            or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            or WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        PixelFormat.TRANSLUCENT
+    ).apply {
+        fitInsetsTypes = 0
+        gravity = android.view.Gravity.TOP or android.view.Gravity.LEFT
+        layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
+        // Avoid announcing window title.
+        accessibilityTitle = " "
     }
 
     /** If the overlay is currently showing. */
@@ -207,6 +238,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             overlayParams = params
             sensorBounds = Rect(params.sensorBounds)
             try {
+                frame = View(context)
+                dimAmount = 0f
                 if (DeviceEntryUdfpsRefactor.isEnabled) {
                     overlayTouchView = (inflater.inflate(
                             R.layout.udfps_touch_overlay, null, false
@@ -216,7 +249,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         if (requestReason.isImportantForAccessibility()) {
                             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         }
-
+                        windowManager.addView(frame, frameLayoutParams)
                         addViewNowOrLater(this, null)
                         when (requestReason) {
                             REASON_AUTH_KEYGUARD ->
@@ -250,8 +283,12 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         }
 
+                        windowManager.addView(frame, frameLayoutParams)
                         addViewNowOrLater(this, animation)
                         sensorRect = sensorBounds
+                        if (requestReason.isEnrollmentReason()) {
+                            this.setEnrolling(true);
+                        }
                     }
                 }
                 getTouchOverlay()?.apply {
@@ -407,6 +444,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     /** Hide the overlay or return false and do nothing if it is already hidden. */
     fun hide(): Boolean {
         val wasShowing = isShowing
+        hideOnUndim = isDimmed
 
         overlayViewLegacy?.apply {
             if (isDisplayConfigured) {
@@ -438,7 +476,15 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         overlayTouchListener = null
         listenForCurrentKeyguardState?.cancel()
 
+        if (!hideOnUndim) hideFrame()
         return wasShowing
+    }
+
+    private fun hideFrame() {
+        frame?.apply {
+            windowManager.removeView(this)
+        }
+        frame = null
     }
 
     /** Cancel this request. */
@@ -540,6 +586,10 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         return subView
     }
 }
+
+@RequestReason
+private fun Int.isEnrollmentReason() =
+    this == REASON_ENROLL_FIND_SENSOR || this == REASON_ENROLL_ENROLLING
 
 @RequestReason
 private fun Int.isImportantForAccessibility() =
