@@ -1,7 +1,9 @@
 package: "android.security"
+container: "system"
 
 flag {
     name: "certificate_transparency_configuration"
+    is_exported: true
     namespace: "network_security"
     description: "Enable certificate transparency setting in the network security config"
     bug: "28746284"
@@ -9,6 +11,7 @@ flag {
 
 flag {
     name: "fsverity_api"
+    is_exported: true
     namespace: "hardware_backed_security"
     description: "Feature flag for fs-verity API"
     bug: "285185747"
@@ -16,6 +19,7 @@ flag {
 
 flag {
     name: "mgf1_digest_setter_v2"
+    is_exported: true
     namespace: "hardware_backed_security"
     description: "Feature flag for mgf1 digest setter in key generation and import parameters."
     bug: "308378912"
@@ -32,9 +36,17 @@ flag {
 
 flag {
     name: "keyinfo_unlocked_device_required"
+    is_exported: true
     namespace: "hardware_backed_security"
     description: "Add the API android.security.keystore.KeyInfo#isUnlockedDeviceRequired()"
     bug: "296475382"
+}
+
+flag {
+    name: "unlocked_storage_api"
+    namespace: "hardware_backed_security"
+    description: "Feature flag for unlocked-only storage API"
+    bug: "325129836"
 }
 
 flag {
@@ -61,6 +73,7 @@ flag {
 
 flag {
     name: "frp_enforcement"
+    is_exported: true
     namespace: "hardware_backed_security"
     description: "This flag controls whether PDB enforces FRP"
     bug: "290312729"
@@ -68,8 +81,22 @@ flag {
 }
 
 flag {
-  name: "report_primary_auth_attempts"
-  namespace: "biometrics"
-  description: "Report primary auth attempts from LockSettingsService"
-  bug: "285053096"
+    name: "significant_places"
+    namespace: "biometrics"
+    description: "Enabled significant place monitoring"
+    bug: "337870680"
+}
+
+flag {
+    name: "report_primary_auth_attempts"
+    namespace: "biometrics"
+    description: "Report primary auth attempts from LockSettingsService"
+    bug: "285053096"
+}
+
+flag {
+    name: "dump_attestation_verifications"
+    namespace: "hardware_backed_security"
+    description: "Add a dump capability for attestation_verification service"
+    bug: "335498868"
 }

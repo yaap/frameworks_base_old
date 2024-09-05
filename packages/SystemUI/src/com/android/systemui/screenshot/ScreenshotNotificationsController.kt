@@ -31,7 +31,6 @@ import com.android.internal.R
 import com.android.internal.messages.nano.SystemMessageProto
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT_EXTERNAL_DISPLAY
-import com.android.systemui.screenshot.ScreenshotController.SCREENSHOT_URI_ID
 import com.android.systemui.SystemUIApplication
 import com.android.systemui.util.NotificationChannels
 import dagger.assisted.Assisted
@@ -131,14 +130,6 @@ internal constructor(
         val actionShare = Notification.Action.Builder(0 /* no icon */,
                 res.getText(com.android.systemui.res.R.string.screenrecord_share_label), shareIntent)
 
-        val deleteIntent = PendingIntent.getBroadcast(context, requestCode,
-                Intent(context, DeleteScreenshotReceiver::class.java)
-                        .putExtra(SCREENSHOT_URI_ID, uri.toString())
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                        PendingIntent.FLAG_IMMUTABLE)
-        val actionDelete = Notification.Action.Builder(0 /* no icon */,
-                res.getText(com.android.systemui.res.R.string.screenshot_delete_label), deleteIntent)
-
         val b = Notification.Builder(context, NotificationChannels.SCREENSHOTS_HEADSUP)
                 .setTicker(res.getString(
                         com.android.systemui.res.R.string.screenshot_saved_title))
@@ -154,7 +145,6 @@ internal constructor(
                         .bigPicture(bitmap).bigLargeIcon(bitmap))
                 .setColor(context.getColor(R.color.system_notification_accent_color))
                 .addAction(actionShare.build())
-                .addAction(actionDelete.build())
                 .setContentIntent(pi)
 
         notificationManager.notify(TAG, requestCode, b.build())
@@ -213,8 +203,8 @@ internal constructor(
 
     /** Factory for [ScreenshotNotificationsController]. */
     @AssistedFactory
-    interface Factory {
-        fun create(displayId: Int = Display.DEFAULT_DISPLAY): ScreenshotNotificationsController
+    fun interface Factory {
+        fun create(displayId: Int): ScreenshotNotificationsController
     }
 
     companion object {

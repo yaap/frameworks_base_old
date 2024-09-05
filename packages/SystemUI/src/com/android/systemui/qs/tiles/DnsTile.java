@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -33,6 +32,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -110,8 +110,8 @@ public class DnsTile extends SecureQSTile<BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view, boolean keyguardShowing) {
-        if (checkKeyguard(view, keyguardShowing)) {
+    protected void handleClick(@Nullable Expandable expandable, boolean keyguardShowing) {
+        if (checkKeyguard(expandable, keyguardShowing)) {
             return;
         }
 

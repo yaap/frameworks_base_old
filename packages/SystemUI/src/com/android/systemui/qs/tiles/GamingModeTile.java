@@ -28,12 +28,12 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -89,7 +89,7 @@ public class GamingModeTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void handleClick(@Nullable View view) {
+    public void handleClick(@Nullable Expandable expandable) {
         if (!mPrefs.getBoolean(KEY_DIALOG_SHOWN, false)) {
             showGamingModeWhatsThisDialog();
             return;

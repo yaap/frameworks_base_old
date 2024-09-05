@@ -225,8 +225,6 @@ public:
     void markDrawStart(SkCanvas& canvas);
     void markDrawEnd(SkCanvas& canvas);
 
-    bool isIntersectOnScreen(const SkISize screenSize, SkRect src);
-
 private:
     void computeOrderingImpl(RenderNodeOp* opState,
                              std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
@@ -242,7 +240,6 @@ private:
     void pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo& info);
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
-    void pinShaderImages(TreeInfo& info);
     void deleteDisplayList(TreeObserver& observer, TreeInfo* info = nullptr);
     void damageSelf(TreeInfo& info);
 

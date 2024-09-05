@@ -57,6 +57,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -127,7 +128,7 @@ public final class NavBarHelper implements
     private boolean mLongPressHomeEnabled;
     private boolean mAssistantTouchGestureEnabled;
     private int mNavBarMode;
-    private int mA11yButtonState;
+    private long mA11yButtonState;
     private int mRotationWatcherRotation;
     private boolean mTogglingNavbarTaskbar;
     private boolean mWallpaperVisible;
@@ -247,7 +248,7 @@ public final class NavBarHelper implements
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Secure.SEARCH_LONG_PRESS_HOME_ENABLED),
+                Settings.Secure.getUriFor(Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
@@ -373,7 +374,7 @@ public final class NavBarHelper implements
      * {@link Secure#ACCESSIBILITY_BUTTON_MODE_GESTURE}, otherwise it is reset to 0.
      */
     private void updateA11yState() {
-        final int prevState = mA11yButtonState;
+        final long prevState = mA11yButtonState;
         final boolean clickable;
         final boolean longClickable;
         if (mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()
@@ -389,7 +390,7 @@ public final class NavBarHelper implements
             // permission
             final List<String> a11yButtonTargets =
                     mAccessibilityManager.getAccessibilityShortcutTargets(
-                            AccessibilityManager.ACCESSIBILITY_BUTTON);
+                            ShortcutConstants.UserShortcutType.SOFTWARE);
             final int requestingServices = a11yButtonTargets.size();
 
             clickable = requestingServices >= 1;
@@ -430,7 +431,7 @@ public final class NavBarHelper implements
      * 48 = the combination of {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
      * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
      */
-    public int getA11yButtonState() {
+    public long getA11yButtonState() {
         return mA11yButtonState;
     }
 
@@ -452,10 +453,10 @@ public final class NavBarHelper implements
         boolean overrideLongPressHome = mAssistManagerLazy.get()
                 .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
         boolean longPressDefault = mContext.getResources().getBoolean(overrideLongPressHome
-                ? com.android.internal.R.bool.config_searchLongPressHomeEnabledDefault
+                ? com.android.internal.R.bool.config_searchAllEntrypointsEnabledDefault
                 : com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
-                overrideLongPressHome ? Secure.SEARCH_LONG_PRESS_HOME_ENABLED
+                overrideLongPressHome ? Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED
                         : Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
                 mUserTracker.getUserId()) != 0;
 

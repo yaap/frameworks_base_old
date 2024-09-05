@@ -1263,6 +1263,24 @@ public class RecoverySystem {
     }
 
     /**
+     * Reboot into recovery and wipe the data partition with ext4
+     *
+     * @throws IOException if something goes wrong.
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.RECOVERY,
+            android.Manifest.permission.REBOOT
+    })
+    public void wipePartitionToExt4()
+            throws IOException {
+        // Reformat /data partition with ext4
+        String command = "--wipe_data\n--reformat_data=ext4";
+        rebootRecoveryWithCommand(command);
+    }
+
+    /**
      * Reboot into the recovery system with the supplied argument.
      * @param args to pass to the recovery utility.
      * @throws IOException if something goes wrong.
@@ -1422,10 +1440,10 @@ public class RecoverySystem {
      * @throws IOException if the recovery system service could not be contacted
      */
     private boolean requestLskf(String packageName, IntentSender sender) throws IOException {
-        Log.i(TAG, String.format("<%s> is requesting LSFK", packageName));
+        Log.i(TAG, TextUtils.formatSimple("Package<%s> requesting LSKF", packageName));
         try {
             boolean validRequest = mService.requestLskf(packageName, sender);
-            Log.i(TAG, String.format("LSKF Request isValid = %b", validRequest));
+            Log.i(TAG, TextUtils.formatSimple("LSKF Request isValid = %b", validRequest));
             return validRequest;
         } catch (RemoteException | SecurityException e) {
             throw new IOException("could not request LSKF capture", e);

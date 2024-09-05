@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -37,7 +38,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
 import com.android.settingslib.utils.AsyncLoaderCompat;
 
 import java.util.ArrayList;
@@ -50,7 +50,8 @@ import java.util.Locale;
  * Picker, showing a sorted lists of applications and other types of entities consuming power.
  * Opens BatteryStatsViewerActivity upon item selection.
  */
-public class BatteryConsumerPickerActivity extends CollapsingToolbarBaseActivity {
+public class BatteryConsumerPickerActivity extends ComponentActivity {
+    private static final String PREF_SELECTED_BATTERY_CONSUMER = "batteryConsumerId";
     private static final int BATTERY_STATS_REFRESH_RATE_MILLIS = 60 * 1000;
     private static final String FORCE_FRESH_STATS = "force_fresh_stats";
     private BatteryConsumerListAdapter mBatteryConsumerListAdapter;
@@ -69,13 +70,29 @@ public class BatteryConsumerPickerActivity extends CollapsingToolbarBaseActivity
         setContentView(R.layout.battery_consumer_picker_layout);
 
         mSwipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_green_light);
         mSwipeRefreshLayout.setRefreshing(true);
         mSwipeRefreshLayout.setOnRefreshListener(this::onRefresh);
         mAppList = findViewById(R.id.list_view);
         mAppList.setLayoutManager(new LinearLayoutManager(this));
         mBatteryConsumerListAdapter =
-                new BatteryConsumerListAdapter((this::startBatteryStatsActivity));
+                new BatteryConsumerListAdapter((this::setSelectedBatteryConsumer));
         mAppList.setAdapter(mBatteryConsumerListAdapter);
+
+        if (icicle == null) {
+            final String batteryConsumerId = getPreferences(Context.MODE_PRIVATE)
+                    .getString(PREF_SELECTED_BATTERY_CONSUMER, null);
+            if (batteryConsumerId != null) {
+                startBatteryStatsActivity(batteryConsumerId);
+            }
+        }
+    }
+
+    public void setSelectedBatteryConsumer(String batteryConsumerId) {
+        getPreferences(Context.MODE_PRIVATE).edit()
+                .putString(PREF_SELECTED_BATTERY_CONSUMER, batteryConsumerId)
+                .apply();
+        startBatteryStatsActivity(batteryConsumerId);
     }
 
     private void startBatteryStatsActivity(String batteryConsumerId) {

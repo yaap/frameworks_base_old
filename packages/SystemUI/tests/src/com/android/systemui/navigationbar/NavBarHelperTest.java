@@ -42,6 +42,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -59,6 +60,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import dagger.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,8 +72,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import dagger.Lazy;
 
 /**
  * Tests for {@link NavBarHelper}.
@@ -124,7 +125,7 @@ public class NavBarHelperTest extends SysuiTestCase {
     private AccessibilityManager.AccessibilityServicesStateChangeListener
             mAccessibilityServicesStateChangeListener;
 
-    private static final int ACCESSIBILITY_BUTTON_CLICKABLE_STATE =
+    private static final long ACCESSIBILITY_BUTTON_CLICKABLE_STATE =
             SYSUI_STATE_A11Y_BUTTON_CLICKABLE | SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
     private NavBarHelper mNavBarHelper;
 
@@ -272,8 +273,8 @@ public class NavBarHelperTest extends SysuiTestCase {
 
     @Test
     public void initNavBarHelper_buttonModeNavBar_a11yButtonClickableState() {
-        when(mAccessibilityManager.getAccessibilityShortcutTargets(
-                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(createFakeShortcutTargets());
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(UserShortcutType.SOFTWARE))
+                .thenReturn(createFakeShortcutTargets());
 
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -297,8 +298,8 @@ public class NavBarHelperTest extends SysuiTestCase {
         when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
                 ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
 
-        when(mAccessibilityManager.getAccessibilityShortcutTargets(
-                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(createFakeShortcutTargets());
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(UserShortcutType.SOFTWARE))
+                .thenReturn(createFakeShortcutTargets());
         mAccessibilityServicesStateChangeListener.onAccessibilityServicesStateChanged(
                 mAccessibilityManager);
 

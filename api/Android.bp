@@ -298,6 +298,28 @@ packages_to_document = [
     "org.xmlpull",
 ]
 
+// These are libs from framework-internal-utils that are required (i.e. being referenced)
+// from framework-non-updatable-sources. Add more here when there's a need.
+// DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
+// dependencies gets bigger.
+android_non_updatable_stubs_libs = [
+    "android.hardware.cas-V1.2-java",
+    "android.hardware.health-V1.0-java-constants",
+    "android.hardware.thermal-V1.0-java-constants",
+    "android.hardware.thermal-V2.0-java",
+    "android.hardware.tv.input-V1.0-java-constants",
+    "android.hardware.usb-V1.0-java-constants",
+    "android.hardware.usb-V1.1-java-constants",
+    "android.hardware.usb.gadget-V1.0-java",
+    "android.hardware.vibrator-V1.3-java",
+    "framework-protos",
+]
+
+java_defaults {
+    name: "android-non-updatable-stubs-libs-defaults",
+    libs: android_non_updatable_stubs_libs,
+}
+
 // Defaults for all stubs that include the non-updatable framework. These defaults do not include
 // module symbols, so will not compile correctly on their own. Users must add module APIs to the
 // classpath (or sources) somehow.
@@ -320,8 +342,11 @@ stubs_defaults {
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/biometrics/common/aidl",
             "hardware/interfaces/biometrics/fingerprint/aidl",
+            "hardware/interfaces/common/aidl",
+            "hardware/interfaces/common/fmq/aidl",
             "hardware/interfaces/graphics/common/aidl",
             "hardware/interfaces/keymaster/aidl",
+            "hardware/interfaces/power/aidl",
             "system/hardware/interfaces/media/aidl",
         ],
     },
@@ -329,18 +354,7 @@ stubs_defaults {
     // from framework-non-updatable-sources. Add more here when there's a need.
     // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
     // dependencies gets bigger.
-    libs: [
-        "android.hardware.cas-V1.2-java",
-        "android.hardware.health-V1.0-java-constants",
-        "android.hardware.thermal-V1.0-java-constants",
-        "android.hardware.thermal-V2.0-java",
-        "android.hardware.tv.input-V1.0-java-constants",
-        "android.hardware.usb-V1.0-java-constants",
-        "android.hardware.usb-V1.1-java-constants",
-        "android.hardware.usb.gadget-V1.0-java",
-        "android.hardware.vibrator-V1.3-java",
-        "framework-protos",
-    ],
+    libs: android_non_updatable_stubs_libs,
     flags: [
         "--error NoSettingsProvider",
         "--error UnhiddenSystemApi",
@@ -365,6 +379,18 @@ stubs_defaults {
     visibility: [
         "//frameworks/base/api",
         "//frameworks/base/core/api",
+    ],
+}
+
+soong_config_module_type {
+    name: "non_updatable_exportable_droidstubs",
+    module_type: "droidstubs",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_hidden_api_exportable_stubs",
+    ],
+    properties: [
+        "dists",
     ],
 }
 

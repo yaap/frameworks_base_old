@@ -58,11 +58,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.Size;
 import android.view.Surface;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -183,17 +186,32 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         HashMap<Integer, List<Size>> supportedCaptureSizes = new HashMap<>();
-        for (int format : CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
+        IntArray supportedCaptureOutputFormats =
+                new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
+        supportedCaptureOutputFormats.addAll(
+                CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
+        if (Flags.extension10Bit()) {
+            supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
+        }
+        for (int format : supportedCaptureOutputFormats.toArray()) {
             List<Size> supportedSizes = extensionChars.getExtensionSupportedSizes(
                     config.getExtension(), format);
             if (supportedSizes != null) {
                 supportedCaptureSizes.put(format, supportedSizes);
             }
         }
+
+        int captureFormat = ImageFormat.UNKNOWN;
         Surface burstCaptureSurface = CameraExtensionUtils.getBurstCaptureSurface(
                 config.getOutputConfigurations(), supportedCaptureSizes);
         if (burstCaptureSurface != null) {
             suitableSurfaceCount++;
+
+            if (Flags.analytics24q3()) {
+                CameraExtensionUtils.SurfaceInfo burstCaptureSurfaceInfo =
+                        CameraExtensionUtils.querySurface(burstCaptureSurface);
+                captureFormat = burstCaptureSurfaceInfo.mFormat;
+            }
         }
 
         if (suitableSurfaceCount != config.getOutputConfigurations().size()) {
@@ -207,7 +225,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             Size burstCaptureSurfaceSize =
                     new Size(burstCaptureSurfaceInfo.mWidth, burstCaptureSurfaceInfo.mHeight);
             HashMap<Integer, List<Size>> supportedPostviewSizes = new HashMap<>();
-            for (int format : CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
+            for (int format : supportedCaptureOutputFormats.toArray()) {
                 List<Size> supportedSizesPostview = extensionChars.getPostviewSupportedSizes(
                         config.getExtension(), burstCaptureSurfaceSize, format);
                 if (supportedSizesPostview != null) {
@@ -248,6 +266,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 extensionChars.getAvailableCaptureResultKeys(config.getExtension()),
                 config.getExtension());
 
+        if (Flags.analytics24q3()) {
+            session.mStatsAggregator.setCaptureFormat(captureFormat);
+        }
         session.mStatsAggregator.setClientName(ctx.getOpPackageName());
         session.mStatsAggregator.setExtensionType(config.getExtension());
 
@@ -380,7 +401,16 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 if (surfaceInfo.mFormat == ImageFormat.JPEG) {
                     mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
                     mImageProcessor = mImageJpegProcessor;
+                } else if (Flags.extension10Bit() && mClientPostviewSurface != null) {
+                    // Handles case when postview is JPEG and capture is YUV
+                    CameraExtensionUtils.SurfaceInfo postviewSurfaceInfo =
+                            CameraExtensionUtils.querySurface(mClientPostviewSurface);
+                    if (postviewSurfaceInfo.mFormat == ImageFormat.JPEG) {
+                        mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
+                        mImageProcessor = mImageJpegProcessor;
+                    }
                 }
+
                 mBurstCaptureImageReader = ImageReader.newInstance(surfaceInfo.mWidth,
                         surfaceInfo.mHeight, CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
                         mImageExtender.getMaxCaptureStage());
@@ -1747,7 +1777,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                 mCallbacks, result.getSequenceId());
                     }
                     if ((!mSingleCapture) && (mPreviewProcessorType ==
-                            IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY)) {
+                            IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY)
+                            && mInitialized) {
                         CaptureStageImpl captureStage = null;
                         try {
                             captureStage = mPreviewRequestUpdateProcessor.process(
@@ -1770,8 +1801,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         } else {
                             mRequestUpdatedNeeded = false;
                         }
-                    } else if (mPreviewProcessorType ==
-                            IPreviewExtenderImpl.PROCESSOR_TYPE_IMAGE_PROCESSOR) {
+                    } else if ((mPreviewProcessorType ==
+                            IPreviewExtenderImpl.PROCESSOR_TYPE_IMAGE_PROCESSOR) && mInitialized) {
                         int idx = mPendingResultMap.indexOfKey(timestamp);
 
                         if ((idx >= 0) && (mPendingResultMap.get(timestamp).first == null)) {
@@ -1818,7 +1849,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     } else {
                         // No special handling for PROCESSOR_TYPE_NONE
                     }
-                    if (notifyClient) {
+                    if (notifyClient && mInitialized) {
                         final long ident = Binder.clearCallingIdentity();
                         try {
                             if (processStatus) {

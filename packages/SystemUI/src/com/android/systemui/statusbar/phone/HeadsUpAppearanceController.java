@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -159,7 +160,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             public void onLayoutChange(View v, int left, int top, int right, int bottom,
                     int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 if (shouldBeVisible()) {
-                    updateTopEntry();
+                    updateTopEntry("onLayoutChange");
 
                     // trigger scroller to notify the latest panel translation
                     mStackScrollerController.requestLayout();
@@ -220,7 +221,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
 
     @Override
     public void onHeadsUpPinned(NotificationEntry entry) {
-        updateTopEntry();
+        updateTopEntry("onHeadsUpPinned");
         updateHeader(entry);
         updateHeadsUpAndPulsingRoundness(entry);
     }
@@ -231,7 +232,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mPhoneStatusBarTransitions.onHeadsUpStateChanged(isHeadsUp);
     }
 
-    private void updateTopEntry() {
+    private void updateTopEntry(String reason) {
         NotificationEntry newEntry = null;
         if (shouldBeVisible()) {
             newEntry = mHeadsUpManager.getTopEntry();
@@ -356,6 +357,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
      * since the headsUp manager might not have notified us yet of the state change.
      *
      * @return if the heads up status bar view should be shown
+     * @deprecated use HeadsUpNotificationInteractor.showHeadsUpStatusBar instead.
      */
     public boolean shouldBeVisible() {
         boolean notificationsShown = !mWakeUpCoordinator.getNotificationsFullyHidden();
@@ -371,7 +373,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
 
     @Override
     public void onHeadsUpUnPinned(NotificationEntry entry) {
-        updateTopEntry();
+        updateTopEntry("onHeadsUpUnPinned");
         updateHeader(entry);
         updateHeadsUpAndPulsingRoundness(entry);
     }
@@ -389,7 +391,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             updateHeadsUpHeaders();
         }
         if (isExpanded() != oldIsExpanded) {
-            updateTopEntry();
+            updateTopEntry("setAppearFraction");
         }
     }
 
@@ -424,9 +426,12 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     public void updateHeader(NotificationEntry entry) {
         ExpandableNotificationRow row = entry.getRow();
         float headerVisibleAmount = 1.0f;
-        if (row.isPinned() || row.isHeadsUpAnimatingAway() || row == mTrackedChild
-                || row.showingPulsing()) {
-            headerVisibleAmount = mAppearFraction;
+        // To fix the invisible HUN group header issue
+        if (!AsyncGroupHeaderViewInflation.isEnabled()) {
+            if (row.isPinned() || row.isHeadsUpAnimatingAway() || row == mTrackedChild
+                    || row.showingPulsing()) {
+                headerVisibleAmount = mAppearFraction;
+            }
         }
         row.setHeaderVisibleAmount(headerVisibleAmount);
     }
@@ -460,11 +465,11 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     }
 
     public void onStateChanged() {
-        updateTopEntry();
+        updateTopEntry("onStateChanged");
     }
 
     @Override
     public void onFullyHiddenChanged(boolean isFullyHidden) {
-        updateTopEntry();
+        updateTopEntry("onFullyHiddenChanged");
     }
 }

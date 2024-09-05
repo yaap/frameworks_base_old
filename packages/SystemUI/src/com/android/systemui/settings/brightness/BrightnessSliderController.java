@@ -19,6 +19,7 @@ package com.android.systemui.settings.brightness;
 import static com.android.systemui.Flags.hapticBrightnessSlider;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -36,7 +37,8 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.haptics.slider.HapticSliderViewBinder;
-import com.android.systemui.haptics.slider.SeekableSliderHapticPlugin;
+import com.android.systemui.haptics.slider.SeekbarHapticPlugin;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -59,13 +61,16 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         ToggleSlider {
 
     private Listener mListener;
+    @Nullable
     private ToggleSlider mMirror;
-    private BrightnessMirrorController mMirrorController;
+    @Nullable
+    private MirrorController mMirrorController;
     private boolean mTracking;
     private final FalsingManager mFalsingManager;
     private final UiEventLogger mUiEventLogger;
 
-    private final SeekableSliderHapticPlugin mBrightnessSliderHapticPlugin;
+    private final SeekbarHapticPlugin mBrightnessSliderHapticPlugin;
+    private final ActivityStarter mActivityStarter;
 
     private ImageView mIconView;
 
@@ -120,12 +125,14 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             ImageView icon,
             FalsingManager falsingManager,
             UiEventLogger uiEventLogger,
-            SeekableSliderHapticPlugin brightnessSliderHapticPlugin) {
+            SeekbarHapticPlugin brightnessSliderHapticPlugin,
+            ActivityStarter activityStarter) {
         super(brightnessSliderView);
         mIconView = icon;
         mFalsingManager = falsingManager;
         mUiEventLogger = uiEventLogger;
         mBrightnessSliderHapticPlugin = brightnessSliderHapticPlugin;
+        mActivityStarter = activityStarter;
     }
 
     /**
@@ -143,6 +150,9 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     protected void onViewAttached() {
         mView.setOnSeekBarChangeListener(mSeekListener);
         mView.setOnInterceptListener(mOnInterceptListener);
+        if (mMirror != null) {
+            mView.setOnDispatchTouchEventListener(this::mirrorTouchEvent);
+        }
         mSettingsObserver.observe();
         mSettingsObserver.update();
     }
@@ -167,14 +177,25 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
 
     private boolean copyEventToMirror(MotionEvent ev) {
         MotionEvent copy = ev.copy();
-        boolean out = mMirror.mirrorTouchEvent(copy);
+        boolean out = false;
+        if (mMirror != null) {
+            out = mMirror.mirrorTouchEvent(copy);
+        }
         copy.recycle();
         return out;
     }
 
     @Override
     public void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
-        mView.setEnforcedAdmin(admin);
+        if (admin == null) {
+            mView.setAdminBlocker(null);
+        } else {
+            mView.setAdminBlocker(() -> {
+                Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(admin);
+                mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
+                return true;
+            });
+        }
     }
 
     private void setMirror(ToggleSlider toggleSlider) {
@@ -196,9 +217,13 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
      * @param c
      */
     @Override
-    public void setMirrorControllerAndMirror(BrightnessMirrorController c) {
+    public void setMirrorControllerAndMirror(@Nullable MirrorController c) {
         mMirrorController = c;
-        setMirror(c.getToggleSlider());
+        if (c != null) {
+            setMirror(c.getToggleSlider());
+        } else {
+            setMirror(null);
+        }
     }
 
     @Override
@@ -302,18 +327,21 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         private final UiEventLogger mUiEventLogger;
         private final VibratorHelper mVibratorHelper;
         private final SystemClock mSystemClock;
+        private final ActivityStarter mActivityStarter;
 
         @Inject
         public Factory(
                 FalsingManager falsingManager,
                 UiEventLogger uiEventLogger,
                 VibratorHelper vibratorHelper,
-                SystemClock clock
+                SystemClock clock,
+                ActivityStarter activityStarter
         ) {
             mFalsingManager = falsingManager;
             mUiEventLogger = uiEventLogger;
             mVibratorHelper = vibratorHelper;
             mSystemClock = clock;
+            mActivityStarter = activityStarter;
         }
 
         /**
@@ -330,13 +358,14 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             BrightnessSliderView root = (BrightnessSliderView) LayoutInflater.from(context)
                     .inflate(layout, viewRoot, false);
             ImageView icon = (ImageView) root.findViewById(R.id.brightness_icon);
-            SeekableSliderHapticPlugin plugin = new SeekableSliderHapticPlugin(
+            SeekbarHapticPlugin plugin = new SeekbarHapticPlugin(
                     mVibratorHelper,
                     mSystemClock);
             if (hapticBrightnessSlider()) {
                 HapticSliderViewBinder.bind(viewRoot, plugin);
             }
-            return new BrightnessSliderController(root, icon, mFalsingManager, mUiEventLogger, plugin);
+            return new BrightnessSliderController(
+                    root, icon, mFalsingManager, mUiEventLogger, plugin, mActivityStarter);
         }
 
         /** Get the layout to inflate based on what slider to use */

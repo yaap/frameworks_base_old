@@ -243,7 +243,7 @@ void SkiaRecordingCanvas::onFilterPaint(android::Paint& paint) {
     //  It's better than nothing, though
     SkImage* image = shader ? shader->isAImage(nullptr, nullptr) : nullptr;
     if (image) {
-        mDisplayList->mMutableBitmapShaderImages.push_back(image);
+        mDisplayList->mMutableImages.push_back(image);
     }
 }
 
@@ -342,7 +342,7 @@ double SkiaRecordingCanvas::drawAnimatedImage(AnimatedImageDrawable* animatedIma
 }
 
 void SkiaRecordingCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Paint& paint) {
-    mDisplayList->mMeshes.push_back(&mesh);
+    mDisplayList->mMeshBufferData.push_back(mesh.refBufferData());
     mRecorder.drawMesh(mesh, blender, paint);
 }
 

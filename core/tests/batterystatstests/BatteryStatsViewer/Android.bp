@@ -10,7 +10,6 @@ package {
 android_app {
     name: "BatteryStatsViewer",
     srcs: ["src/**/*.java"],
-    resource_dirs: ["res"],
     defaults: ["SettingsLibDefaults"],
     static_libs: [
         "androidx.appcompat_appcompat",

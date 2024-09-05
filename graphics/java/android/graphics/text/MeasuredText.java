@@ -88,7 +88,7 @@ public class MeasuredText {
     }
 
     private void rangeCheck(int start, int end) {
-        if (((start | end) < 0) | (start > end) | (end > mChars.length)) {
+        if (start < 0 || start > end || end > mChars.length) {
             throwRangeError(start, end);
         }
     }
@@ -100,7 +100,7 @@ public class MeasuredText {
     }
 
     private void offsetCheck(int offset) {
-        if ((offset < 0) | (offset >= mChars.length)) {
+        if (offset < 0 || offset >= mChars.length) {
             throwOffsetError(offset);
         }
     }

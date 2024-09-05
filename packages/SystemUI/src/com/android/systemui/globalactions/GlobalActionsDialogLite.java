@@ -130,6 +130,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.globalactions.domain.interactor.GlobalActionsInteractor;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
@@ -193,6 +194,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private static final String GLOBAL_ACTION_KEY_LOGOUT = "logout";
     static final String GLOBAL_ACTION_KEY_EMERGENCY = "emergency";
     static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
+    static final String GLOBAL_ACTION_KEY_SYSTEM_UPDATE = "system_update";
     private static final String GLOBAL_ACTION_KEY_REBOOT_RECOVERY = "reboot_recovery";
     private static final String GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER = "reboot_bootloader";
     private static final String GLOBAL_ACTION_KEY_REBOOT_FASTBOOT = "reboot_fastboot";
@@ -231,6 +233,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
+    private final ActivityStarter mActivityStarter;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -341,7 +344,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         GA_CLOSE_TAP_OUTSIDE(810),
 
         @UiEvent(doc = "Power menu was closed via power + volume up.")
-        GA_CLOSE_POWER_VOLUP(811);
+        GA_CLOSE_POWER_VOLUP(811),
+
+        @UiEvent(doc = "System Update button was pressed.")
+        GA_SYSTEM_UPDATE_PRESS(1716);
 
         private final int mId;
 
@@ -373,6 +379,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             @NonNull VibratorHelper vibrator,
             @Main Resources resources,
             ConfigurationController configurationController,
+            ActivityStarter activityStarter,
             UserTracker userTracker,
             KeyguardStateController keyguardStateController,
             UserManager userManager,
@@ -409,6 +416,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mSecureSettings = secureSettings;
         mResources = resources;
         mConfigurationController = configurationController;
+        mActivityStarter = activityStarter;
         mUserTracker = userTracker;
         mUserManager = userManager;
         mTrustManager = trustManager;
@@ -444,7 +452,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         // get notified of phone state changes
         mTelephonyListenerManager.addServiceStateListener(mPhoneStateListener);
-        mGlobalSettings.registerContentObserver(
+        mGlobalSettings.registerContentObserverSync(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
         mHasVibrator = vibrator.hasVibrator();
@@ -474,7 +482,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     public void destroy() {
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
         mTelephonyListenerManager.removeServiceStateListener(mPhoneStateListener);
-        mGlobalSettings.unregisterContentObserver(mAirplaneModeObserver);
+        mGlobalSettings.unregisterContentObserverSync(mAirplaneModeObserver);
         mConfigurationController.removeCallback(this);
     }
 
@@ -694,6 +702,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 if (shouldDisplayEmergency()) {
                     addIfShouldShowAction(tempActions, new EmergencyDialerAction());
                 }
+            } else if (GLOBAL_ACTION_KEY_SYSTEM_UPDATE.equals(actionKey)) {
+                addIfShouldShowAction(tempActions, new SystemUpdateAction());
             } else if (GLOBAL_ACTION_KEY_REBOOT_RECOVERY.equals(actionKey)) {
                 addIfShouldShowAction(tempActions, rebootRecoveryAction);
             } else if (GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
@@ -1381,6 +1391,40 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             } else {
                 return false;
             }
+        }
+    }
+
+    @VisibleForTesting
+    final class SystemUpdateAction extends SinglePressAction {
+
+        SystemUpdateAction() {
+            super(com.android.settingslib.R.drawable.ic_system_update,
+                    com.android.settingslib.R.string.system_update_settings_list_item_title);
+        }
+
+        @Override
+        public void onPress() {
+            mUiEventLogger.log(GlobalActionsEvent.GA_SYSTEM_UPDATE_PRESS);
+            launchSystemUpdate();
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return false;
+        }
+
+        private void launchSystemUpdate() {
+            Intent intent = new Intent(Settings.ACTION_SYSTEM_UPDATE_SETTINGS);
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            // postStartActivityDismissingKeyguard is used for showing keyguard
+            // input/pin/password screen if lockscreen is secured, before sending the intent.
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         }
     }
 

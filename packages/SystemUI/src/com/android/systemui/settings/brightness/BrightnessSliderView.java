@@ -32,7 +32,6 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.res.R;
 
@@ -69,6 +68,7 @@ public class BrightnessSliderView extends LinearLayout {
 
         mSlider = requireViewById(R.id.slider);
         mSlider.setAccessibilityLabel(getContentDescription().toString());
+        setBoundaryOffset();
 
         // Finds the progress drawable. Assumes brightness_progress_drawable.xml
         try {
@@ -80,6 +80,17 @@ public class BrightnessSliderView extends LinearLayout {
         } catch (Exception e) {
             // Nothing to do, mProgressDrawable will be null.
         }
+    }
+
+    private void setBoundaryOffset() {
+         //  BrightnessSliderView uses hardware layer; if the background of its children exceed its
+         //  boundary, it'll be cropped. We need to expand its boundary so that the background of
+         //  ToggleSeekBar (i.e. the focus state) can be correctly rendered.
+        int offset = getResources().getDimensionPixelSize(R.dimen.rounded_slider_boundary_offset);
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.setMargins(-offset, -offset, -offset, -offset);
+        setLayoutParams(lp);
+        setPadding(offset,  offset, offset,  offset);
     }
 
     /**
@@ -121,9 +132,8 @@ public class BrightnessSliderView extends LinearLayout {
      * @param admin
      * @see ToggleSeekBar#setEnforcedAdmin
      */
-    public void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
-        mSlider.setEnabled(admin == null);
-        mSlider.setEnforcedAdmin(admin);
+    void setAdminBlocker(ToggleSeekBar.AdminBlocker blocker) {
+        mSlider.setAdminBlocker(blocker);
     }
 
     /**

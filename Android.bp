@@ -97,7 +97,7 @@ filegroup {
         // AIDL sources from external directories
         ":android.frameworks.location.altitude-V2-java-source",
         ":android.hardware.biometrics.common-V4-java-source",
-        ":android.hardware.biometrics.fingerprint-V3-java-source",
+        ":android.hardware.biometrics.fingerprint-V5-java-source",
         ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
@@ -115,7 +115,7 @@ filegroup {
         ":android.security.legacykeystore-java-source",
         ":android.security.maintenance-java-source",
         ":android.security.metrics-java-source",
-        ":android.system.keystore2-V3-java-source",
+        ":android.system.keystore2-V4-java-source",
         ":android.hardware.cas-V1-java-source",
         ":credstore_aidl",
         ":dumpstate_aidl",
@@ -150,7 +150,6 @@ filegroup {
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
         ":audio_policy_configuration_V7_0",
-        ":perfetto_trace_javastream_protos",
     ],
 }
 
@@ -356,8 +355,11 @@ java_defaults {
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/biometrics/common/aidl",
             "hardware/interfaces/biometrics/fingerprint/aidl",
+            "hardware/interfaces/common/aidl",
+            "hardware/interfaces/common/fmq/aidl",
             "hardware/interfaces/graphics/common/aidl",
             "hardware/interfaces/keymaster/aidl",
+            "hardware/interfaces/power/aidl",
             "system/hardware/interfaces/media/aidl",
         ],
     },
@@ -387,8 +389,6 @@ java_defaults {
         // TODO(b/120066492): remove gps_debug and protolog.conf.json when the build
         // system propagates "required" properly.
         "gps_debug.conf",
-        "protolog.conf.json.gz",
-        "core.protolog.pb",
         "framework-res",
         // any install dependencies should go into framework-minus-apex-install-dependencies
         // rather than here to avoid bloating incremental build time
@@ -405,6 +405,7 @@ java_defaults {
         "android.hardware.common.fmq-V1-java",
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
+        "com.android.sysprop.view",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
@@ -425,6 +426,8 @@ java_defaults {
         "audiopolicy-aidl-java",
         "sounddose-aidl-java",
         "modules-utils-expresslog",
+        "perfetto_trace_javastream_protos_jarjar",
+        "libaconfig_java_proto_nano",
     ],
 }
 
@@ -662,6 +665,16 @@ filegroup {
         "**/package.html",
     ],
     visibility: ["//frameworks/base/api"],
+}
+
+java_library {
+    name: "perfetto_trace_javastream_protos_jarjar",
+    srcs: [
+        ":perfetto_trace_javastream_protos",
+    ],
+    jarjar_rules: ":framework-jarjar-rules",
+    sdk_version: "core_platform",
+    installable: false,
 }
 
 build = [

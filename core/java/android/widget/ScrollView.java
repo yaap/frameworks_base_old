@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.viewVelocityApi;
+
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -567,7 +569,7 @@ public class ScrollView extends FrameLayout {
                     handled = pageScroll(View.FOCUS_DOWN);
                     break;
                 case KeyEvent.KEYCODE_SPACE:
-                    pageScroll(event.isShiftPressed() ? View.FOCUS_UP : View.FOCUS_DOWN);
+                    handled = pageScroll(event.isShiftPressed() ? View.FOCUS_UP : View.FOCUS_DOWN);
                     break;
             }
         }
@@ -727,6 +729,12 @@ public class ScrollView extends FrameLayout {
                  * isFinished() is correct.
                 */
                 mScroller.computeScrollOffset();
+
+                // For variable refresh rate project to track the current velocity of this View
+                if (viewVelocityApi()) {
+                    setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
+                }
+
                 mIsBeingDragged = !mScroller.isFinished() || !mEdgeGlowBottom.isFinished()
                     || !mEdgeGlowTop.isFinished();
                 // Catch the edge effect if it is active.
@@ -1574,6 +1582,11 @@ public class ScrollView extends FrameLayout {
                 // Keep on drawing until the animation has finished.
                 postInvalidateOnAnimation();
             }
+
+            // For variable refresh rate project to track the current velocity of this View
+            if (viewVelocityApi()) {
+                setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
+            }
         } else {
             if (mFlingStrictSpan != null) {
                 mFlingStrictSpan.finish();
@@ -1885,6 +1898,10 @@ public class ScrollView extends FrameLayout {
             mScroller.fling(mScrollX, mScrollY, 0, velocityY, 0, 0, 0,
                     Math.max(0, bottom - height), 0, height/2);
 
+            // For variable refresh rate project to track the current velocity of this View
+            if (viewVelocityApi()) {
+                setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
+            }
             if (mFlingStrictSpan == null) {
                 mFlingStrictSpan = StrictMode.enterCriticalSpan("ScrollView-fling");
             }

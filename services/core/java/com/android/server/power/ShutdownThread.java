@@ -54,6 +54,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimingsTraceLog;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -356,10 +357,17 @@ public final class ShutdownThread extends Thread {
                             com.android.internal.R.string.reboot_to_update_reboot));
             }
         } else if (mReason != null && mReason.equals(PowerManager.REBOOT_RECOVERY)) {
-            if (showSysuiReboot()) {
+            if (RescueParty.isRecoveryTriggeredReboot()) {
+                // We're not actually doing a factory reset yet; we're rebooting
+                // to ask the user if they'd like to reset, so give them a less
+                // scary dialog message.
+                pd.setTitle(context.getText(com.android.internal.R.string.power_off));
+                pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
+                pd.setIndeterminate(true);
+            } else if (showSysuiReboot()) {
                 return null;
             } else if (!mRebootCustom) {
-                if (RescueParty.isAttemptingFactoryReset()) {
+                if (RescueParty.isFactoryResetPropertySet()) {
                     // We're not actually doing a factory reset yet; we're rebooting
                     // to ask the user if they'd like to reset, so give them a less
                     // scary dialog message.
@@ -503,6 +511,10 @@ public final class ShutdownThread extends Thread {
         shutdownTimingLog.traceBegin("SystemServerShutdown");
         metricShutdownStart();
         metricStarted(METRIC_SYSTEM_SERVER);
+
+        // Notify SurfaceFlinger that the device is shutting down.
+        // Transaction traces should be captured at this stage.
+        SurfaceControl.notifyShutdown();
 
         // Start dumping check points for this shutdown in a separate thread.
         Thread dumpCheckPointsThread = ShutdownCheckPoints.newDumpThread(

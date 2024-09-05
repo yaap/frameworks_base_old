@@ -21,11 +21,14 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.pm.SigningDetails;
 import android.app.ActivityManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.apk.ApkSignatureVerifier;
 import android.util.Slog;
 
 import com.android.server.art.model.DexoptResult;
@@ -76,6 +79,31 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
     public FilteredSnapshotImpl withFilteredSnapshot(int callingUid, @NonNull UserHandle user) {
         return new FilteredSnapshotImpl(callingUid, user,
                 mService.snapshotComputer(false /*allowLiveComputer*/), null);
+    }
+
+    @Override
+    public void addOverrideSigningDetails(@NonNull SigningDetails oldSigningDetails,
+            @NonNull SigningDetails newSigningDetails) {
+        if (!Build.isDebuggable()) {
+            throw new SecurityException("This test API is only available on debuggable builds");
+        }
+        ApkSignatureVerifier.addOverrideSigningDetails(oldSigningDetails, newSigningDetails);
+    }
+
+    @Override
+    public void removeOverrideSigningDetails(@NonNull SigningDetails oldSigningDetails) {
+        if (!Build.isDebuggable()) {
+            throw new SecurityException("This test API is only available on debuggable builds");
+        }
+        ApkSignatureVerifier.removeOverrideSigningDetails(oldSigningDetails);
+    }
+
+    @Override
+    public void clearOverrideSigningDetails() {
+        if (!Build.isDebuggable()) {
+            throw new SecurityException("This test API is only available on debuggable builds");
+        }
+        ApkSignatureVerifier.clearOverrideSigningDetails();
     }
 
     private abstract static class BaseSnapshotImpl implements AutoCloseable {

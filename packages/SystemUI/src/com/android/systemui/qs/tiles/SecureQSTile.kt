@@ -18,7 +18,7 @@ package com.android.systemui.qs.tiles
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.view.View
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.QSHost
 import com.android.systemui.plugins.FalsingManager
@@ -41,18 +41,18 @@ internal abstract class SecureQSTile<TState : QSTile.State> protected constructo
 ) {
     abstract override fun newTileState(): TState
 
-    protected abstract fun handleClick(view: View?, keyguardShowing: Boolean)
+    protected abstract fun handleClick(expandable: Expandable?, keyguardShowing: Boolean)
 
-    override fun handleClick(view: View?) {
+    override fun handleClick(expandable: Expandable?) {
         val enabled: Boolean = Settings.Secure.getInt(mContext.getContentResolver(),
             Settings.Secure.QSTILE_REQUIRES_UNLOCKING, 1) == 1
-        handleClick(view, keyguardController.isMethodSecure && keyguardController.isShowing && enabled)
+        handleClick(expandable, keyguardController.isMethodSecure && keyguardController.isShowing && enabled)
     }
 
-    protected fun checkKeyguard(view: View?, keyguardShowing: Boolean): Boolean {
+    protected fun checkKeyguard(expandable: Expandable?, keyguardShowing: Boolean): Boolean {
         return if (keyguardShowing) {
             mActivityStarter.postQSRunnableDismissingKeyguard {
-                handleClick(view, false)
+                handleClick(expandable, false)
             }
             true
         } else {

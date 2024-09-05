@@ -61,10 +61,11 @@ import com.android.systemui.shade.ShadeViewProviderModule.Companion.SHADE_HEADER
 import com.android.systemui.shade.carrier.ShadeCarrierGroup
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
-import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.StatusOverlayHoverListenerFactory
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.NetworkTraffic
@@ -91,7 +92,7 @@ class ShadeHeaderController
 constructor(
     @Named(SHADE_HEADER) private val header: MotionLayout,
     private val statusBarIconController: StatusBarIconController,
-    private val tintedIconManagerFactory: StatusBarIconController.TintedIconManager.Factory,
+    private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val insetsProvider: StatusBarContentInsetsProvider,
     private val configurationController: ConfigurationController,
@@ -130,7 +131,7 @@ constructor(
 
     var shadeCollapseAction: Runnable? = null
 
-    private lateinit var iconManager: StatusBarIconController.TintedIconManager
+    private lateinit var iconManager: TintedIconManager
     private lateinit var carrierIconSlots: List<String>
     private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
 
@@ -310,10 +311,18 @@ constructor(
         // battery settings same as in QS icons
         batteryMeterViewController.ignoreTunerUpdates()
 
+        val fgColor =
+            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary)
+        val bgColor =
+            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimaryInverse)
+
         iconManager = tintedIconManagerFactory.create(iconContainer, StatusBarLocation.QS)
-        iconManager.setTint(
-            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary),
-            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimaryInverse),
+        iconManager.setTint(fgColor, bgColor)
+
+        batteryIcon.updateColors(
+            fgColor /* foreground */,
+            bgColor /* background */,
+            fgColor /* single tone (current default) */
         )
 
         carrierIconSlots =

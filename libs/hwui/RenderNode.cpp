@@ -16,18 +16,6 @@
 
 #include "RenderNode.h"
 
-#include "DamageAccumulator.h"
-#include "Debug.h"
-#include "Properties.h"
-#include "TreeInfo.h"
-#include "VectorDrawable.h"
-#include "private/hwui/WebViewFunctor.h"
-#ifdef __ANDROID__
-#include "renderthread/CanvasContext.h"
-#else
-#include "DamageAccumulator.h"
-#include "pipeline/skia/SkiaDisplayList.h"
-#endif
 #include <SkPathOps.h>
 #include <gui/TraceUtils.h>
 #include <ui/FatVector.h>
@@ -36,6 +24,14 @@
 #include <atomic>
 #include <sstream>
 #include <string>
+
+#include "DamageAccumulator.h"
+#include "Debug.h"
+#include "Properties.h"
+#include "TreeInfo.h"
+#include "VectorDrawable.h"
+#include "private/hwui/WebViewFunctor.h"
+#include "renderthread/CanvasContext.h"
 
 #ifdef __ANDROID__
 #include "include/gpu/ganesh/SkImageGanesh.h"
@@ -186,7 +182,6 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
 }
 
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext and Layers
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
@@ -218,32 +213,8 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     // That might be us, so tell CanvasContext that this layer is in the
     // tree and should not be destroyed.
     info.canvasContext.markLayerInUse(this);
-#endif
 }
 
-void RenderNode::pinShaderImages(TreeInfo& info) {
-    if (mDisplayList.getMutableBitmapShaderImages().size() <= 0) return;
-
-    SkRect dirty;
-    info.damageAccumulator->peekAtDirty(&dirty);
-
-    auto grContext = info.canvasContext.getGrContext();
-    if (!grContext) return;
-
-    size_t maxCache = grContext->getResourceCacheLimit();
-    size_t usedCache;
-    grContext->getResourceCacheUsage(nullptr, &usedCache);
-    bool isAlmostReachedMax = (usedCache > (maxCache * 0.9f));
-
-    Rect clipRect;
-    properties().getClippingRectForFlags(properties().getClippingFlags(), &clipRect);
-    SkRect skClipRect = clipRect.toSkRect();
-
-    if ((!dirty.isEmpty() && (isIntersectOnScreen(info.screenSize, dirty)) && isIntersectOnScreen(info.screenSize, skClipRect))
-        || !isAlmostReachedMax) {
-        info.canvasContext.pinImages(mDisplayList.getMutableBitmapShaderImages());
-    }
-}
 /**
  * Traverse down the the draw tree to prepare for a frame.
  *
@@ -319,8 +290,6 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     }
     pushLayerUpdate(info);
 
-    pinShaderImages(info);
-
     if (!mProperties.getAllowForceDark()) {
         info.disableForceDark--;
     }
@@ -328,16 +297,6 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
         info.stretchEffectCount--;
     }
     info.damageAccumulator->popTransform();
-}
-
-bool RenderNode::isIntersectOnScreen(const SkISize screenSize, SkRect src) {
-    // in case of clip rect, 0,0 means full screen clip. So 0,0 will return true
-    if (src.right() < 0 || src.left() >= screenSize.width() ||
-        src.bottom() < 0 || src.top() >= screenSize.height()) {
-        return false;
-    }
-
-    return true;
 }
 
 void RenderNode::syncProperties() {

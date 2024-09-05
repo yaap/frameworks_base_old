@@ -35,7 +35,6 @@ import android.apex.ApexInfo;
 import android.app.AppOpsManager;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.DataLoaderType;
-import android.content.pm.Flags;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -50,6 +49,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ExceptionUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
@@ -131,6 +131,12 @@ final class InstallRequest {
     @Nullable
     private String mApexModuleName;
 
+    /**
+     * The title of the responsible installer for the archive behavior used
+     */
+    @Nullable
+    private SparseArray<String> mResponsibleInstallerTitles;
+
     @Nullable
     private ScanResult mScanResult;
 
@@ -159,29 +165,34 @@ final class InstallRequest {
     @Nullable
     private DomainSet mPreVerifiedDomains;
 
+    private int mInstallerUidForInstallExisting = INVALID_UID;
+
+    private final boolean mHasAppMetadataFileFromInstaller;
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
         mInstallArgs = new InstallArgs(params.mOriginInfo, params.mMoveInfo, params.mObserver,
                 params.mInstallFlags, params.mDevelopmentInstallFlags, params.mInstallSource,
-                params.mVolumeUuid,  params.getUser(), null /*instructionSets*/,
+                params.mVolumeUuid, params.getUser(), null /*instructionSets*/,
                 params.mPackageAbiOverride, params.mPermissionStates,
                 params.mAllowlistedRestrictedPermissions, params.mAutoRevokePermissionsMode,
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource,
-                params.mApplicationEnabledSettingPersistent);
+                params.mApplicationEnabledSettingPersistent, params.mDexoptCompilerFilter);
         mPackageLite = params.mPackageLite;
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
         mRequireUserAction = params.mRequireUserAction;
         mPreVerifiedDomains = params.mPreVerifiedDomains;
+        mHasAppMetadataFileFromInstaller = params.mHasAppMetadataFile;
     }
 
     // Install existing package as user
     InstallRequest(int userId, int returnCode, AndroidPackage pkg, int[] newUsers,
-            Runnable runnable) {
+            Runnable runnable, int appId, int installerUid, boolean isSystem) {
         mUserId = userId;
         mInstallArgs = null;
         mReturnCode = returnCode;
@@ -192,6 +203,10 @@ final class InstallRequest {
         mIsInstallForUsers = true;
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
+        mAppId = appId;
+        mInstallerUidForInstallExisting = installerUid;
+        mSystem = isSystem;
+        mHasAppMetadataFileFromInstaller = false;
     }
 
     // addForInit
@@ -213,6 +228,7 @@ final class InstallRequest {
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
         mDisabledPs = disabledPs;
+        mHasAppMetadataFileFromInstaller = false;
     }
 
     @Nullable
@@ -360,6 +376,10 @@ final class InstallRequest {
         return PackageInstallerSession.isArchivedInstallation(getInstallFlags());
     }
 
+    public boolean hasAppMetadataFile() {
+        return mHasAppMetadataFileFromInstaller;
+    }
+
     @Nullable
     public String getRemovedPackage() {
         return mRemovedInfo != null ? mRemovedInfo.mRemovedPackage : null;
@@ -382,7 +402,8 @@ final class InstallRequest {
 
     public int getInstallerPackageUid() {
         return (mInstallArgs != null && mInstallArgs.mInstallSource != null)
-                ? mInstallArgs.mInstallSource.mInstallerPackageUid : INVALID_UID;
+                ? mInstallArgs.mInstallSource.mInstallerPackageUid
+                : mInstallerUidForInstallExisting;
     }
 
     public int getDataLoaderType() {
@@ -413,6 +434,12 @@ final class InstallRequest {
     public String getApexModuleName() {
         return mApexModuleName;
     }
+
+    @Nullable
+    public SparseArray<String> getResponsibleInstallerTitles() {
+        return mResponsibleInstallerTitles;
+    }
+
     public boolean isRollback() {
         return mInstallArgs != null
                 && mInstallArgs.mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK;
@@ -682,6 +709,11 @@ final class InstallRequest {
         return mWarnings;
     }
 
+    @Nullable
+    public String getDexoptCompilerFilter() {
+        return mInstallArgs != null ? mInstallArgs.mDexoptCompilerFilter : null;
+    }
+
     public void setScanFlags(int scanFlags) {
         mScanFlags = scanFlags;
     }
@@ -749,6 +781,11 @@ final class InstallRequest {
 
     public void setApexModuleName(@Nullable String apexModuleName) {
         mApexModuleName = apexModuleName;
+    }
+
+    public void setResponsibleInstallerTitles(
+            @NonNull SparseArray<String> responsibleInstallerTitles) {
+        mResponsibleInstallerTitles = responsibleInstallerTitles;
     }
 
     public void setPkg(AndroidPackage pkg) {
@@ -951,7 +988,7 @@ final class InstallRequest {
         // Only report external profile warnings when installing from adb. The goal is to warn app
         // developers if they have provided bad external profiles, so it's not beneficial to report
         // those warnings in the normal app install workflow.
-        if (isInstallFromAdb() && Flags.useArtServiceV2()) {
+        if (isInstallFromAdb()) {
             var externalProfileErrors = new LinkedHashSet<String>();
             for (PackageDexoptResult packageResult : dexoptResult.getPackageDexoptResults()) {
                 for (DexContainerFileDexoptResult fileResult :

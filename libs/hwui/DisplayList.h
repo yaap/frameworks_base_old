@@ -129,15 +129,6 @@ public:
                 observer, info, functorsNeedLayer, std::move(childFn));
     }
 
-    std::vector<SkImage*>& getMutableBitmapShaderImages() {
-        if (mImpl)
-            return mImpl->mMutableBitmapShaderImages;
-        else {
-            static std::vector<SkImage*> emptyVector;
-            return emptyVector;
-        }
-    }
-
     void syncContents(const WebViewSyncData& data) {
         if (mImpl) {
             mImpl->syncContents(data);

@@ -65,6 +65,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 /**
  MediaCodec class can be used to access low-level media codecs, i.e. encoder/decoder components.
@@ -2014,6 +2015,23 @@ final public class MediaCodec {
         }
     }
 
+    // HACKY(b/325389296): aconfig flag accessors may not work in all contexts where MediaCodec API
+    // is used, so allow accessors to fail. In those contexts use a default value, normally false.
+
+    /* package private */
+    static boolean GetFlag(Supplier<Boolean> flagValueSupplier) {
+        return GetFlag(flagValueSupplier, false /* defaultValue */);
+    }
+
+    /* package private */
+    static boolean GetFlag(Supplier<Boolean> flagValueSupplier, boolean defaultValue) {
+        try {
+            return flagValueSupplier.get();
+        } catch (java.lang.RuntimeException e) {
+            return defaultValue;
+        }
+    }
+
     private boolean mHasSurface = false;
 
     /**
@@ -2345,6 +2363,19 @@ final public class MediaCodec {
             throw new IllegalArgumentException("Can't use crypto and descrambler together!");
         }
 
+        // at the moment no codecs support detachable surface
+        boolean canDetach = GetFlag(() -> android.media.codec.Flags.nullOutputSurfaceSupport());
+        if (GetFlag(() -> android.media.codec.Flags.nullOutputSurface())) {
+            // Detached surface flag is only meaningful if surface is null. Otherwise, it is
+            // ignored.
+            if (surface == null && (flags & CONFIGURE_FLAG_DETACHED_SURFACE) != 0 && !canDetach) {
+                throw new IllegalArgumentException("Codec does not support detached surface");
+            }
+        } else {
+            // don't allow detaching if API is disabled
+            canDetach = false;
+        }
+
         String[] keys = null;
         Object[] values = null;
 
@@ -2384,6 +2415,14 @@ final public class MediaCodec {
         }
 
         native_configure(keys, values, surface, crypto, descramblerBinder, flags);
+
+        if (canDetach) {
+            // If we were able to configure native codec with a detached surface
+            // we now know that we have a surface.
+            if (surface == null && (flags & CONFIGURE_FLAG_DETACHED_SURFACE) != 0) {
+                mHasSurface = true;
+            }
+        }
     }
 
     /**
@@ -2419,7 +2458,8 @@ final public class MediaCodec {
      *  output.
      *
      *  @throws IllegalStateException if the codec was not
-     *                                configured in surface mode.
+     *            configured in surface mode or if the codec does not support
+     *            detaching the output surface.
      *  @see CONFIGURE_FLAG_DETACHED_SURFACE
      */
     @FlaggedApi(FLAG_NULL_OUTPUT_SURFACE)
@@ -2427,10 +2467,18 @@ final public class MediaCodec {
         if (!mHasSurface) {
             throw new IllegalStateException("codec was not configured for an output surface");
         }
+
         // note: we still have a surface in detached mode, so keep mHasSurface
         // we also technically allow calling detachOutputSurface multiple times in a row
-        // native_detachSurface();
+
+        if (GetFlag(() -> android.media.codec.Flags.nullOutputSurfaceSupport())) {
+            native_detachOutputSurface();
+        } else {
+            throw new IllegalStateException("codec does not support detaching output surface");
+        }
     }
+
+    private native void native_detachOutputSurface();
 
     /**
      * Create a persistent input surface that can be used with codecs that normally have an input
@@ -4750,6 +4798,9 @@ final public class MediaCodec {
         }
 
         void setBufferInfo(MediaCodec.BufferInfo info) {
+            // since any of setBufferInfo(s) should translate to getBufferInfos,
+            // mBufferInfos needs to be reset for every setBufferInfo(s)
+            mBufferInfos.clear();
             mPresentationTimeUs = info.presentationTimeUs;
             mFlags = info.flags;
         }
@@ -5087,7 +5138,7 @@ final public class MediaCodec {
      * size is larger than 16x16, then the qpOffset information of all 16x16 blocks that
      * encompass the coding unit is combined and used. The QP of target block will be calculated
      * as 'frameQP + offsetQP'. If the result exceeds minQP or maxQP configured then the value
-     * may be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
+     * will be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
      * positive offsets will result in encoding blocks at higher QP than frame QP. If the areas
      * of negative QP and positive QP are chosen wisely, the overall viewing experience can be
      * improved.
@@ -5114,7 +5165,7 @@ final public class MediaCodec {
      * quantization parameter (QP) offset of the blocks in the bounding box. The bounding box
      * will get stretched outwards to align to LCU boundaries during encoding. The Qp Offset is
      * integral and shall be in the range [-128, 127]. The QP of target block will be calculated
-     * as frameQP + offsetQP. If the result exceeds minQP or maxQP configured then the value may
+     * as frameQP + offsetQP. If the result exceeds minQP or maxQP configured then the value will
      * be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
      * positive offsets will result in blocks encoded at higher QP than frame QP. If the areas of
      * negative QP and positive QP are chosen wisely, the overall viewing experience can be
@@ -5181,6 +5232,13 @@ final public class MediaCodec {
         setParameters(keys, values);
     }
 
+    private void logAndRun(String message, Runnable r) {
+        final String TAG = "MediaCodec";
+        android.util.Log.d(TAG, "enter: " + message);
+        r.run();
+        android.util.Log.d(TAG, "exit : " + message);
+    }
+
     /**
      * Sets an asynchronous callback for actionable MediaCodec events.
      *
@@ -5210,14 +5268,40 @@ final public class MediaCodec {
                 // even if we were to extend this to be callable dynamically, it must
                 // be called when codec is flushed, so no messages are pending.
                 if (newHandler != mCallbackHandler) {
-                    mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
-                    mCallbackHandler.removeMessages(EVENT_CALLBACK);
+                    if (android.media.codec.Flags.setCallbackStall()) {
+                        logAndRun(
+                                "[new handler] removeMessages(SET_CALLBACK)",
+                                () -> {
+                                    mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
+                                });
+                        logAndRun(
+                                "[new handler] removeMessages(CALLBACK)",
+                                () -> {
+                                    mCallbackHandler.removeMessages(EVENT_CALLBACK);
+                                });
+                    } else {
+                        mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
+                        mCallbackHandler.removeMessages(EVENT_CALLBACK);
+                    }
                     mCallbackHandler = newHandler;
                 }
             }
         } else if (mCallbackHandler != null) {
-            mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
-            mCallbackHandler.removeMessages(EVENT_CALLBACK);
+            if (android.media.codec.Flags.setCallbackStall()) {
+                logAndRun(
+                        "[null handler] removeMessages(SET_CALLBACK)",
+                        () -> {
+                            mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
+                        });
+                logAndRun(
+                        "[null handler] removeMessages(CALLBACK)",
+                        () -> {
+                            mCallbackHandler.removeMessages(EVENT_CALLBACK);
+                        });
+            } else {
+                mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
+                mCallbackHandler.removeMessages(EVENT_CALLBACK);
+            }
         }
 
         if (mCallbackHandler != null) {

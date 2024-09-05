@@ -24,13 +24,13 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.yaap.YaapUtils;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -93,7 +93,7 @@ public class AODTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void handleClick(@Nullable View view) {
+    public void handleClick(@Nullable Expandable expandable) {
         int aodState = getAodState();
         if (aodState < 2) {
             aodState++;
@@ -109,7 +109,7 @@ public class AODTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleLongClick(@Nullable View view) {
+    protected void handleLongClick(@Nullable Expandable expandable) {
         // always toggle on/off on long click
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.DOZE_ALWAYS_ON, getAodState() != 0 ? 0 : 1,

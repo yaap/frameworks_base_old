@@ -142,7 +142,7 @@ public class NavigationModeController implements Dumpable {
 
 
         mSystemSettings = systemSettings;
-        mSystemSettings.registerContentObserverForUser(
+        mSystemSettings.registerContentObserverForUserSync(
             Settings.System.NAVIGATION_BAR_INVERSE,
             new ContentObserver(mainHandler) {
                 @Override
@@ -152,7 +152,7 @@ public class NavigationModeController implements Dumpable {
                             shouldInvertNavBarLayout()));
                 }
             }, UserHandle.USER_ALL);
-        mSystemSettings.registerContentObserverForUser(
+        mSystemSettings.registerContentObserverForUserSync(
             Settings.System.NAVBAR_LAYOUT_VIEWS,
             new ContentObserver(mainHandler) {
                 @Override
@@ -162,7 +162,7 @@ public class NavigationModeController implements Dumpable {
                             getCustomNavbarLayout()));
                 }
             }, UserHandle.USER_ALL);
-        mSystemSettings.registerContentObserverForUser(
+        mSystemSettings.registerContentObserverForUserSync(
             Settings.System.BACK_GESTURE_HEIGHT,
             new ContentObserver(mainHandler) {
                 @Override

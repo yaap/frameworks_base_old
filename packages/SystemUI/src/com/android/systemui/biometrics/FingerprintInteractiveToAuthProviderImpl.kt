@@ -51,11 +51,11 @@ class FingerprintInteractiveToAuthProviderImpl @Inject constructor(
                         trySend(isEnabled(currentUserId))
                     }
                 }
-                secureSettings.registerContentObserver(
+                secureSettings.registerContentObserverSync(
                     Settings.Secure.SFPS_PERFORMANT_AUTH_ENABLED, true, callback
                 )
                 trySend(isEnabled(currentUserId))
-                awaitClose { secureSettings.unregisterContentObserver(callback) }
+                awaitClose { secureSettings.unregisterContentObserverSync(callback) }
             }
         }
         .flowOn(backgroundDispatcher)

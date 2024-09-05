@@ -17,7 +17,6 @@
 package android.os;
 
 import android.Manifest;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -37,6 +36,8 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
+import com.android.internal.ravenwood.RavenwoodEnvironment;
+
 import dalvik.system.VMRuntime;
 
 import java.lang.reflect.Field;
@@ -54,6 +55,10 @@ import java.util.regex.Pattern;
  */
 @RavenwoodKeepWholeClass
 public class Build {
+    static {
+        // Set up the default system properties.
+        RavenwoodEnvironment.ensureRavenwoodInitialized();
+    }
     private static final String TAG = "Build";
 
     /** Value used for when a build property is unknown. */
@@ -1240,9 +1245,20 @@ public class Build {
         /**
          * Vanilla Ice Cream.
          */
-        @FlaggedApi(Flags.FLAG_ANDROID_OS_BUILD_VANILLA_ICE_CREAM)
-        public static final int VANILLA_ICE_CREAM = CUR_DEVELOPMENT;
+        public static final int VANILLA_ICE_CREAM = 35;
     }
+
+    /**
+     * The vendor API for 2024 Q2
+     *
+     * <p>For Android 14-QPR3 and later, the vendor API level is completely decoupled from the SDK
+     * API level and the format has switched to YYYYMM (year and month)
+     *
+     * @see <a href="https://preview.source.android.com/docs/core/architecture/api-flags">Vendor API
+     *     level</a>
+     * @hide
+     */
+    public static final int VENDOR_API_2024_Q2 = 202404;
 
     /** The type of build, like "user" or "eng". */
     public static final String TYPE = getString("ro.build.type");

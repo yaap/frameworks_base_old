@@ -368,7 +368,6 @@ public class Vpn {
 
     private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
-    private final INetworkManagementService mNms;
     private final INetd mNetd;
     @VisibleForTesting
     @GuardedBy("this")
@@ -628,7 +627,6 @@ public class Vpn {
         mSubscriptionManager = mContext.getSystemService(SubscriptionManager.class);
 
         mDeps = deps;
-        mNms = netService;
         mNetd = netd;
         mUserId = userId;
         mLooper = looper;
