@@ -187,7 +187,8 @@ public class ImageExporter {
         return export(executor,
                 new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
                         mQuality, /* publish */ true, owner, mFlags,
-                        createFilename(captureTime, mCompressFormat, displayId, pkgName)));
+                        createFilename(captureTime, mCompressFormat, displayId, pkgName),
+                        false, pkgName));
     }
 
     /**
@@ -234,7 +235,8 @@ public class ImageExporter {
                         ZonedDateTime.now(ZoneId.systemDefault()),
                         format,
                         mQuality, /* publish */ true, owner, mFlags,
-                        createSystemFileDisplayName(fileName, format, pkgName)));
+                        createSystemFileDisplayName(fileName, format, pkgName),
+                        false, pkgName));
     }
 
     /**
@@ -292,7 +294,7 @@ public class ImageExporter {
             ZonedDateTime captureTime, UserHandle owner, String fileName, String pkgName) {
         return export(executor, new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
                 mQuality, /* publish */ true, owner, mFlags,
-                createSystemFileDisplayName(fileName, mCompressFormat, pkgName)));
+                createSystemFileDisplayName(fileName, mCompressFormat, pkgName), false, pkgName));
     }
 
     /**
@@ -367,13 +369,20 @@ public class ImageExporter {
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
                 CompressFormat format, int quality, boolean publish, UserHandle owner,
                 FeatureFlags flags, String fileName) {
-            this(resolver, requestId, bitmap, captureTime, null, format, quality, publish, owner, flags,
+            this(resolver, requestId, bitmap, captureTime, format, quality, publish, owner, flags,
                     fileName, false /* allowOverwrite */);
         }
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
-                String pkgName, CompressFormat format, int quality, boolean publish, UserHandle owner,
+                CompressFormat format, int quality, boolean publish, UserHandle owner,
                 FeatureFlags flags, String fileName, boolean allowOverwrite) {
+            this(resolver, requestId, bitmap, captureTime, format, quality, publish, owner, flags,
+                    fileName, allowOverwrite, null /* pkgName */);
+        }
+
+        Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
+                CompressFormat format, int quality, boolean publish, UserHandle owner,
+                FeatureFlags flags, String fileName, boolean allowOverwrite, String pkgName) {
             mResolver = resolver;
             mRequestId = requestId;
             mBitmap = bitmap;
