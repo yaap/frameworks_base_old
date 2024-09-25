@@ -106,11 +106,19 @@ internal constructor(
 
     /**
      * Shows a notification containing the screenshot and the chip actions
-     * @param imageData for actions, uri. cannot be null
+     * @param imageData for uri. cannot be null
      * @param bitmap for image preview. can be null
      */
     fun showPostActionNotification(imageData: ScreenshotController.SavedImageData, bitmap: Bitmap) {
-        val uri = imageData.uri
+        showPostActionNotification(imageData.uri, bitmap)
+    }
+
+    /**
+     * Shows a notification containing the screenshot and the chip actions
+     * @param uri image uri
+     * @param bitmap for image preview. can be null
+     */
+    fun showPostActionNotification(uri: Uri, bitmap: Bitmap) {
         // notification channel ID is the URI hash as string - to allow notifications to pile up
         // and still be able to get the same ID someplace else for dismiss
         val requestCode = uri.toString().hashCode()
@@ -130,6 +138,14 @@ internal constructor(
         val actionShare = Notification.Action.Builder(0 /* no icon */,
                 res.getText(com.android.systemui.res.R.string.screenrecord_share_label), shareIntent)
 
+        val deleteIntent = PendingIntent.getBroadcast(context, requestCode,
+                Intent(context, DeleteScreenshotReceiver::class.java)
+                        .setData(uri)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                        PendingIntent.FLAG_IMMUTABLE)
+        val actionDelete = Notification.Action.Builder(0 /* no icon */,
+                res.getText(com.android.systemui.res.R.string.screenshot_delete_label), deleteIntent)
+
         val b = Notification.Builder(context, NotificationChannels.SCREENSHOTS_HEADSUP)
                 .setTicker(res.getString(
                         com.android.systemui.res.R.string.screenshot_saved_title))
@@ -145,6 +161,7 @@ internal constructor(
                         .bigPicture(bitmap).bigLargeIcon(bitmap))
                 .setColor(context.getColor(R.color.system_notification_accent_color))
                 .addAction(actionShare.build())
+                .addAction(actionDelete.build())
                 .setContentIntent(pi)
 
         notificationManager.notify(TAG, requestCode, b.build())

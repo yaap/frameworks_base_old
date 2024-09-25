@@ -583,6 +583,10 @@
         <receiver android:name=".screenshot.SmartActionsReceiver"
                   android:exported="false"/>
 
+        <!-- Callback for deleting screenshot notification -->
+        <receiver android:name=".screenshot.DeleteScreenshotReceiver"
+                  android:exported="false" />
+
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
             android:exported="true"

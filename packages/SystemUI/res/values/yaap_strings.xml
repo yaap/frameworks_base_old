@@ -121,4 +121,10 @@
     <string name="qs_footer_dialog_title">QS Footer Text</string>
     <string name="qs_footer_dialog_toast">Long press to change text</string>
 
+    <!-- Screenshot delete action -->
+    <!-- Label for UI element which allows deleting the screenshot [CHAR LIMIT=30] -->
+    <string name="screenshot_delete_label">Delete</string>
+    <!-- Content description indicating that tapping the element will allow deleting the screenshot [CHAR LIMIT=NONE] -->
+    <string name="screenshot_delete_description">Delete screenshot</string>
+
 </resources>
