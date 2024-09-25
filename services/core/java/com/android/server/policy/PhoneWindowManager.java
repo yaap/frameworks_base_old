@@ -2767,6 +2767,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
+        void onMultiPress(long downTime, int count, int unusedDisplayId) {
+            if (count != 2 ||
+                !mSingleKeyGestureDetector.beganFromNonInteractive() ||
+                !handleTorchPress(false)) {
+                return;
+            }
+
+            mSingleKeyGestureDetector.reset();
+        }
+
+        @Override
         long getLongPressTimeoutMs() {
             if (getResolvedLongPressOnPowerBehavior() == LONG_PRESS_POWER_ASSISTANT) {
                 return mLongPressOnPowerAssistantTimeoutMs;
@@ -2887,14 +2898,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onMultiPress(long downTime, int count, int unusedDisplayId) {
-            final boolean beganFromNonInteractive =
-                    mSingleKeyGestureDetector.beganFromNonInteractive();
-            if (beganFromNonInteractive) {
-                if (handleTorchPress(false)) {
-                    mSingleKeyGestureDetector.reset();
-                    return;
-                }
-            }
             // Triple-press stem to toggle accessibility gesture should always be triggered
             // regardless of if app handles it.
             if (count == 3
