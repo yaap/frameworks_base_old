@@ -62,6 +62,8 @@ public enum ScreenshotEvent implements UiEventLogger.UiEventEnum {
     SCREENSHOT_INTERACTION_TIMEOUT(310),
     @UiEvent(doc = "screenshot explicitly dismissed")
     SCREENSHOT_EXPLICIT_DISMISSAL(311),
+    @UiEvent(doc = "screenshot delete button tapped")
+    SCREENSHOT_DELETE_TAPPED(316),
     @UiEvent(doc = "screenshot swiped to dismiss")
     SCREENSHOT_SWIPE_DISMISSED(656),
     @UiEvent(doc = "screenshot dismissed, miscellaneous reason")
