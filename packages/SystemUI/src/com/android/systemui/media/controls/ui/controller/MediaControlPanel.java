@@ -270,8 +270,10 @@ public class MediaControlPanel {
     private boolean mWasPlaying = false;
     private boolean mButtonClicked = false;
 
+    private final boolean mShowRippleByDefault;
     private boolean mAlwaysOnTime;
     private boolean mTimeAsNext;
+    private boolean mShowRipple;
     private boolean mShowSquiggle;
     private int mActionsLimit = 5;
 
@@ -311,6 +313,9 @@ public class MediaControlPanel {
                     Settings.Secure.MEDIA_CONTROLS_TIME_AS_NEXT),
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.MEDIA_CONTROLS_RIPPLE),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.MEDIA_CONTROLS_SQUIGGLE),
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
@@ -335,6 +340,10 @@ public class MediaControlPanel {
                     updateTimeAsNext();
                     updateDisplayForScrubbing();
                     break;
+                case Settings.Secure.MEDIA_CONTROLS_RIPPLE:
+                    updateShowRipple();
+                    updatePlayers();
+                    break;
                 case Settings.Secure.MEDIA_CONTROLS_SQUIGGLE:
                     updateShowSquiggle();
                     if (mMediaViewHolder == null) break;
@@ -351,6 +360,7 @@ public class MediaControlPanel {
         void update() {
             updateAlwaysOnTime();
             updateTimeAsNext();
+            updateShowRipple();
             updateShowSquiggle();
             updateShowActions();
         }
@@ -363,6 +373,11 @@ public class MediaControlPanel {
         private void updateTimeAsNext() {
             mTimeAsNext = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.MEDIA_CONTROLS_TIME_AS_NEXT, 0) == 1;
+        }
+
+        private void updateShowRipple() {
+            mShowRipple = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.MEDIA_CONTROLS_RIPPLE, mShowRippleByDefault ? 1 : 0) == 1;
         }
 
         private void updateShowSquiggle() {
@@ -436,6 +451,9 @@ public class MediaControlPanel {
         mLockscreenUserManager = lockscreenUserManager;
         mBroadcastDialogController = broadcastDialogController;
         mMediaFlags = mediaFlags;
+
+        mShowRippleByDefault = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_mediaControlsRippleByDefault);
 
         mSeekBarViewModel.setLogSeek(() -> {
             if (mPackageName != null && mInstanceId != null) {
@@ -755,7 +773,7 @@ public class MediaControlPanel {
                         mLoadingEffect::finish,
                         TURBULENCE_NOISE_PLAY_DURATION
                 );
-            } else {
+            } else if (mShowRipple) {
                 mTurbulenceNoiseController.play(
                         Type.SIMPLEX_NOISE,
                         mTurbulenceNoiseAnimationConfig
@@ -1373,13 +1391,15 @@ public class MediaControlPanel {
 
                         action.run();
 
-                        mMultiRippleController.play(createTouchRippleAnimation(button));
+                        if (mShowRipple) {
+                            mMultiRippleController.play(createTouchRippleAnimation(button));
 
-                        if (icon instanceof Animatable) {
-                            ((Animatable) icon).start();
-                        }
-                        if (bgDrawable instanceof Animatable) {
-                            ((Animatable) bgDrawable).start();
+                            if (icon instanceof Animatable) {
+                                ((Animatable) icon).start();
+                            }
+                            if (bgDrawable instanceof Animatable) {
+                                ((Animatable) bgDrawable).start();
+                            }
                         }
                     }
                 });
@@ -1538,7 +1558,9 @@ public class MediaControlPanel {
 
                 action.getAction().run();
 
-                mMultiRippleController.play(createTouchRippleAnimation(view));
+                if (mShowRipple) {
+                    mMultiRippleController.play(createTouchRippleAnimation(view));
+                }
             }
         });
     }

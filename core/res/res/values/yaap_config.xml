@@ -97,4 +97,7 @@
     </string>
     <string name="config_batterymeterRLandErrorPerimeterPath" translatable="false">@string/config_batterymeterRLandPerimeterPath</string>
 
+    <!-- media controls -->
+    <bool name="config_mediaControlsRippleByDefault">true</bool>
+
 </resources>

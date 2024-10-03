@@ -97,4 +97,7 @@
     <java-symbol type="string" name="config_batterymeterLandBoltPath" />
     <java-symbol type="string" name="config_batterymeterLandPowersavePath" />
     <java-symbol type="string" name="config_batterymeterLandErrorPerimeterPath" />
+
+    <!-- media controls -->
+    <java-symbol type="bool" name="config_mediaControlsRippleByDefault" />
 </resources>

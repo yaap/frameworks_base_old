@@ -13474,6 +13474,12 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_TIME_AS_NEXT = "media_controls_time_as_next";
 
         /**
+         * Whether to show the ripple effects on media controls
+         * @hide
+         */
+        public static final String MEDIA_CONTROLS_RIPPLE = "media_controls_ripple";
+
+        /**
          * Whether to always show squiggle progress bar on media controls
          * @hide
          */
