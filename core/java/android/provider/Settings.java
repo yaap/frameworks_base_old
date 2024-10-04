@@ -13480,6 +13480,12 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_RIPPLE = "media_controls_ripple";
 
         /**
+         * Whether to show the turbulence effects on media controls
+         * @hide
+         */
+        public static final String MEDIA_CONTROLS_TURBULENCE = "media_controls_turbulence";
+
+        /**
          * Whether to always show squiggle progress bar on media controls
          * @hide
          */

@@ -100,4 +100,5 @@
 
     <!-- media controls -->
     <java-symbol type="bool" name="config_mediaControlsRippleByDefault" />
+    <java-symbol type="bool" name="config_mediaControlsTurbulenceByDefault" />
 </resources>

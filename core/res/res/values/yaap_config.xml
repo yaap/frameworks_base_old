@@ -99,5 +99,6 @@
 
     <!-- media controls -->
     <bool name="config_mediaControlsRippleByDefault">true</bool>
+    <bool name="config_mediaControlsTurbulenceByDefault">true</bool>
 
 </resources>
