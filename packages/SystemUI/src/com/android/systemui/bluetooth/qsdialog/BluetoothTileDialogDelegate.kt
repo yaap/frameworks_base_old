@@ -95,6 +95,8 @@ internal constructor(
 
     private var lastItemRow: Int = -1
 
+    private var autoOnDone: Boolean = false
+
     @AssistedFactory
     internal interface Factory {
         fun create(
@@ -143,10 +145,6 @@ internal constructor(
 
     override fun onStart(dialog: SystemUIDialog) {
         lastUiUpdateMs = systemClock.elapsedRealtime()
-        if (isAutoOn) {
-            getToggleView(dialog).isChecked = true
-            mutableBluetoothStateToggle.value = true
-        }
     }
 
     override fun onStop(dialog: SystemUIDialog) {
@@ -197,6 +195,12 @@ internal constructor(
         isEnabled: Boolean,
         uiProperties: BluetoothTileDialogViewModel.UiProperties
     ) {
+        if (isAutoOn && !autoOnDone && !isEnabled) {
+            mutableBluetoothStateToggle.value = true
+            autoOnDone = true
+            return
+        }
+        autoOnDone = true
         getToggleView(dialog).apply {
             isChecked = isEnabled
             setEnabled(true)
