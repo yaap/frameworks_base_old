@@ -2279,7 +2279,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     row.anim.setIntValues(progress, newProgress);
                     // The animator can't keep up with the volume changes so haptics need to be
                     // triggered here. This happens when the volume keys are continuously pressed.
-                    row.deliverOnProgressChangedHaptics(false, newProgress);
+                    if (mHapticsEnabled) {
+                        row.deliverOnProgressChangedHaptics(false, newProgress);
+                    }
                 }
                 row.animTargetProgress = newProgress;
                 row.anim.setDuration(UPDATE_ANIMATION_DURATION);
@@ -2729,7 +2731,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         public void onStartTrackingTouch(SeekBar seekBar) {
             if (D.BUG) Log.d(TAG, "onStartTrackingTouch"+ " " + mRow.stream);
             Events.writeEvent(Events.EVENT_SLIDER_TOUCH_TRACKING, /* startedTracking= */true);
-            if (mRow.mHapticPlugin != null) {
+            if (mRow.mHapticPlugin != null && mHapticsEnabled) {
                 mRow.mHapticPlugin.onStartTrackingTouch(seekBar);
             }
             mController.setActiveStream(mRow.stream);
@@ -2740,7 +2742,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         public void onStopTrackingTouch(SeekBar seekBar) {
             if (D.BUG) Log.d(TAG, "onStopTrackingTouch"+ " " + mRow.stream);
             Events.writeEvent(Events.EVENT_SLIDER_TOUCH_TRACKING, /* startedTracking= */false);
-            if (mRow.mHapticPlugin != null) {
+            if (mRow.mHapticPlugin != null && mHapticsEnabled) {
                 mRow.mHapticPlugin.onStopTrackingTouch(seekBar);
             }
             mRow.tracking = false;
