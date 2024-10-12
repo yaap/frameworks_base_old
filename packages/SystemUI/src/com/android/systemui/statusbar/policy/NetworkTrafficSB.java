@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 
 import android.view.ViewGroup;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -59,8 +60,16 @@ public class NetworkTrafficSB extends NetworkTraffic implements DarkReceiver {
         return arr;
     }
 
+    boolean sizeCheck() {
+        // don't show a very tiny text (6sp minimum)
+        // if we reached this size just hide the entire view
+        final float dpTextSize = TypedValue.convertPixelsToDimension(
+                TypedValue.COMPLEX_UNIT_SP, getTextSize(), getDisplayMetrics());
+        return dpTextSize >= 6f;
+    }
+
     @Override
     boolean isDisabled() {
-        return !mIsEnabled || mLocation == LOCATION_QS_HEADER;
+        return !getIsEnabled() || getLocation() == LOCATION_QS_HEADER;
     }
 }

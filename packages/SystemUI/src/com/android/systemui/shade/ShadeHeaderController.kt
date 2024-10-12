@@ -595,7 +595,7 @@ constructor(
     }
 
     private fun setNetworkTrafficVisible(visible: Boolean) {
-        networkTraffic.setAlpha(if (visible) 1f else 0f)
+        networkTraffic.setIsObscured(!visible)
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

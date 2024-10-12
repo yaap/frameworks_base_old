@@ -16,13 +16,13 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.IntDef;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
-import android.graphics.Color;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.PorterDuff.Mode;
@@ -38,6 +38,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -45,6 +46,8 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormat;
 
 public class NetworkTraffic extends TextView {
@@ -72,7 +75,15 @@ public class NetworkTraffic extends TextView {
         decimalFormat.setMaximumFractionDigits(1);
     }
 
-    private float mDisplayDensity;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        LOCATION_STATUSBAR,
+        LOCATION_QS_HEADER,
+        LOCATION_BOTH
+    })
+    public @interface LocationInt {}
+
+    private DisplayMetrics mDisplayMetrics;
     private long mLastUpdateTime;
     private int mTrafficType;
     private int mAutoHideThreshold;
@@ -84,8 +95,9 @@ public class NetworkTraffic extends TextView {
     private boolean iBytes;
     private boolean oBytes;
 
-    boolean mIsEnabled;
-    int mLocation;
+    private boolean mIsEnabled;
+    private boolean mIsObscured = false;
+    private @LocationInt int mLocation;
 
     private final int mResourceFontSize;
     private final HandlerThread mHandlerThread = new HandlerThread(THREAD_NAME);
@@ -124,10 +136,10 @@ public class NetworkTraffic extends TextView {
                 totalTxBytes = 0;
             }
 
-            if (shouldHide(rxData, txData, timeDelta)) {
+            if (shouldHide(rxData, txData, timeDelta) || mIsObscured) {
                 getHandler().post(() -> {
                     setText("");
-                    setVisibility(View.GONE);
+                    setVisibility(View.INVISIBLE);
                 });
             } else if (!isUpdate) {
                 String output;
@@ -161,19 +173,13 @@ public class NetworkTraffic extends TextView {
                         else oBytes = true;
                         break;
                 }
-                if (mLocation == LOCATION_BOTH || mLocation == LOCATION_STATUSBAR) {
-                    // don't show a vary tiny text (4dp minimum)
-                    // if we reached this size just hide the entire view
-                    final float dpTextSize = getTextSize() / mDisplayDensity;
-                    if (dpTextSize < 4f) output = "";
-                }
                 // Update view if there's anything new to show
                 final String out = output;
                 getHandler().post(() -> {
-                    if (!out.contentEquals(getText())) {
+                    if (!out.contentEquals(getText()))
                         setText(out);
-                        setVisibility(out != "" ? View.VISIBLE : View.GONE);
-                    }
+                    setVisibility(!out.isEmpty() && sizeCheck() && !mIsObscured
+                            ? View.VISIBLE : View.INVISIBLE);
                 });
             }
             getHandler().post(NetworkTraffic.this::updateTrafficDrawable);
@@ -188,7 +194,7 @@ public class NetworkTraffic extends TextView {
             } else {
                 getHandler().post(() -> {
                     setText("");
-                    setVisibility(View.GONE);
+                    setVisibility(View.INVISIBLE);
                 });
             }
 
@@ -263,7 +269,7 @@ public class NetworkTraffic extends TextView {
         @Override
         public void onDisplayChanged(int displayId) {
             if (getDisplay().getDisplayId() != displayId) return;
-            mDisplayDensity = getResources().getDisplayMetrics().density;
+            mDisplayMetrics = getResources().getDisplayMetrics();
             if (mScreenOn) getHandler().post(NetworkTraffic.this::updateSettings);
         }
     };
@@ -331,7 +337,7 @@ public class NetworkTraffic extends TextView {
             mHandlerThread.start();
             mLooper = mHandlerThread.getLooper();
             mTrafficHandler = new Handler(mLooper, mTrafficHandlerCallback);
-            mDisplayDensity = getResources().getDisplayMetrics().density;
+            mDisplayMetrics = getResources().getDisplayMetrics();
             mIsConnected = mConnectivityManager.getActiveNetwork() != null;
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -359,8 +365,9 @@ public class NetworkTraffic extends TextView {
     }
 
     private void updateSettings() {
+        if (!mAttached) return;
         setText("");
-        setVisibility(View.GONE);
+        setVisibility(View.INVISIBLE);
         updateTextSize();
         updateTrafficDrawable();
         mTrafficHandler.removeCallbacksAndMessages(null);
@@ -432,6 +439,13 @@ public class NetworkTraffic extends TextView {
         updateTrafficDrawable();
     }
 
+    public void setIsObscured(boolean obscured) {
+        final boolean changed = mIsObscured != obscured;
+        if (!changed) return;
+        mIsObscured = obscured;
+        updateSettings();
+    }
+
     boolean isDisabled() {
         return !mIsEnabled || mLocation == LOCATION_STATUSBAR;
     }
@@ -454,5 +468,25 @@ public class NetworkTraffic extends TextView {
         setTextSize(unit, (float)size);
         setMaxLines(1);
         return new int[] { size, unit };
+    }
+
+    DisplayMetrics getDisplayMetrics() {
+        if (mDisplayMetrics == null) {
+            mDisplayMetrics = getResources().getDisplayMetrics();
+        }
+        return mDisplayMetrics;
+    }
+
+    @LocationInt
+    int getLocation() {
+        return mLocation;
+    }
+
+    boolean getIsEnabled() {
+        return mIsEnabled;
+    }
+
+    boolean sizeCheck() {
+        return true;
     }
 }
