@@ -158,6 +158,7 @@ class ScreenRecordPermissionDialogDelegate(
             }
             dialog.dismiss()
         }
+        dialog.setOnDismissListener { dialog -> savePreferences() }
         setCancelButtonOnClickListener { dialog.dismiss() }
         initRecordOptionsView()
     }
@@ -297,17 +298,22 @@ class ScreenRecordPermissionDialogDelegate(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-        Prefs.putInt(userContext, PREF_SHARE_MODE, screenShareModeSpinner.selectedItemPosition)
-        Prefs.putInt(userContext, PREF_TAPS, if (showTaps) 1 else 0)
-        Prefs.putInt(userContext, PREF_DOT, if (showStopDot) 1 else 0)
-        Prefs.putInt(userContext, PREF_LOW, lowQuality)
-        Prefs.putInt(userContext, PREF_AUDIO, if (audioSwitch.isChecked) 1 else 0)
-        Prefs.putInt(userContext, PREF_AUDIO_SOURCE, options.selectedItemPosition)
-        Prefs.putInt(userContext, PREF_SKIP, if (skipTime) 1 else 0)
-        Prefs.putInt(userContext, PREF_HEVC, if (hevc) 1 else 0)
-
+        dialog.setOnDismissListener(null)
+        savePreferences()
         controller.startCountdown(if (skipTime) NO_DELAY else DELAY_MS,
                                                     INTERVAL_MS, startIntent, stopIntent)
+    }
+
+    private fun savePreferences() {
+        val userContext = userContextProvider.userContext
+        Prefs.putInt(userContext, PREF_SHARE_MODE, screenShareModeSpinner.selectedItemPosition)
+        Prefs.putInt(userContext, PREF_TAPS, if (tapsSwitch.isChecked) 1 else 0)
+        Prefs.putInt(userContext, PREF_DOT, if (stopDotSwitch.isChecked) 1 else 0)
+        Prefs.putInt(userContext, PREF_LOW, lowQualitySpinner.selectedItemPosition)
+        Prefs.putInt(userContext, PREF_AUDIO, if (audioSwitch.isChecked) 1 else 0)
+        Prefs.putInt(userContext, PREF_AUDIO_SOURCE, options.selectedItemPosition)
+        Prefs.putInt(userContext, PREF_SKIP, if (skipTimeSwitch.isChecked) 1 else 0)
+        Prefs.putInt(userContext, PREF_HEVC, if (hevcSwitch.isChecked) 1 else 0)
     }
 
     private inner class CaptureTargetResultReceiver() :

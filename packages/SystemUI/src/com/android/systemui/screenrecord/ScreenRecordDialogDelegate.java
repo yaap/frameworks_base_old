@@ -86,6 +86,7 @@ public class ScreenRecordDialogDelegate implements SystemUIDialog.Delegate {
     private final Context mUserContext;
     private final boolean mIsHEVCAllowed;
     private final Runnable mOnStartRecordingClicked;
+    private SystemUIDialog mDialog;
     private Switch mTapsSwitch;
     private Switch mStopDotSwitch;
     private Switch mHEVCSwitch;
@@ -123,6 +124,7 @@ public class ScreenRecordDialogDelegate implements SystemUIDialog.Delegate {
 
     @Override
     public void onCreate(SystemUIDialog dialog, Bundle savedInstanceState) {
+        mDialog = dialog;
         Window window = dialog.getWindow();
 
         window.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
@@ -195,6 +197,8 @@ public class ScreenRecordDialogDelegate implements SystemUIDialog.Delegate {
             }
         }
 
+        dialog.setOnDismissListener(d -> { savePreferences(); });
+
         mTapsSwitch.setChecked(Prefs.getInt(mUserContext, PREFS + PREF_TAPS, 0) == 1);
         mStopDotSwitch.setChecked(Prefs.getInt(mUserContext, PREFS + PREF_DOT, 0) == 1);
         mLowQualitySpinner.setSelection(Prefs.getInt(mUserContext, PREFS + PREF_LOW, 0));
@@ -229,14 +233,19 @@ public class ScreenRecordDialogDelegate implements SystemUIDialog.Delegate {
                 RecordingService.REQUEST_CODE,
                 RecordingService.getStopIntent(mUserContext),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        Prefs.putInt(mUserContext, PREFS + PREF_TAPS, showTaps ? 1 : 0);
-        Prefs.putInt(mUserContext, PREFS + PREF_DOT, showStopDot ? 1 : 0);
-        Prefs.putInt(mUserContext, PREFS + PREF_LOW, lowQuality);
-        Prefs.putInt(mUserContext, PREFS + PREF_AUDIO, audioSwitch ? 1 : 0);
-        Prefs.putInt(mUserContext, PREFS + PREF_AUDIO_SOURCE, mOptions.getSelectedItemPosition());
-        Prefs.putInt(mUserContext, PREFS + PREF_SKIP, skipTime ? 1 : 0);
-        Prefs.putInt(mUserContext, PREFS + PREF_HEVC, mIsHEVCAllowed && mHEVCSwitch.isChecked() ? 1 : 0);
+        mDialog.setOnDismissListener(null);
+        savePreferences();
         mController.startCountdown(skipTime ? NO_DELAY : DELAY_MS, INTERVAL_MS, startIntent, stopIntent);
+    }
+
+    private void savePreferences() {
+        Prefs.putInt(mUserContext, PREFS + PREF_TAPS, mTapsSwitch.isChecked() ? 1 : 0);
+        Prefs.putInt(mUserContext, PREFS + PREF_DOT, mStopDotSwitch.isChecked() ? 1 : 0);
+        Prefs.putInt(mUserContext, PREFS + PREF_LOW, mLowQualitySpinner.getSelectedItemPosition());
+        Prefs.putInt(mUserContext, PREFS + PREF_AUDIO, mAudioSwitch.isChecked() ? 1 : 0);
+        Prefs.putInt(mUserContext, PREFS + PREF_AUDIO_SOURCE, mOptions.getSelectedItemPosition());
+        Prefs.putInt(mUserContext, PREFS + PREF_SKIP, mSkipSwitch.isChecked() ? 1 : 0);
+        Prefs.putInt(mUserContext, PREFS + PREF_HEVC, mIsHEVCAllowed && mHEVCSwitch.isChecked() ? 1 : 0);
     }
 
     private class CaptureTargetResultReceiver extends ResultReceiver {
