@@ -22,7 +22,7 @@
     <string name="cert_fp" translatable="false"></string>
     <string name="cert_model" translatable="false"></string>
     <string name="cert_spl" translatable="false"></string>
-    <integer name="cert_sdk" translatable="false"></integer>
+    <string name="cert_sdk" translatable="false"></string>
     <string name="cert_manufacturer" translatable="false"></string>
 
     <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog

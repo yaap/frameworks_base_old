@@ -117,6 +117,7 @@ public class Instrumentation {
             UiAutomation.FLAG_DONT_USE_ACCESSIBILITY})
     public @interface UiAutomationFlags {};
 
+    private static PixelPropsUtils mPixelPropsUtils = null;
 
     private final Object mSync = new Object();
     private ActivityThread mThread = null;
@@ -1352,7 +1353,10 @@ public class Instrumentation {
         Application app = getFactory(context.getPackageName())
                 .instantiateApplication(cl, className);
         app.attach(context);
-        PixelPropsUtils.setProps(context.getPackageName());
+        PixelPropsUtils ppu = PixelPropsUtils.getInstance(context);
+        if (ppu != null) {
+            ppu.setProps(context.getPackageName());
+        }
         return app;
     }
     
@@ -1370,7 +1374,10 @@ public class Instrumentation {
             ClassNotFoundException {
         Application app = (Application)clazz.newInstance();
         app.attach(context);
-        PixelPropsUtils.setProps(context.getPackageName());
+        PixelPropsUtils ppu = PixelPropsUtils.getInstance(context);
+        if (ppu != null) {
+            ppu.setProps(context.getPackageName());
+        }
         return app;
     }
 

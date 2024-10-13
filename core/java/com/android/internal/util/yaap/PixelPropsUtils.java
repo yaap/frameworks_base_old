@@ -17,6 +17,7 @@
 package com.android.internal.util.yaap;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
@@ -37,25 +38,47 @@ public final class PixelPropsUtils {
     private static final String PROCESS_GMS_UNSTABLE = PACKAGE_GMS + ".unstable";
     private static final String VERSION_PREFIX = "VERSION.";
 
-    private static final Resources mResources;
-    static {
-        // make sure we only use the english strings
-        Resources res = Resources.getSystem();
-        Configuration conf = res.getConfiguration();
-        conf.setLocale(Locale.ENGLISH);
-        res.updateConfiguration(conf, null);
-        mResources = res;
+    private final HashMap<String, Object> certifiedProps;
+
+    private static volatile boolean sIsFinsky = false;
+    private static volatile boolean sIsEnabled = false;
+
+    private static PixelPropsUtils sInstance = null;
+
+    public static PixelPropsUtils getInstance(Context context) {
+        if (sInstance == null) {
+            synchronized (PixelPropsUtils.class) {
+                try {
+                    // see if we can even read the resource before we cache it forever
+                    final String fp = context.getResources().getString(R.string.cert_fp);
+                    if (fp == null || fp.isEmpty()) {
+                        Logger.d("Can't read props from \"" +
+                            context.getPackageName() + "\" context");
+                        return null;
+                    }
+                } catch (Resources.NotFoundException e) {
+                    Logger.d("Can't read props from \"" +
+                            context.getPackageName() + "\" context");
+                    return null;
+                }
+                sIsEnabled = true;
+                sInstance = new PixelPropsUtils(context);
+            }
+        }
+        return sInstance;
     }
 
-    private static final String cert_device = mResources.getString(R.string.cert_device);
-    private static final String cert_fp = mResources.getString(R.string.cert_fp);
-    private static final String cert_model = mResources.getString(R.string.cert_model);
-    private static final String cert_spl = mResources.getString(R.string.cert_spl);
-    private static final String cert_manufacturer = mResources.getString(R.string.cert_manufacturer);
-    private static final int cert_sdk = mResources.getInteger(R.integer.cert_sdk);
+    private PixelPropsUtils(Context context) {
+        Resources res = context.getResources();
 
-    private static final HashMap<String, Object> certifiedProps;
-    static {
+        // init certified props
+        final String cert_device = res.getString(R.string.cert_device);
+        final String cert_fp = res.getString(R.string.cert_fp);
+        final String cert_model = res.getString(R.string.cert_model);
+        final String cert_spl = res.getString(R.string.cert_spl);
+        final String cert_manufacturer = res.getString(R.string.cert_manufacturer);
+        final int cert_sdk = Integer.parseInt(res.getString(R.string.cert_sdk));
+
         Map<String, Object> tMap = new HashMap<>();
         String[] sections = cert_fp.split("/");
         tMap.put("ID", sections[3]);
@@ -83,10 +106,16 @@ public final class PixelPropsUtils {
         certifiedProps = new HashMap<>(tMap);
     }
 
-    private static volatile boolean sIsFinsky = false;
-
-    public static void setProps(String packageName) {
-        if (packageName == null) {
+    public void setProps(String packageName) {
+        if (packageName == null || !sIsEnabled) {
+            return;
+        }
+        final String fp = (String) certifiedProps.get("FINGERPRINT");
+        if (fp == null || fp.isEmpty()) {
+            // no spoofing if the overlay doesn't exist
+            Logger.d("Skipping setProps for \"" + packageName +
+                    "\" because FINGERPRINT is empty");
+            sIsEnabled = false;
             return;
         }
         Logger.d("Package = " + packageName);
@@ -118,6 +147,10 @@ public final class PixelPropsUtils {
 
     public static boolean getIsFinsky() {
         return sIsFinsky;
+    }
+
+    public static boolean getIsEnabled() {
+        return sIsEnabled;
     }
 
     private static class Logger {
